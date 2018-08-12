@@ -30,7 +30,7 @@ class Authorizer(
         }
 
 
-        val requestedIdentity = identityService.identityOF(
+        val requestedIdentity = identityService.identityOf(
                 passwordGrantRequest.username
         )
 
