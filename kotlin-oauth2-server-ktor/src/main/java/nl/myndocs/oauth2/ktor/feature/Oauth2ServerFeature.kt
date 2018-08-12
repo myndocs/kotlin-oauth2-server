@@ -4,7 +4,10 @@ import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
 import io.ktor.application.call
 import io.ktor.http.HttpMethod
-import io.ktor.request.*
+import io.ktor.request.header
+import io.ktor.request.httpMethod
+import io.ktor.request.path
+import io.ktor.request.receiveParameters
 import io.ktor.response.respondText
 import io.ktor.util.AttributeKey
 import nl.myndocs.oauth2.Authorizer
@@ -29,7 +32,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
 
             val feature = Oauth2ServerFeature(configuration)
 
-            pipeline.receivePipeline.intercept(ApplicationReceivePipeline.Before) {
+            pipeline.intercept(ApplicationCallPipeline.Infrastructure) {
 
                 try {
                     if (call.request.httpMethod != HttpMethod.Post) {
