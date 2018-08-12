@@ -2,8 +2,6 @@ package nl.myndocs.oauth2.ktor.feature
 
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
-import io.ktor.application.call
-import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.util.AttributeKey

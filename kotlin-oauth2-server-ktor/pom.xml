@@ -23,5 +23,11 @@
             <version>${ktor.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-utils</artifactId>
+            <version>${ktor.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
