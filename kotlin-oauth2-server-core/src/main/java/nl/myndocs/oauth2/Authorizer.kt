@@ -25,7 +25,7 @@ class Authorizer(
                 passwordGrantRequest.clientId
         )
 
-        if (requestedClient == null || !requestedClient.secretVerifier(passwordGrantRequest.clientSecret)) {
+        if (requestedClient == null || !clientService.validClient(requestedClient, passwordGrantRequest.clientSecret)) {
             throw UnverifiedClientException()
         }
 
@@ -34,7 +34,7 @@ class Authorizer(
                 passwordGrantRequest.username
         )
 
-        if (requestedIdentity == null || !requestedIdentity.passwordVerifier(passwordGrantRequest.password)) {
+        if (requestedIdentity == null || !identityService.validIdentity(requestedIdentity, passwordGrantRequest.password)) {
             throw UnverifiedIdentity()
         }
         var requestedScopes = ScopeParser.parseScopes(passwordGrantRequest.scope)
