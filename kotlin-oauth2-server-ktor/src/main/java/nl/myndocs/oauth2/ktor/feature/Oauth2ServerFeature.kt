@@ -83,8 +83,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
                     t.printStackTrace()
                 }
 
-                proceed()
-
+                finish()
             }
 
             return feature
