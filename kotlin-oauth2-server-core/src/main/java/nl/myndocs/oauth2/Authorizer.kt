@@ -56,7 +56,8 @@ class Authorizer(
 
         val token = tokenStore.generateAndStoreTokenFor(
                 requestedIdentity,
-                requestedClient
+                requestedClient,
+                requestedScopes
         )
 
         return PasswordGrantResponse(

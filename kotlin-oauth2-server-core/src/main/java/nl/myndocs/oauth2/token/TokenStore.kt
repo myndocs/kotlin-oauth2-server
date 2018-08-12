@@ -4,5 +4,5 @@ import nl.myndocs.oauth2.client.Client
 import nl.myndocs.oauth2.identity.Identity
 
 interface TokenStore {
-    fun generateAndStoreTokenFor(identity: Identity, client: Client): Token
+    fun generateAndStoreTokenFor(identity: Identity, client: Client, requestedScopes: Set<String>): Token
 }
