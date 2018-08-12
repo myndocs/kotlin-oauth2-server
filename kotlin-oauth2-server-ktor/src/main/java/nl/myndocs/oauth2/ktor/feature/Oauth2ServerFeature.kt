@@ -2,15 +2,22 @@ package nl.myndocs.oauth2.ktor.feature
 
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
-import io.ktor.routing.get
-import io.ktor.routing.routing
+import io.ktor.application.call
+import io.ktor.http.HttpMethod
+import io.ktor.request.*
+import io.ktor.response.respondText
 import io.ktor.util.AttributeKey
+import nl.myndocs.oauth2.Authorizer
+import nl.myndocs.oauth2.requeset.PasswordGrantRequest
+import java.util.*
 
 class Oauth2ServerFeature(configuration: Configuration) {
     val tokenEndpoint = configuration.tokenEndpoint
+    val authorizer = configuration.authorizer!!
 
     class Configuration {
         var tokenEndpoint = "/oauth/token"
+        var authorizer: Authorizer? = null
     }
 
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, Oauth2ServerFeature.Configuration, Oauth2ServerFeature> {
@@ -22,13 +29,58 @@ class Oauth2ServerFeature(configuration: Configuration) {
 
             val feature = Oauth2ServerFeature(configuration)
 
-            val phase = pipeline.items.find { it.name == "Infrastructure" }
+            pipeline.receivePipeline.intercept(ApplicationReceivePipeline.Before) {
 
-            pipeline.intercept(phase!!) {
-                this.context.application.routing {
-                    get(feature.tokenEndpoint) {
+                try {
+                    if (call.request.httpMethod != HttpMethod.Post) {
+                        proceed()
+                        return@intercept
                     }
+
+                    if (call.request.path() != feature.tokenEndpoint) {
+                        proceed()
+                        return@intercept
+                    }
+
+                    val params = call.receiveParameters()
+
+                    val authorizationHeader = call.request.header("authorization")!!
+
+                    authorizationHeader.startsWith("basic ", true)
+
+                    val basicAuthorizationString = String(
+                            Base64.getDecoder()
+                                    .decode(authorizationHeader.substring(6))
+                    )
+
+
+                    val (clientId, clientSecret) = basicAuthorizationString.split(":")
+                    val authorize = feature.authorizer.authorize(
+                            PasswordGrantRequest(
+                                    clientId,
+                                    clientSecret,
+                                    params["username"]!!,
+                                    params["password"]!!,
+                                    params["scope"]
+                            )
+                    )
+
+                    call.respondText(
+                            """
+                                {
+                                  "access_token": "${authorize.accessToken}",
+                                  "token_type": "${authorize.tokenType}",
+                                  "expires_in": ${authorize.expiresIn},
+                                  "refresh_token": "${authorize.refreshToken}"
+                                }
+                            """.trimIndent(),
+                            io.ktor.http.ContentType.Application.Json
+                    )
+                } catch (t: Throwable) {
+                    t.printStackTrace()
                 }
+
+                proceed()
 
             }
 

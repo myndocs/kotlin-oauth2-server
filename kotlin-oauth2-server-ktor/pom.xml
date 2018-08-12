@@ -23,6 +23,12 @@
             <version>${ktor.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>nl.myndocs</groupId>
+            <artifactId>kotlin-oauth2-server-core</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <repositories>
