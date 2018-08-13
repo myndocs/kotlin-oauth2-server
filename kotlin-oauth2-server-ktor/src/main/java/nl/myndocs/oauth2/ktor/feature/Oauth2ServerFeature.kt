@@ -2,25 +2,28 @@ package nl.myndocs.oauth2.ktor.feature
 
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
-import io.ktor.application.call
-import io.ktor.http.HttpMethod
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.path
-import io.ktor.request.receiveParameters
-import io.ktor.response.respondText
 import io.ktor.util.AttributeKey
 import nl.myndocs.oauth2.Authorizer
-import nl.myndocs.oauth2.requeset.PasswordGrantRequest
-import java.util.*
+import nl.myndocs.oauth2.client.ClientService
+import nl.myndocs.oauth2.identity.IdentityService
+import nl.myndocs.oauth2.ktor.feature.routing.configureAuthorizationCodeGranting
+import nl.myndocs.oauth2.ktor.feature.routing.configurePasswordGrantRouting
+import nl.myndocs.oauth2.token.TokenStore
 
 class Oauth2ServerFeature(configuration: Configuration) {
     val tokenEndpoint = configuration.tokenEndpoint
-    val authorizer = configuration.authorizer!!
+    val authorizeEndpoint = configuration.authorizeEndpoint
+    val clientService = configuration.clientService!!
+    val identityService = configuration.identityService!!
+    val tokenStore = configuration.tokenStore!!
+    val authorizer = Authorizer(identityService, clientService, tokenStore)
 
     class Configuration {
         var tokenEndpoint = "/oauth/token"
-        var authorizer: Authorizer? = null
+        var authorizeEndpoint = "/oauth/authorize"
+        var clientService: ClientService? = null
+        var identityService: IdentityService? = null
+        var tokenStore: TokenStore? = null
     }
 
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, Oauth2ServerFeature.Configuration, Oauth2ServerFeature> {
@@ -33,57 +36,8 @@ class Oauth2ServerFeature(configuration: Configuration) {
             val feature = Oauth2ServerFeature(configuration)
 
             pipeline.intercept(ApplicationCallPipeline.Infrastructure) {
-
-                try {
-                    if (call.request.httpMethod != HttpMethod.Post) {
-                        proceed()
-                        return@intercept
-                    }
-
-                    if (call.request.path() != feature.tokenEndpoint) {
-                        proceed()
-                        return@intercept
-                    }
-
-                    val params = call.receiveParameters()
-
-                    val authorizationHeader = call.request.header("authorization")!!
-
-                    authorizationHeader.startsWith("basic ", true)
-
-                    val basicAuthorizationString = String(
-                            Base64.getDecoder()
-                                    .decode(authorizationHeader.substring(6))
-                    )
-
-
-                    val (clientId, clientSecret) = basicAuthorizationString.split(":")
-                    val authorize = feature.authorizer.authorize(
-                            PasswordGrantRequest(
-                                    clientId,
-                                    clientSecret,
-                                    params["username"]!!,
-                                    params["password"]!!,
-                                    params["scope"]
-                            )
-                    )
-
-                    call.respondText(
-                            """
-                                {
-                                  "access_token": "${authorize.accessToken}",
-                                  "token_type": "${authorize.tokenType}",
-                                  "expires_in": ${authorize.expiresIn},
-                                  "refresh_token": "${authorize.refreshToken}"
-                                }
-                            """.trimIndent(),
-                            io.ktor.http.ContentType.Application.Json
-                    )
-                } catch (t: Throwable) {
-                    t.printStackTrace()
-                }
-
-                finish()
+                configurePasswordGrantRouting(feature)
+                configureAuthorizationCodeGranting(feature)
             }
 
             return feature
