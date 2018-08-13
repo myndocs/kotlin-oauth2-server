@@ -1,4 +1,4 @@
-package nl.myndocs.oauth2.requeset
+package nl.myndocs.oauth2.request
 
 data class PasswordGrantRequest(
         val clientId: String,

@@ -4,7 +4,7 @@ import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.client.UnverifiedClientException
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.UnverifiedIdentity
-import nl.myndocs.oauth2.requeset.PasswordGrantRequest
+import nl.myndocs.oauth2.request.PasswordGrantRequest
 import nl.myndocs.oauth2.response.PasswordGrantResponse
 import nl.myndocs.oauth2.scope.RequestedScopeNotAllowed
 import nl.myndocs.oauth2.scope.ScopeParser
