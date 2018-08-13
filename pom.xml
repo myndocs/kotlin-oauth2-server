@@ -16,6 +16,7 @@
     <modules>
         <module>kotlin-oauth2-server-core</module>
         <module>kotlin-oauth2-server-ktor</module>
+        <module>kotlin-oauth2-server-client-inmemory</module>
     </modules>
 
     <dependencies>
