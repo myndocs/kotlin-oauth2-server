@@ -8,7 +8,9 @@ import nl.myndocs.oauth2.request.PasswordGrantRequest
 import nl.myndocs.oauth2.response.PasswordGrantResponse
 import nl.myndocs.oauth2.scope.RequestedScopeNotAllowed
 import nl.myndocs.oauth2.scope.ScopeParser
+import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.TokenStore
+import java.util.*
 
 class Authorizer(
         private val identityService: IdentityService,
@@ -54,17 +56,24 @@ class Authorizer(
             throw RequestedScopeNotAllowed(identityDiffScopes)
         }
 
-        val token = tokenStore.generateAndStoreTokenFor(
-                requestedIdentity,
-                requestedClient,
-                requestedScopes
+        // @TODO: should not be done here
+        val accessToken = AccessToken(
+                UUID.randomUUID().toString(),
+                "bearer",
+                3600,
+                requestedIdentity.username,
+                requestedClient.clientId,
+                requestedScopes,
+                UUID.randomUUID().toString()
         )
 
+        tokenStore.storeAccessToken(accessToken)
+
         return PasswordGrantResponse(
-                token.accessToken,
-                token.tokenType,
-                token.expiresIn,
-                token.refreshToken
+                accessToken.accessToken,
+                accessToken.tokenType,
+                accessToken.expiresIn,
+                accessToken.refreshToken
         )
     }
 

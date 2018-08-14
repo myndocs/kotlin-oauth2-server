@@ -14,6 +14,8 @@ import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
 import nl.myndocs.oauth2.ktor.feature.Oauth2ServerFeature
 import nl.myndocs.oauth2.ktor.feature.util.BasicAuth
+import nl.myndocs.oauth2.token.CodeToken
+import java.util.*
 
 // @TODO: Move logic to core
 suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGranting(feature: Oauth2ServerFeature) {
@@ -77,16 +79,21 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
         }
 
 
-        val code = feature.tokenStore.generateCodeTokenAndStoreFor(
-                identityOf!!,
-                clientOf,
-                // @TODO: Implement me
+        // @TODO: Should not be generated here
+        val codeToken = CodeToken(
+                UUID.randomUUID().toString(),
+                3600,
+                identityOf!!.username,
+                clientOf.clientId,
                 queryParameters["redirect_uri"]!!,
+                // @TODO: Implement me
                 setOf()
         )
 
+        feature.tokenStore.storeCodeToken(codeToken)
+
         call.respondRedirect(
-                queryParameters["redirect_uri"] + "?code=$code"
+                queryParameters["redirect_uri"] + "?code=${codeToken.codeToken}"
         )
 
         finish()

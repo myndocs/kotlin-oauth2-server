@@ -1,10 +1,11 @@
 package nl.myndocs.oauth2.token
 
-import nl.myndocs.oauth2.client.Client
-import nl.myndocs.oauth2.identity.Identity
-
 interface TokenStore {
-    fun generateAndStoreTokenFor(identity: Identity, client: Client, requestedScopes: Set<String>): Token
+    fun storeAccessToken(accessToken: AccessToken)
 
-    fun generateCodeTokenAndStoreFor(identity: Identity, client: Client, redirectUri: String, requestedScopes: Set<String>): String
+    fun accessToken(token: String): AccessToken?
+
+    fun storeCodeToken(codeToken: CodeToken)
+
+    fun codeToken(token: String): CodeToken?
 }
