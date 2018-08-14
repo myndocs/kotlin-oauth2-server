@@ -24,7 +24,8 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureCodeConsumer(feature
 
     val code = formParams["code"]!!
     val redirectUri = formParams["redirect_uri"]!!
-    val clientId = formParams["client_id"]
+    val clientId = formParams["client_id"]!!
+    val clientSecret = formParams["client_secret"] ?: ""
 
     val consumeCodeToken = feature.tokenStore.consumeCodeToken(code)
 
@@ -35,7 +36,10 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureCodeConsumer(feature
     }
 
 
-    if (consumeCodeToken.redirectUri != redirectUri || consumeCodeToken.clientId != clientId) {
+    val clientService = feature.clientService
+    val client = clientService.clientOf(clientId)
+
+    if (consumeCodeToken.redirectUri != redirectUri || consumeCodeToken.clientId != clientId || !clientService.validClient(client!!, clientSecret)) {
         call.respondText(text = "could not verify token", status = HttpStatusCode.BadRequest)
         finish()
         return
