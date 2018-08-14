@@ -42,8 +42,6 @@ class InMemoryTokenStore : TokenStore {
         return code
     }
 
-    fun userInfo(accessToken: String) = tokens[accessToken]!!
-
     class StoredToken(
             val token: Token,
             val identity: Identity,
