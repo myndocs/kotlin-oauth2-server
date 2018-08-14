@@ -8,4 +8,9 @@ interface TokenStore {
     fun storeCodeToken(codeToken: CodeToken)
 
     fun codeToken(token: String): CodeToken?
+
+    /**
+     * Retrieve token and delete it from store
+     */
+    fun consumeCodeToken(token: String): CodeToken?
 }

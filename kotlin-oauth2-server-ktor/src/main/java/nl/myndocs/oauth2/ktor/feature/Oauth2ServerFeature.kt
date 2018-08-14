@@ -7,7 +7,7 @@ import nl.myndocs.oauth2.Authorizer
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.ktor.feature.routing.authorize.configureAuthorizationCodeGranting
-import nl.myndocs.oauth2.ktor.feature.routing.token.configurePasswordGrantRouting
+import nl.myndocs.oauth2.ktor.feature.routing.token.configureTokenEndpoint
 import nl.myndocs.oauth2.token.TokenStore
 
 class Oauth2ServerFeature(configuration: Configuration) {
@@ -36,7 +36,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
             val feature = Oauth2ServerFeature(configuration)
 
             pipeline.intercept(ApplicationCallPipeline.Infrastructure) {
-                configurePasswordGrantRouting(feature)
+                configureTokenEndpoint(feature)
                 configureAuthorizationCodeGranting(feature)
             }
 

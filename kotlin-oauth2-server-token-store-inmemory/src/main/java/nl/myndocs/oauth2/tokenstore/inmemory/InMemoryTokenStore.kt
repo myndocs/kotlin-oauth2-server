@@ -20,4 +20,6 @@ class InMemoryTokenStore : TokenStore {
     }
 
     override fun codeToken(token: String): CodeToken? = codes[token]
+
+    override fun consumeCodeToken(token: String): CodeToken? = codes.remove(token)
 }
