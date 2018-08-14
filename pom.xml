@@ -18,6 +18,7 @@
         <module>kotlin-oauth2-server-ktor</module>
         <module>kotlin-oauth2-server-client-inmemory</module>
         <module>kotlin-oauth2-server-identity-inmemory</module>
+        <module>kotlin-oauth2-server-token-store-inmemory</module>
     </modules>
 
     <dependencies>
