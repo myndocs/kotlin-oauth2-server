@@ -6,8 +6,8 @@ import io.ktor.util.AttributeKey
 import nl.myndocs.oauth2.Authorizer
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.identity.IdentityService
-import nl.myndocs.oauth2.ktor.feature.routing.configureAuthorizationCodeGranting
-import nl.myndocs.oauth2.ktor.feature.routing.configurePasswordGrantRouting
+import nl.myndocs.oauth2.ktor.feature.routing.authorize.configureAuthorizationCodeGranting
+import nl.myndocs.oauth2.ktor.feature.routing.token.configurePasswordGrantRouting
 import nl.myndocs.oauth2.token.TokenStore
 
 class Oauth2ServerFeature(configuration: Configuration) {

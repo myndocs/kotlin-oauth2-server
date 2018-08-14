@@ -1,4 +1,4 @@
-package nl.myndocs.oauth2.ktor.feature.routing
+package nl.myndocs.oauth2.ktor.feature.routing.token
 
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
