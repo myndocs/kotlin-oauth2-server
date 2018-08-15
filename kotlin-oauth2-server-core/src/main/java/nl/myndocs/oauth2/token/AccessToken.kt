@@ -8,5 +8,5 @@ data class AccessToken(
         val username: String,
         val clientId: String,
         val scopes: Set<String>,
-        val refreshToken: String?
+        val refreshToken: RefreshToken?
 )

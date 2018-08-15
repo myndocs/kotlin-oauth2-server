@@ -7,8 +7,6 @@ import io.ktor.http.Parameters
 import io.ktor.pipeline.PipelineContext
 import io.ktor.response.respondText
 import nl.myndocs.oauth2.ktor.feature.Oauth2ServerFeature
-import nl.myndocs.oauth2.token.AccessToken
-import java.util.*
 
 // @TODO: Move logic to core
 suspend fun PipelineContext<Unit, ApplicationCall>.configureCodeConsumer(feature: Oauth2ServerFeature, formParams: Parameters) {
@@ -45,15 +43,10 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureCodeConsumer(feature
         return
     }
 
-    // @TODO: should not be done here
-    val accessToken = AccessToken(
-            UUID.randomUUID().toString(),
-            "bearer",
-            3600,
+    val accessToken = feature.accessTokenConverter.convertToToken(
             consumeCodeToken.username,
             consumeCodeToken.clientId,
-            consumeCodeToken.scopes,
-            UUID.randomUUID().toString()
+            consumeCodeToken.scopes
     )
 
     feature.tokenStore.storeAccessToken(accessToken)

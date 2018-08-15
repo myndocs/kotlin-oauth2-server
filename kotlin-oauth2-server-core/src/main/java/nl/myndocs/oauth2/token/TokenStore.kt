@@ -13,4 +13,8 @@ interface TokenStore {
      * Retrieve token and delete it from store
      */
     fun consumeCodeToken(token: String): CodeToken?
+
+    fun storeRefreshToken(refreshToken: RefreshToken)
+
+    fun refreshToken(token: String): RefreshToken?
 }

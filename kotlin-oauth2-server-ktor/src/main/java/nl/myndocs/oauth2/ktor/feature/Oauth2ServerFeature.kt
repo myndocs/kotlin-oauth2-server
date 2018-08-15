@@ -9,6 +9,9 @@ import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.ktor.feature.routing.authorize.configureAuthorizationCodeGranting
 import nl.myndocs.oauth2.ktor.feature.routing.token.configureTokenEndpoint
 import nl.myndocs.oauth2.token.TokenStore
+import nl.myndocs.oauth2.token.converter.AccessTokenConverter
+import nl.myndocs.oauth2.token.converter.UUIDAccessTokenConverter
+import nl.myndocs.oauth2.token.converter.UUIDRefreshTokenConverter
 
 class Oauth2ServerFeature(configuration: Configuration) {
     val tokenEndpoint = configuration.tokenEndpoint
@@ -16,7 +19,8 @@ class Oauth2ServerFeature(configuration: Configuration) {
     val clientService = configuration.clientService!!
     val identityService = configuration.identityService!!
     val tokenStore = configuration.tokenStore!!
-    val authorizer = Authorizer(identityService, clientService, tokenStore)
+    val accessTokenConverter = configuration.accessTokenConverter
+    val authorizer = Authorizer(identityService, clientService, tokenStore, accessTokenConverter)
 
     class Configuration {
         var tokenEndpoint = "/oauth/token"
@@ -24,6 +28,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
         var clientService: ClientService? = null
         var identityService: IdentityService? = null
         var tokenStore: TokenStore? = null
+        var accessTokenConverter: AccessTokenConverter = UUIDAccessTokenConverter(refreshTokenConverter = UUIDRefreshTokenConverter())
     }
 
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, Oauth2ServerFeature.Configuration, Oauth2ServerFeature> {

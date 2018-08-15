@@ -8,14 +8,14 @@ import nl.myndocs.oauth2.request.PasswordGrantRequest
 import nl.myndocs.oauth2.response.PasswordGrantResponse
 import nl.myndocs.oauth2.scope.RequestedScopeNotAllowed
 import nl.myndocs.oauth2.scope.ScopeParser
-import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.TokenStore
-import java.util.*
+import nl.myndocs.oauth2.token.converter.AccessTokenConverter
 
 class Authorizer(
         private val identityService: IdentityService,
         private val clientService: ClientService,
-        private val tokenStore: TokenStore
+        private val tokenStore: TokenStore,
+        private val accessTokenConverter: AccessTokenConverter
 ) {
     /**
      * @throws UnverifiedIdentity
@@ -56,15 +56,11 @@ class Authorizer(
             throw RequestedScopeNotAllowed(identityDiffScopes)
         }
 
-        // @TODO: should not be done here
-        val accessToken = AccessToken(
-                UUID.randomUUID().toString(),
-                "bearer",
-                3600,
+
+        val accessToken = accessTokenConverter.convertToToken(
                 requestedIdentity.username,
                 requestedClient.clientId,
-                requestedScopes,
-                UUID.randomUUID().toString()
+                requestedScopes
         )
 
         tokenStore.storeAccessToken(accessToken)
@@ -73,7 +69,7 @@ class Authorizer(
                 accessToken.accessToken,
                 accessToken.tokenType,
                 accessToken.expiresIn,
-                accessToken.refreshToken
+                accessToken.refreshToken?.refreshToken
         )
     }
 
