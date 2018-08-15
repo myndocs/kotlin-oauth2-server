@@ -15,6 +15,7 @@ import io.ktor.response.respondText
 import nl.myndocs.oauth2.ktor.feature.Oauth2ServerFeature
 import nl.myndocs.oauth2.ktor.feature.util.BasicAuth
 import nl.myndocs.oauth2.token.CodeToken
+import java.time.Instant
 import java.util.*
 
 // @TODO: Move logic to core
@@ -82,7 +83,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
         // @TODO: Should not be generated here
         val codeToken = CodeToken(
                 UUID.randomUUID().toString(),
-                3600,
+                Instant.now().plusSeconds(300),
                 identityOf!!.username,
                 clientOf.clientId,
                 queryParameters["redirect_uri"]!!,

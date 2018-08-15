@@ -2,6 +2,7 @@ package nl.myndocs.oauth2.token.converter
 
 import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.RefreshToken
+import java.time.Instant
 import java.util.*
 
 class UUIDAccessTokenConverter(
@@ -22,7 +23,7 @@ class UUIDAccessTokenConverter(
         return AccessToken(
                 UUID.randomUUID().toString(),
                 "bearer",
-                accessTokenExpireInSeconds,
+                Instant.now().plusSeconds(accessTokenExpireInSeconds.toLong()),
                 username,
                 clientId,
                 requestedScopes,
