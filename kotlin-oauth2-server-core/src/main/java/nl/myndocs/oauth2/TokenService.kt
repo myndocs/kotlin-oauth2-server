@@ -108,7 +108,7 @@ class TokenService(
     private fun AccessToken.toTokenResponse() = TokenResponse(
             accessToken,
             tokenType,
-            expiresIn,
+            expiresIn(),
             refreshToken?.refreshToken
     )
 }

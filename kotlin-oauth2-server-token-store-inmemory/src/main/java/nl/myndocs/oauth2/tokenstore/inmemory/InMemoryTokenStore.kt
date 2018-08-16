@@ -1,27 +1,25 @@
 package nl.myndocs.oauth2.tokenstore.inmemory
 
-import nl.myndocs.oauth2.token.AccessToken
-import nl.myndocs.oauth2.token.CodeToken
-import nl.myndocs.oauth2.token.RefreshToken
-import nl.myndocs.oauth2.token.TokenStore
+import nl.myndocs.oauth2.token.*
 
 class InMemoryTokenStore : TokenStore {
     private val accessTokens = mutableMapOf<String, AccessToken>()
     private val codes = mutableMapOf<String, CodeToken>()
     private val refreshTokens = mutableMapOf<String, RefreshToken>()
 
-
     override fun storeAccessToken(accessToken: AccessToken) {
         accessTokens[accessToken.accessToken] = accessToken
     }
 
-    override fun accessToken(token: String): AccessToken? = accessTokens[token]
+    override fun accessToken(token: String): AccessToken? =
+            locateToken(accessTokens, token)
 
     override fun storeCodeToken(codeToken: CodeToken) {
         codes[codeToken.codeToken] = codeToken
     }
 
-    override fun codeToken(token: String): CodeToken? = codes[token]
+    override fun codeToken(token: String): CodeToken? =
+            locateToken(codes, token)
 
     override fun consumeCodeToken(token: String): CodeToken? = codes.remove(token)
 
@@ -29,5 +27,18 @@ class InMemoryTokenStore : TokenStore {
         refreshTokens[refreshToken.refreshToken] = refreshToken
     }
 
-    override fun refreshToken(token: String): RefreshToken? = refreshTokens[token]
+    override fun refreshToken(token: String): RefreshToken? =
+            locateToken(refreshTokens, token)
+
+    private fun <T : ExpirableToken> locateToken(tokens: MutableMap<String, T>, token: String): T? {
+        var tokenFromMap = tokens[token]
+
+        if (tokenFromMap != null && tokenFromMap.expired()) {
+            tokens.remove(token)
+
+            tokenFromMap = null
+        }
+
+        return tokenFromMap
+    }
 }
