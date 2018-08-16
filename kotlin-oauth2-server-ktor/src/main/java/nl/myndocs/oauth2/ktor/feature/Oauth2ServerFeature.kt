@@ -3,7 +3,7 @@ package nl.myndocs.oauth2.ktor.feature
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
 import io.ktor.util.AttributeKey
-import nl.myndocs.oauth2.Authorizer
+import nl.myndocs.oauth2.TokenService
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.ktor.feature.routing.authorize.configureAuthorizationCodeGranting
@@ -20,7 +20,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
     val identityService = configuration.identityService!!
     val tokenStore = configuration.tokenStore!!
     val accessTokenConverter = configuration.accessTokenConverter
-    val authorizer = Authorizer(identityService, clientService, tokenStore, accessTokenConverter)
+    val tokenService = TokenService(identityService, clientService, tokenStore, accessTokenConverter)
 
     class Configuration {
         var tokenEndpoint = "/oauth/token"

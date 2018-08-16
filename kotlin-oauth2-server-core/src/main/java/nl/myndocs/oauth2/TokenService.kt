@@ -2,16 +2,20 @@ package nl.myndocs.oauth2
 
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.client.UnverifiedClientException
+import nl.myndocs.oauth2.code.InvalidAuthorizationCode
+import nl.myndocs.oauth2.code.UnverifiedAuthorizationCode
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.UnverifiedIdentity
+import nl.myndocs.oauth2.request.AuthorizationCodeRequest
 import nl.myndocs.oauth2.request.PasswordGrantRequest
-import nl.myndocs.oauth2.response.PasswordGrantResponse
+import nl.myndocs.oauth2.response.TokenResponse
 import nl.myndocs.oauth2.scope.RequestedScopeNotAllowed
 import nl.myndocs.oauth2.scope.ScopeParser
+import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.AccessTokenConverter
 
-class Authorizer(
+class TokenService(
         private val identityService: IdentityService,
         private val clientService: ClientService,
         private val tokenStore: TokenStore,
@@ -22,7 +26,7 @@ class Authorizer(
      * @throws UnverifiedClientException
      * @throws RequestedScopeNotAllowed
      */
-    fun authorize(passwordGrantRequest: PasswordGrantRequest): PasswordGrantResponse {
+    fun authorize(passwordGrantRequest: PasswordGrantRequest): TokenResponse {
         val requestedClient = clientService.clientOf(
                 passwordGrantRequest.clientId
         )
@@ -65,12 +69,34 @@ class Authorizer(
 
         tokenStore.storeAccessToken(accessToken)
 
-        return PasswordGrantResponse(
-                accessToken.accessToken,
-                accessToken.tokenType,
-                accessToken.expiresIn,
-                accessToken.refreshToken?.refreshToken
+        return accessToken.toTokenResponse()
+    }
+
+    fun authorize(authorizationCodeRequest: AuthorizationCodeRequest): TokenResponse {
+
+        val client = clientService.clientOf(authorizationCodeRequest.clientId)
+
+        if (!clientService.validClient(client!!, authorizationCodeRequest.clientSecret)) {
+            throw UnverifiedClientException()
+        }
+
+        val consumeCodeToken = tokenStore.consumeCodeToken(authorizationCodeRequest.code)
+                ?: throw InvalidAuthorizationCode()
+
+
+        if (consumeCodeToken.redirectUri != authorizationCodeRequest.redirectUri || consumeCodeToken.clientId != authorizationCodeRequest.clientId) {
+            throw UnverifiedAuthorizationCode()
+        }
+
+        val accessToken = accessTokenConverter.convertToToken(
+                consumeCodeToken.username,
+                consumeCodeToken.clientId,
+                consumeCodeToken.scopes
         )
+
+        tokenStore.storeAccessToken(accessToken)
+
+        return accessToken.toTokenResponse()
     }
 
     private fun diffScopes(allowedScopes: Set<String>, validationScopes: Set<String>): Set<String> {
@@ -80,4 +106,11 @@ class Authorizer(
 
         return setOf()
     }
+
+    private fun AccessToken.toTokenResponse() = TokenResponse(
+            accessToken,
+            tokenType,
+            expiresIn,
+            refreshToken?.refreshToken
+    )
 }

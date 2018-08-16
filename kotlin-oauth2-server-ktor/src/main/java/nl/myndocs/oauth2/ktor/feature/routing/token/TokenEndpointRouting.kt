@@ -9,6 +9,10 @@ import io.ktor.request.httpMethod
 import io.ktor.request.path
 import io.ktor.request.receiveParameters
 import io.ktor.response.respond
+import io.ktor.response.respondText
+import nl.myndocs.oauth2.client.UnverifiedClientException
+import nl.myndocs.oauth2.code.InvalidAuthorizationCode
+import nl.myndocs.oauth2.code.UnverifiedAuthorizationCode
 import nl.myndocs.oauth2.ktor.feature.Oauth2ServerFeature
 
 suspend fun PipelineContext<Unit, ApplicationCall>.configureTokenEndpoint(feature: Oauth2ServerFeature) {
@@ -38,9 +42,23 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureTokenEndpoint(featur
             return
         }
 
-        when (grantType) {
-            "password" -> configurePasswordGrantRouting(feature, formParams)
-            "authorization_code" -> configureCodeConsumer(feature, formParams)
+        try {
+            when (grantType) {
+                "password" -> configurePasswordGrantRouting(feature, formParams)
+                "authorization_code" -> configureCodeConsumer(feature, formParams)
+            }
+        } catch (invalidAuthorizationCode: InvalidAuthorizationCode) {
+            call.respondText(text = "'code' is invalid", status = HttpStatusCode.BadRequest)
+            finish()
+            return
+        } catch (unverifiedClient: UnverifiedClientException) {
+            call.respondText(text = "invalid client", status = HttpStatusCode.BadRequest)
+            finish()
+            return
+        } catch (unverifiedAuthorizationCode: UnverifiedAuthorizationCode) {
+            call.respondText(text = "could not verify token", status = HttpStatusCode.BadRequest)
+            finish()
+            return
         }
 
     } catch (t: Throwable) {

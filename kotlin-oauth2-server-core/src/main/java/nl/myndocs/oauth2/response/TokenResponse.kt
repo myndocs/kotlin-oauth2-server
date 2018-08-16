@@ -1,6 +1,6 @@
 package nl.myndocs.oauth2.response
 
-data class PasswordGrantResponse(
+data class TokenResponse(
     val accessToken: String,
     val tokenType: String,
     val expiresIn: Int,

@@ -7,8 +7,9 @@ import io.ktor.http.Parameters
 import io.ktor.pipeline.PipelineContext
 import io.ktor.response.respondText
 import nl.myndocs.oauth2.ktor.feature.Oauth2ServerFeature
+import nl.myndocs.oauth2.ktor.feature.util.toJson
+import nl.myndocs.oauth2.request.AuthorizationCodeRequest
 
-// @TODO: Move logic to core
 suspend fun PipelineContext<Unit, ApplicationCall>.configureCodeConsumer(feature: Oauth2ServerFeature, formParams: Parameters) {
     val requiredParameters = arrayOf("code", "redirect_uri", "client_id")
 
@@ -20,47 +21,17 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureCodeConsumer(feature
         }
     }
 
-    val code = formParams["code"]!!
-    val redirectUri = formParams["redirect_uri"]!!
-    val clientId = formParams["client_id"]!!
-    val clientSecret = formParams["client_secret"] ?: ""
-
-    val consumeCodeToken = feature.tokenStore.consumeCodeToken(code)
-
-    if (consumeCodeToken == null) {
-        call.respondText(text = "'code' is invalid", status = HttpStatusCode.BadRequest)
-        finish()
-        return
-    }
-
-
-    val clientService = feature.clientService
-    val client = clientService.clientOf(clientId)
-
-    if (consumeCodeToken.redirectUri != redirectUri || consumeCodeToken.clientId != clientId || !clientService.validClient(client!!, clientSecret)) {
-        call.respondText(text = "could not verify token", status = HttpStatusCode.BadRequest)
-        finish()
-        return
-    }
-
-    val accessToken = feature.accessTokenConverter.convertToToken(
-            consumeCodeToken.username,
-            consumeCodeToken.clientId,
-            consumeCodeToken.scopes
+    val accessToken = feature.tokenService.authorize(
+            AuthorizationCodeRequest(
+                    formParams["client_id"]!!,
+                    formParams["client_secret"] ?: "",
+                    formParams["code"]!!,
+                    formParams["redirect_uri"]!!
+            )
     )
-
-    feature.tokenStore.storeAccessToken(accessToken)
 
     call.respondText(
-            """
-                                {
-                                  "access_token": "${accessToken.accessToken}",
-                                  "token_type": "${accessToken.tokenType}",
-                                  "expires_in": ${accessToken.expiresIn},
-                                  "refresh_token": "${accessToken.refreshToken}"
-                                }
-                            """.trimIndent(),
+            accessToken.toJson(),
             io.ktor.http.ContentType.Application.Json
     )
-
 }
