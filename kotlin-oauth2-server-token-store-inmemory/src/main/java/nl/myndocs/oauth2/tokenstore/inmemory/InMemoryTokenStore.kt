@@ -9,6 +9,10 @@ class InMemoryTokenStore : TokenStore {
 
     override fun storeAccessToken(accessToken: AccessToken) {
         accessTokens[accessToken.accessToken] = accessToken
+
+        if (accessToken.refreshToken != null) {
+            storeRefreshToken(accessToken.refreshToken!!)
+        }
     }
 
     override fun accessToken(token: String): AccessToken? =

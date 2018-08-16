@@ -28,7 +28,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureTokenEndpoint(featur
         }
         val formParams = call.receiveParameters()
 
-        val allowedGrantTypes = setOf("password", "implicit", "authorization_code")
+        val allowedGrantTypes = setOf("password", "implicit", "authorization_code", "refresh_token")
         val grantType = formParams["grant_type"]
         if (grantType == null) {
             call.respond(HttpStatusCode.BadRequest, "'grant_type' not given")
@@ -46,6 +46,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureTokenEndpoint(featur
             when (grantType) {
                 "password" -> configurePasswordGrantRouting(feature, formParams)
                 "authorization_code" -> configureCodeConsumer(feature, formParams)
+                "refresh_token" -> configureRefreshToken(feature, formParams)
             }
         } catch (invalidAuthorizationCode: InvalidAuthorizationCode) {
             call.respondText(text = "'code' is invalid", status = HttpStatusCode.BadRequest)

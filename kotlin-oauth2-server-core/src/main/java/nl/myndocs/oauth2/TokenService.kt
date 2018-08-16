@@ -6,9 +6,11 @@ import nl.myndocs.oauth2.code.InvalidAuthorizationCode
 import nl.myndocs.oauth2.code.UnverifiedAuthorizationCode
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.UnverifiedIdentity
+import nl.myndocs.oauth2.refresh.InvalidRefreshToken
 import nl.myndocs.oauth2.request.AuthorizationCodeRequest
 import nl.myndocs.oauth2.request.ClientRequest
 import nl.myndocs.oauth2.request.PasswordGrantRequest
+import nl.myndocs.oauth2.request.RefreshTokenRequest
 import nl.myndocs.oauth2.response.TokenResponse
 import nl.myndocs.oauth2.scope.RequestedScopeNotAllowed
 import nl.myndocs.oauth2.scope.ScopeParser
@@ -82,6 +84,23 @@ class TokenService(
                 consumeCodeToken.username,
                 consumeCodeToken.clientId,
                 consumeCodeToken.scopes
+        )
+
+        tokenStore.storeAccessToken(accessToken)
+
+        return accessToken.toTokenResponse()
+    }
+
+    fun refresh(refreshTokenRequest: RefreshTokenRequest): TokenResponse {
+        throwExceptionIfUnverifiedClient(refreshTokenRequest)
+
+        val refreshToken = tokenStore.refreshToken(refreshTokenRequest.refreshToken) ?: throw InvalidRefreshToken()
+
+        val accessToken = accessTokenConverter.convertToToken(
+                refreshToken.username,
+                refreshToken.clientId,
+                refreshToken.scopes,
+                refreshToken
         )
 
         tokenStore.storeAccessToken(accessToken)
