@@ -7,6 +7,7 @@ import nl.myndocs.oauth2.code.UnverifiedAuthorizationCode
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.UnverifiedIdentity
 import nl.myndocs.oauth2.request.AuthorizationCodeRequest
+import nl.myndocs.oauth2.request.ClientRequest
 import nl.myndocs.oauth2.request.PasswordGrantRequest
 import nl.myndocs.oauth2.response.TokenResponse
 import nl.myndocs.oauth2.scope.RequestedScopeNotAllowed
@@ -27,14 +28,7 @@ class TokenService(
      * @throws RequestedScopeNotAllowed
      */
     fun authorize(passwordGrantRequest: PasswordGrantRequest): TokenResponse {
-        val requestedClient = clientService.clientOf(
-                passwordGrantRequest.clientId
-        )
-
-        if (requestedClient == null || !clientService.validClient(requestedClient, passwordGrantRequest.clientSecret)) {
-            throw UnverifiedClientException()
-        }
-
+        throwExceptionIfUnverifiedClient(passwordGrantRequest)
 
         val requestedIdentity = identityService.identityOf(
                 passwordGrantRequest.username
@@ -43,23 +37,24 @@ class TokenService(
         if (requestedIdentity == null || !identityService.validIdentity(requestedIdentity, passwordGrantRequest.password)) {
             throw UnverifiedIdentity()
         }
+
         var requestedScopes = ScopeParser.parseScopes(passwordGrantRequest.scope)
                 .toSet()
+
+        val requestedClient = clientService.clientOf(
+                passwordGrantRequest.clientId
+        )!!
 
         if (requestedScopes.isEmpty()) {
             requestedScopes = requestedClient.clientScopes
         }
 
         val clientDiffScopes = diffScopes(requestedClient.clientScopes, requestedScopes)
+                .plus(diffScopes(requestedIdentity.allowedScopes, requestedScopes))
+
         if (clientDiffScopes.isNotEmpty()) {
             throw RequestedScopeNotAllowed(clientDiffScopes)
         }
-
-        val identityDiffScopes = diffScopes(requestedClient.clientScopes, requestedScopes)
-        if (identityDiffScopes.isNotEmpty()) {
-            throw RequestedScopeNotAllowed(identityDiffScopes)
-        }
-
 
         val accessToken = accessTokenConverter.convertToToken(
                 requestedIdentity.username,
@@ -73,12 +68,7 @@ class TokenService(
     }
 
     fun authorize(authorizationCodeRequest: AuthorizationCodeRequest): TokenResponse {
-
-        val client = clientService.clientOf(authorizationCodeRequest.clientId)
-
-        if (!clientService.validClient(client!!, authorizationCodeRequest.clientSecret)) {
-            throw UnverifiedClientException()
-        }
+        throwExceptionIfUnverifiedClient(authorizationCodeRequest)
 
         val consumeCodeToken = tokenStore.consumeCodeToken(authorizationCodeRequest.code)
                 ?: throw InvalidAuthorizationCode()
@@ -97,6 +87,14 @@ class TokenService(
         tokenStore.storeAccessToken(accessToken)
 
         return accessToken.toTokenResponse()
+    }
+
+    private fun throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) {
+        val client = clientService.clientOf(clientRequest.clientId)
+
+        if (!clientService.validClient(client!!, clientRequest.clientSecret)) {
+            throw UnverifiedClientException()
+        }
     }
 
     private fun diffScopes(allowedScopes: Set<String>, validationScopes: Set<String>): Set<String> {
