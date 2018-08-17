@@ -1,7 +1,9 @@
 package nl.myndocs.oauth2.identity
 
-interface IdentityService {
-    fun identityOf(username: String): Identity?
+import nl.myndocs.oauth2.client.Client
 
-    fun validIdentity(identity: Identity, password: String): Boolean
+interface IdentityService {
+    fun identityOf(forClient: Client, username: String): Identity?
+
+    fun validIdentity(forClient: Client, identity: Identity, password: String): Boolean
 }

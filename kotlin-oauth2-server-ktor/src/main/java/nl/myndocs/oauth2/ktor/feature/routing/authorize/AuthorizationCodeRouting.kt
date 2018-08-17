@@ -65,11 +65,11 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
 
         val credentials = BasicAuth.parse(authorizationHeader)
 
-        val identityOf = feature.identityService.identityOf(credentials.username)
+        val identityOf = feature.identityService.identityOf(clientOf, credentials.username)
 
         var validIdentity = false
         if (identityOf != null) {
-            validIdentity = feature.identityService.validIdentity(identityOf, credentials.password)
+            validIdentity = feature.identityService.validIdentity(clientOf, identityOf, credentials.password)
         }
 
         if (!validIdentity) {

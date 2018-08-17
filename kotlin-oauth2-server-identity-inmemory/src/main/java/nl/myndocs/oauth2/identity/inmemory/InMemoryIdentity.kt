@@ -1,5 +1,6 @@
 package nl.myndocs.oauth2.identity.inmemory
 
+import nl.myndocs.oauth2.client.Client
 import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.IdentityService
 
@@ -14,7 +15,7 @@ class InMemoryIdentity : IdentityService {
         return this
     }
 
-    override fun identityOf(username: String): Identity? {
+    override fun identityOf(forClient: Client, username: String): Identity? {
         val findConfiguration = findConfiguration(username)
 
         if (findConfiguration == null) {
@@ -22,12 +23,11 @@ class InMemoryIdentity : IdentityService {
         }
 
         return Identity(
-                findConfiguration.username!!,
-                findConfiguration.scopes
+                findConfiguration.username!!
         )
     }
 
-    override fun validIdentity(identity: Identity, password: String): Boolean =
+    override fun validIdentity(forClient: Client, identity: Identity, password: String): Boolean =
             findConfiguration(identity.username)!!.password == password
 
 

@@ -32,27 +32,25 @@ class TokenService(
     fun authorize(passwordGrantRequest: PasswordGrantRequest): TokenResponse {
         throwExceptionIfUnverifiedClient(passwordGrantRequest)
 
+        val requestedClient = clientService.clientOf(
+                passwordGrantRequest.clientId
+        )!!
         val requestedIdentity = identityService.identityOf(
-                passwordGrantRequest.username
+                requestedClient, passwordGrantRequest.username
         )
 
-        if (requestedIdentity == null || !identityService.validIdentity(requestedIdentity, passwordGrantRequest.password)) {
+        if (requestedIdentity == null || !identityService.validIdentity(requestedClient, requestedIdentity, passwordGrantRequest.password)) {
             throw UnverifiedIdentity()
         }
 
         var requestedScopes = ScopeParser.parseScopes(passwordGrantRequest.scope)
                 .toSet()
 
-        val requestedClient = clientService.clientOf(
-                passwordGrantRequest.clientId
-        )!!
-
         if (requestedScopes.isEmpty()) {
             requestedScopes = requestedClient.clientScopes
         }
 
         val clientDiffScopes = diffScopes(requestedClient.clientScopes, requestedScopes)
-                .plus(diffScopes(requestedIdentity.allowedScopes, requestedScopes))
 
         if (clientDiffScopes.isNotEmpty()) {
             throw RequestedScopeNotAllowed(clientDiffScopes)
