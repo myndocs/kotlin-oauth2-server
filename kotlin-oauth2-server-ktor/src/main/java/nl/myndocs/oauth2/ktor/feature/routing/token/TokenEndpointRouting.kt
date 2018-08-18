@@ -10,10 +10,9 @@ import io.ktor.request.path
 import io.ktor.request.receiveParameters
 import io.ktor.response.respond
 import io.ktor.response.respondText
-import nl.myndocs.oauth2.client.UnverifiedClientException
-import nl.myndocs.oauth2.code.InvalidAuthorizationCode
-import nl.myndocs.oauth2.code.UnverifiedAuthorizationCode
+import nl.myndocs.oauth2.exception.OauthException
 import nl.myndocs.oauth2.ktor.feature.Oauth2ServerFeature
+import nl.myndocs.oauth2.ktor.feature.util.toJson
 
 suspend fun PipelineContext<Unit, ApplicationCall>.configureTokenEndpoint(feature: Oauth2ServerFeature) {
     try {
@@ -48,16 +47,8 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureTokenEndpoint(featur
                 "authorization_code" -> configureCodeConsumer(feature, formParams)
                 "refresh_token" -> configureRefreshToken(feature, formParams)
             }
-        } catch (invalidAuthorizationCode: InvalidAuthorizationCode) {
-            call.respondText(text = "'code' is invalid", status = HttpStatusCode.BadRequest)
-            finish()
-            return
-        } catch (unverifiedClient: UnverifiedClientException) {
-            call.respondText(text = "invalid client", status = HttpStatusCode.BadRequest)
-            finish()
-            return
-        } catch (unverifiedAuthorizationCode: UnverifiedAuthorizationCode) {
-            call.respondText(text = "could not verify token", status = HttpStatusCode.BadRequest)
+        } catch (oauthException: OauthException) {
+            call.respondText(text = oauthException.toJson(), status = HttpStatusCode.BadRequest)
             finish()
             return
         }

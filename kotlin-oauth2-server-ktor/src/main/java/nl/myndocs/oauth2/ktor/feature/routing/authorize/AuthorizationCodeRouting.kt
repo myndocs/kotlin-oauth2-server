@@ -12,7 +12,7 @@ import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
-import nl.myndocs.oauth2.identity.UnverifiedIdentity
+import nl.myndocs.oauth2.exception.InvalidIdentityException
 import nl.myndocs.oauth2.ktor.feature.Oauth2ServerFeature
 import nl.myndocs.oauth2.ktor.feature.util.BasicAuth
 import nl.myndocs.oauth2.request.RedirectAuthorizationCodeRequest
@@ -82,7 +82,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
 
             finish()
             return
-        } catch (unverfiedIdentity: UnverifiedIdentity) {
+        } catch (unverfiedIdentityException: InvalidIdentityException) {
             call.response.header("WWW-Authenticate", "Basic realm=\"User Visible Realm\" ")
             call.respond(HttpStatusCode.Unauthorized)
             finish()
