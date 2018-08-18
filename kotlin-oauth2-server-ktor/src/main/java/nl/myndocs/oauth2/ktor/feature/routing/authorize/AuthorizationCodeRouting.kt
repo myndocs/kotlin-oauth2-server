@@ -12,11 +12,10 @@ import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
+import nl.myndocs.oauth2.identity.UnverifiedIdentity
 import nl.myndocs.oauth2.ktor.feature.Oauth2ServerFeature
 import nl.myndocs.oauth2.ktor.feature.util.BasicAuth
-import nl.myndocs.oauth2.token.CodeToken
-import java.time.Instant
-import java.util.*
+import nl.myndocs.oauth2.request.RedirectAuthorizationCodeRequest
 
 // @TODO: Move logic to core
 suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGranting(feature: Oauth2ServerFeature) {
@@ -36,7 +35,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
 
         val requiredParameters = arrayOf("redirect_uri", "client_id", "response_type")
 
-
+        // @TODO check response type
         for (requiredParameter in requiredParameters) {
             if (queryParameters[requiredParameter] == null) {
                 call.respondText(text = "'$requiredParameter' not given", status = HttpStatusCode.BadRequest)
@@ -65,40 +64,30 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
 
         val credentials = BasicAuth.parse(authorizationHeader)
 
-        val identityOf = feature.identityService.identityOf(clientOf, credentials.username)
+        try {
+            val redirect = feature.tokenService.redirect(
+                    RedirectAuthorizationCodeRequest(
+                            queryParameters["client_id"]!!,
+                            queryParameters["redirect_uri"]!!,
+                            credentials.username,
+                            credentials.password,
+                            queryParameters["scope"]
+                    )
+            )
 
-        var validIdentity = false
-        if (identityOf != null) {
-            validIdentity = feature.identityService.validIdentity(clientOf, identityOf, credentials.password)
-        }
 
-        if (!validIdentity) {
+            call.respondRedirect(
+                    queryParameters["redirect_uri"] + "?code=${redirect.codeToken}"
+            )
+
+            finish()
+            return
+        } catch (unverfiedIdentity: UnverifiedIdentity) {
             call.response.header("WWW-Authenticate", "Basic realm=\"User Visible Realm\" ")
             call.respond(HttpStatusCode.Unauthorized)
             finish()
             return
         }
-
-
-        // @TODO: Should not be generated here
-        val codeToken = CodeToken(
-                UUID.randomUUID().toString(),
-                Instant.now().plusSeconds(300),
-                identityOf!!.username,
-                clientOf.clientId,
-                queryParameters["redirect_uri"]!!,
-                // @TODO: Implement me
-                setOf()
-        )
-
-        feature.tokenStore.storeCodeToken(codeToken)
-
-        call.respondRedirect(
-                queryParameters["redirect_uri"] + "?code=${codeToken.codeToken}"
-        )
-
-        finish()
-        return
     } catch (t: Throwable) {
         t.printStackTrace()
     }

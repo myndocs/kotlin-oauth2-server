@@ -4,7 +4,6 @@ import java.time.Instant
 
 data class CodeToken(
         val codeToken: String,
-        // @TODO: Is this according spec?
         override val expireTime: Instant,
         val username: String,
         val clientId: String,

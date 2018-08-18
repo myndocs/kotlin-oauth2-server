@@ -1,28 +1,30 @@
 package nl.myndocs.oauth2
 
+import nl.myndocs.oauth2.client.ClientDoesNotExist
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.client.UnverifiedClientException
 import nl.myndocs.oauth2.code.InvalidAuthorizationCode
 import nl.myndocs.oauth2.code.UnverifiedAuthorizationCode
+import nl.myndocs.oauth2.identity.IdentityDoesNotExist
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.UnverifiedIdentity
 import nl.myndocs.oauth2.refresh.InvalidRefreshToken
-import nl.myndocs.oauth2.request.AuthorizationCodeRequest
-import nl.myndocs.oauth2.request.ClientRequest
-import nl.myndocs.oauth2.request.PasswordGrantRequest
-import nl.myndocs.oauth2.request.RefreshTokenRequest
+import nl.myndocs.oauth2.request.*
 import nl.myndocs.oauth2.response.TokenResponse
 import nl.myndocs.oauth2.scope.RequestedScopeNotAllowed
 import nl.myndocs.oauth2.scope.ScopeParser
 import nl.myndocs.oauth2.token.AccessToken
+import nl.myndocs.oauth2.token.CodeToken
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.AccessTokenConverter
+import nl.myndocs.oauth2.token.converter.CodeTokenConverter
 
 class TokenService(
         private val identityService: IdentityService,
         private val clientService: ClientService,
         private val tokenStore: TokenStore,
-        private val accessTokenConverter: AccessTokenConverter
+        private val accessTokenConverter: AccessTokenConverter,
+        private val codeTokenConverter: CodeTokenConverter
 ) {
     /**
      * @throws UnverifiedIdentity
@@ -106,10 +108,40 @@ class TokenService(
         return accessToken.toTokenResponse()
     }
 
-    private fun throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) {
-        val client = clientService.clientOf(clientRequest.clientId)
+    fun redirect(redirect: RedirectAuthorizationCodeRequest): CodeToken {
+        val clientOf = clientService.clientOf(redirect.clientId) ?: throw ClientDoesNotExist()
+        val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw IdentityDoesNotExist()
 
-        if (!clientService.validClient(client!!, clientRequest.clientSecret)) {
+        var validIdentity = identityService.validIdentity(clientOf, identityOf, redirect.password)
+
+        if (!validIdentity) {
+            throw UnverifiedIdentity()
+        }
+
+        val requestedScopes = ScopeParser.parseScopes(redirect.scope)
+
+        val diffScopes = diffScopes(clientOf.clientScopes, requestedScopes)
+        if (diffScopes.isNotEmpty()) {
+            throw RequestedScopeNotAllowed(diffScopes)
+        }
+
+        val codeToken = codeTokenConverter.convertToToken(
+                identityOf.username,
+                clientOf.clientId,
+                redirect.redirectUri,
+                requestedScopes
+        )
+
+        tokenStore.storeCodeToken(codeToken)
+
+
+        return codeToken
+    }
+
+    private fun throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) {
+        val client = clientService.clientOf(clientRequest.clientId) ?: throw ClientDoesNotExist()
+
+        if (!clientService.validClient(client, clientRequest.clientSecret)) {
             throw UnverifiedClientException()
         }
     }
