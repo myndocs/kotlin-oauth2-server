@@ -46,6 +46,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
 
         val clientOf = feature.clientService
                 .clientOf(queryParameters["client_id"]!!)
+        // @TODO Should not be resolved here
         if (clientOf?.redirectUris
                         ?.contains(queryParameters["redirect_uri"]) != true
         ) {
@@ -56,7 +57,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
         val authorizationHeader = call.request.header("authorization")
 
         if (authorizationHeader == null) {
-            call.response.header("WWW-Authenticate", "Basic realm=\"User Visible Realm\" ")
+            call.response.header("WWW-Authenticate", "Basic realm=\"${queryParameters["client_id"]}\"")
             call.respond(HttpStatusCode.Unauthorized)
             finish()
             return
