@@ -14,12 +14,14 @@ import nl.myndocs.oauth2.token.CodeToken
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.AccessTokenConverter
 import nl.myndocs.oauth2.token.converter.CodeTokenConverter
+import nl.myndocs.oauth2.token.converter.RefreshTokenConverter
 
 class TokenService(
         private val identityService: IdentityService,
         private val clientService: ClientService,
         private val tokenStore: TokenStore,
         private val accessTokenConverter: AccessTokenConverter,
+        private val refreshTokenConverter: RefreshTokenConverter,
         private val codeTokenConverter: CodeTokenConverter
 ) {
     /**
@@ -57,7 +59,12 @@ class TokenService(
         val accessToken = accessTokenConverter.convertToToken(
                 requestedIdentity.username,
                 requestedClient.clientId,
-                requestedScopes
+                requestedScopes,
+                refreshTokenConverter.convertToToken(
+                        requestedIdentity.username,
+                        requestedClient.clientId,
+                        requestedScopes
+                )
         )
 
         tokenStore.storeAccessToken(accessToken)
@@ -79,7 +86,12 @@ class TokenService(
         val accessToken = accessTokenConverter.convertToToken(
                 consumeCodeToken.username,
                 consumeCodeToken.clientId,
-                consumeCodeToken.scopes
+                consumeCodeToken.scopes,
+                refreshTokenConverter.convertToToken(
+                        consumeCodeToken.username,
+                        consumeCodeToken.clientId,
+                        consumeCodeToken.scopes
+                )
         )
 
         tokenStore.storeAccessToken(accessToken)

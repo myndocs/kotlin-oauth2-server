@@ -18,12 +18,14 @@ class Oauth2ServerFeature(configuration: Configuration) {
     val identityService = configuration.identityService!!
     val tokenStore = configuration.tokenStore!!
     val accessTokenConverter = configuration.accessTokenConverter
+    val refreshTokenConverter = configuration.refreshTokenConverter
     val codeTokenConverter = configuration.codeTokenConverter
     val tokenService = TokenService(
             identityService,
             clientService,
             tokenStore,
             accessTokenConverter,
+            refreshTokenConverter,
             codeTokenConverter
     )
 
@@ -33,7 +35,8 @@ class Oauth2ServerFeature(configuration: Configuration) {
         var clientService: ClientService? = null
         var identityService: IdentityService? = null
         var tokenStore: TokenStore? = null
-        var accessTokenConverter: AccessTokenConverter = UUIDAccessTokenConverter(refreshTokenConverter = UUIDRefreshTokenConverter())
+        var accessTokenConverter: AccessTokenConverter = UUIDAccessTokenConverter()
+        val refreshTokenConverter = UUIDRefreshTokenConverter()
         var codeTokenConverter: CodeTokenConverter = UUIDCodeTokenConverter()
     }
 
