@@ -6,7 +6,7 @@ import io.ktor.util.AttributeKey
 import nl.myndocs.oauth2.TokenService
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.identity.IdentityService
-import nl.myndocs.oauth2.ktor.feature.routing.authorize.configureAuthorizationCodeGranting
+import nl.myndocs.oauth2.ktor.feature.routing.authorize.configureAuthorizeEndpoint
 import nl.myndocs.oauth2.ktor.feature.routing.token.configureTokenEndpoint
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.*
@@ -51,7 +51,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
 
             pipeline.intercept(ApplicationCallPipeline.Infrastructure) {
                 configureTokenEndpoint(feature)
-                configureAuthorizationCodeGranting(feature)
+                configureAuthorizeEndpoint(feature)
             }
 
             return feature

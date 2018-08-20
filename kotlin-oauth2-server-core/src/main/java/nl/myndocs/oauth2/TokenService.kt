@@ -184,8 +184,56 @@ class TokenService(
 
         tokenStore.storeCodeToken(codeToken)
 
-
         return codeToken
+    }
+
+    fun redirect(redirect: RedirectTokenRequest): AccessToken {
+        if (redirect.clientId == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
+        }
+
+        if (redirect.username == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("username"))
+        }
+
+        if (redirect.password == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("password"))
+        }
+        if (redirect.redirectUri == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("redirect_uri"))
+        }
+
+        val clientOf = clientService.clientOf(redirect.clientId) ?: throw InvalidClientException()
+
+        if (!clientOf.redirectUris.contains(redirect.redirectUri)) {
+            throw InvalidGrantException("invalid 'redirect_uri'")
+        }
+
+        val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
+
+        var validIdentity = identityService.validCredentials(clientOf, identityOf, redirect.password)
+
+        if (!validIdentity) {
+            throw InvalidIdentityException()
+        }
+
+        val requestedScopes = ScopeParser.parseScopes(redirect.scope)
+
+        val scopesAllowed = scopesAllowed(clientOf.clientScopes, requestedScopes)
+        if (!scopesAllowed) {
+            throw InvalidScopeException(requestedScopes.minus(clientOf.clientScopes))
+        }
+
+        val accessToken = accessTokenConverter.convertToToken(
+                identityOf.username,
+                clientOf.clientId,
+                requestedScopes,
+                null
+        )
+
+        tokenStore.storeAccessToken(accessToken)
+
+        return accessToken
     }
 
     private fun throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) {

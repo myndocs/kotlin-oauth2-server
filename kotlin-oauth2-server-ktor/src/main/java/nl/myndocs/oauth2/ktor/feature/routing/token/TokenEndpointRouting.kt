@@ -27,7 +27,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureTokenEndpoint(featur
         }
         val formParams = call.receiveParameters()
 
-        val allowedGrantTypes = setOf("password", "implicit", "authorization_code", "refresh_token")
+        val allowedGrantTypes = setOf("password", "authorization_code", "refresh_token")
         val grantType = formParams["grant_type"]
         if (grantType == null) {
             call.respond(HttpStatusCode.BadRequest, "'grant_type' not given")
