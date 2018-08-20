@@ -1,10 +1,7 @@
 package nl.myndocs.oauth2
 
 import nl.myndocs.oauth2.client.ClientService
-import nl.myndocs.oauth2.exception.InvalidClientException
-import nl.myndocs.oauth2.exception.InvalidGrantException
-import nl.myndocs.oauth2.exception.InvalidIdentityException
-import nl.myndocs.oauth2.exception.InvalidScopeException
+import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.request.*
 import nl.myndocs.oauth2.response.TokenResponse
@@ -24,6 +21,7 @@ class TokenService(
         private val refreshTokenConverter: RefreshTokenConverter,
         private val codeTokenConverter: CodeTokenConverter
 ) {
+    private val INVALID_REQUEST_FIELD_MESSAGE = "'%s' field is missing"
     /**
      * @throws InvalidIdentityException
      * @throws InvalidClientException
@@ -32,28 +30,40 @@ class TokenService(
     fun authorize(passwordGrantRequest: PasswordGrantRequest): TokenResponse {
         throwExceptionIfUnverifiedClient(passwordGrantRequest)
 
+        if (passwordGrantRequest.username == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("username"))
+        }
+
+        if (passwordGrantRequest.password == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("password"))
+        }
+
         val requestedClient = clientService.clientOf(
-                passwordGrantRequest.clientId
+                passwordGrantRequest.clientId!!
         )!!
         val requestedIdentity = identityService.identityOf(
                 requestedClient, passwordGrantRequest.username
         )
 
-        if (requestedIdentity == null || !identityService.validIdentity(requestedClient, requestedIdentity, passwordGrantRequest.password)) {
+        if (requestedIdentity == null || !identityService.validCredentials(requestedClient, requestedIdentity, passwordGrantRequest.password)) {
             throw InvalidIdentityException()
         }
 
         var requestedScopes = ScopeParser.parseScopes(passwordGrantRequest.scope)
                 .toSet()
 
-        if (requestedScopes.isEmpty()) {
+        if (passwordGrantRequest.scope == null) {
             requestedScopes = requestedClient.clientScopes
         }
 
-        val clientDiffScopes = diffScopes(requestedClient.clientScopes, requestedScopes)
+        val scopesAllowed = scopesAllowed(requestedClient.clientScopes, requestedScopes)
 
-        if (clientDiffScopes.isNotEmpty()) {
-            throw InvalidScopeException(clientDiffScopes)
+        if (!scopesAllowed) {
+            throw InvalidScopeException(requestedScopes.minus(requestedClient.clientScopes))
+        }
+
+        if (!identityService.validScopes(requestedClient, requestedIdentity, requestedScopes)) {
+            throw InvalidScopeException(requestedScopes)
         }
 
         val accessToken = accessTokenConverter.convertToToken(
@@ -74,6 +84,14 @@ class TokenService(
 
     fun authorize(authorizationCodeRequest: AuthorizationCodeRequest): TokenResponse {
         throwExceptionIfUnverifiedClient(authorizationCodeRequest)
+
+        if (authorizationCodeRequest.code == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("code"))
+        }
+
+        if (authorizationCodeRequest.redirectUri == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("redirect_uri"))
+        }
 
         val consumeCodeToken = tokenStore.consumeCodeToken(authorizationCodeRequest.code)
                 ?: throw InvalidGrantException()
@@ -102,6 +120,10 @@ class TokenService(
     fun refresh(refreshTokenRequest: RefreshTokenRequest): TokenResponse {
         throwExceptionIfUnverifiedClient(refreshTokenRequest)
 
+        if (refreshTokenRequest.refreshToken == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("refresh_token"))
+        }
+
         val refreshToken = tokenStore.refreshToken(refreshTokenRequest.refreshToken) ?: throw InvalidGrantException()
 
         val accessToken = accessTokenConverter.convertToToken(
@@ -117,10 +139,30 @@ class TokenService(
     }
 
     fun redirect(redirect: RedirectAuthorizationCodeRequest): CodeToken {
+        if (redirect.clientId == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
+        }
+
+        if (redirect.username == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("username"))
+        }
+
+        if (redirect.password == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("password"))
+        }
+        if (redirect.redirectUri == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("redirect_uri"))
+        }
+
         val clientOf = clientService.clientOf(redirect.clientId) ?: throw InvalidClientException()
+
+        if (!clientOf.redirectUris.contains(redirect.redirectUri)) {
+            throw InvalidGrantException("invalid 'redirect_uri'")
+        }
+
         val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
 
-        var validIdentity = identityService.validIdentity(clientOf, identityOf, redirect.password)
+        var validIdentity = identityService.validCredentials(clientOf, identityOf, redirect.password)
 
         if (!validIdentity) {
             throw InvalidIdentityException()
@@ -128,9 +170,9 @@ class TokenService(
 
         val requestedScopes = ScopeParser.parseScopes(redirect.scope)
 
-        val diffScopes = diffScopes(clientOf.clientScopes, requestedScopes)
-        if (diffScopes.isNotEmpty()) {
-            throw InvalidScopeException(diffScopes)
+        val scopesAllowed = scopesAllowed(clientOf.clientScopes, requestedScopes)
+        if (!scopesAllowed) {
+            throw InvalidScopeException(requestedScopes.minus(clientOf.clientScopes))
         }
 
         val codeToken = codeTokenConverter.convertToToken(
@@ -147,19 +189,23 @@ class TokenService(
     }
 
     private fun throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) {
-        val client = clientService.clientOf(clientRequest.clientId) ?: throw InvalidClientException()
+        if (clientRequest.clientId == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
+        }
 
-        if (!clientService.validClient(client, clientRequest.clientSecret)) {
+        if (clientRequest.clientSecret == null) {
+            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_secret"))
+        }
+
+        val client = clientService.clientOf(clientRequest.clientId!!) ?: throw InvalidClientException()
+
+        if (!clientService.validClient(client, clientRequest.clientSecret!!)) {
             throw InvalidClientException()
         }
     }
 
-    private fun diffScopes(allowedScopes: Set<String>, validationScopes: Set<String>): Set<String> {
-        if (allowedScopes.containsAll(validationScopes)) {
-            return validationScopes.minus(allowedScopes)
-        }
-
-        return setOf()
+    private fun scopesAllowed(clientScopes: Set<String>, requestedScopes: Set<String>): Boolean {
+        return clientScopes.containsAll(requestedScopes)
     }
 
     private fun AccessToken.toTokenResponse() = TokenResponse(

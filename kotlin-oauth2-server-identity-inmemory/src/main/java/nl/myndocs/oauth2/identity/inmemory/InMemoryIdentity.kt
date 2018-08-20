@@ -27,7 +27,9 @@ class InMemoryIdentity : IdentityService {
         )
     }
 
-    override fun validIdentity(forClient: Client, identity: Identity, password: String): Boolean =
+    override fun validScopes(forClient: Client, identity: Identity, scopes: Set<String>) = true
+
+    override fun validCredentials(forClient: Client, identity: Identity, password: String): Boolean =
             findConfiguration(identity.username)!!.password == password
 
 

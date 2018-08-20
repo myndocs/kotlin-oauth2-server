@@ -1,3 +1,3 @@
 package nl.myndocs.oauth2.exception
 
-class InvalidGrantException : OauthException(OauthError.INVALID_GRANT)
+open class InvalidGrantException(message: String? = null) : OauthException(OauthError.INVALID_GRANT, message)

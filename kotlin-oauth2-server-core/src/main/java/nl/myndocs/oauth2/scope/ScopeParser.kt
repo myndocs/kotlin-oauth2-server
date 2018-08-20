@@ -1,7 +1,7 @@
 package nl.myndocs.oauth2.scope
 
 object ScopeParser {
-    const val SCOPE_SEPARATOR = " "
+    private const val SCOPE_SEPARATOR = " "
 
     fun parseScopes(scopes: String?): Set<String> {
         if (!scopes.isNullOrBlank()) {
