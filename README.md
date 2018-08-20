@@ -6,6 +6,48 @@ Configuring the oauth2 server for any framework should be simple and understanda
 It encourages to adapt to existing implementations instead the other way around.
 ## Frameworks
 ### Ktor
+Setup
+```xml
+<repositories>
+    <repository>
+        <id>myndocs-oauth2</id>
+        <url>https://repo.myndocs.nl/repository/oauth2</url>
+    </repository>
+</repositories>
+```
+```xml
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>kotlin-oauth2-server-core</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>kotlin-oauth2-server-ktor</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>kotlin-oauth2-server-client-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>kotlin-oauth2-server-identity-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>kotlin-oauth2-server-token-store-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>com.google.code.gson</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.8.5</version>
+</dependency>
+```
+
 Basic setup for Ktor:
 ```kotlin
 embeddedServer(Netty, 8080) {
