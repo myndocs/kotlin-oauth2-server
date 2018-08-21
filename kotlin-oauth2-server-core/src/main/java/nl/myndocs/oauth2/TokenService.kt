@@ -3,6 +3,7 @@ package nl.myndocs.oauth2
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.identity.IdentityService
+import nl.myndocs.oauth2.identity.UserInfo
 import nl.myndocs.oauth2.request.*
 import nl.myndocs.oauth2.response.TokenResponse
 import nl.myndocs.oauth2.scope.ScopeParser
@@ -168,11 +169,19 @@ class TokenService(
             throw InvalidIdentityException()
         }
 
-        val requestedScopes = ScopeParser.parseScopes(redirect.scope)
+        var requestedScopes = ScopeParser.parseScopes(redirect.scope)
+
+        if (redirect.scope == null) {
+            requestedScopes = clientOf.clientScopes
+        }
 
         val scopesAllowed = scopesAllowed(clientOf.clientScopes, requestedScopes)
         if (!scopesAllowed) {
             throw InvalidScopeException(requestedScopes.minus(clientOf.clientScopes))
+        }
+
+        if (!identityService.validScopes(clientOf, identityOf, requestedScopes)) {
+            throw InvalidScopeException(requestedScopes)
         }
 
         val codeToken = codeTokenConverter.convertToToken(
@@ -217,11 +226,19 @@ class TokenService(
             throw InvalidIdentityException()
         }
 
-        val requestedScopes = ScopeParser.parseScopes(redirect.scope)
+        var requestedScopes = ScopeParser.parseScopes(redirect.scope)
+
+        if (redirect.scope == null) {
+            requestedScopes = clientOf.clientScopes
+        }
 
         val scopesAllowed = scopesAllowed(clientOf.clientScopes, requestedScopes)
         if (!scopesAllowed) {
             throw InvalidScopeException(requestedScopes.minus(clientOf.clientScopes))
+        }
+
+        if (!identityService.validScopes(clientOf, identityOf, requestedScopes)) {
+            throw InvalidScopeException(requestedScopes)
         }
 
         val accessToken = accessTokenConverter.convertToToken(
@@ -234,6 +251,18 @@ class TokenService(
         tokenStore.storeAccessToken(accessToken)
 
         return accessToken
+    }
+
+    fun userInfo(accessToken: String): UserInfo {
+        val storedAccessToken = tokenStore.accessToken(accessToken)!!
+        val client = clientService.clientOf(storedAccessToken.clientId)!!
+        val identity = identityService.identityOf(client, storedAccessToken.username)!!
+
+        return UserInfo(
+                identity,
+                client,
+                storedAccessToken.scopes
+        )
     }
 
     private fun throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) {

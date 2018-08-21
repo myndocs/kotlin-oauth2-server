@@ -7,8 +7,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.pipeline.PipelineContext
 import io.ktor.request.httpMethod
 import io.ktor.request.path
-import io.ktor.response.respond
 import io.ktor.response.respondText
+import nl.myndocs.oauth2.exception.InvalidGrantException
+import nl.myndocs.oauth2.exception.InvalidRequestException
 import nl.myndocs.oauth2.exception.OauthException
 import nl.myndocs.oauth2.ktor.feature.Oauth2ServerFeature
 import nl.myndocs.oauth2.ktor.feature.util.toJson
@@ -26,22 +27,15 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizeEndpoint(fe
             return
         }
 
-        val allowedResponseTypes = setOf("code", "token")
-        val responseType = call.request.queryParameters["response_type"]
-
-        if (responseType == null) {
-            call.respond(HttpStatusCode.BadRequest, "'response_type' not given")
-            finish()
-            return
-        }
-
-        if (!allowedResponseTypes.contains(responseType)) {
-            call.respond(HttpStatusCode.BadRequest, "'response_type' with value '$responseType' not allowed")
-            finish()
-            return
-        }
-
         try {
+            val allowedResponseTypes = setOf("code", "token")
+            val responseType = call.request.queryParameters["response_type"]
+                    ?: throw InvalidRequestException("'response_type' not given")
+
+            if (!allowedResponseTypes.contains(responseType)) {
+                throw InvalidGrantException("'grant_type' with value '$responseType' not allowed")
+            }
+
             when (responseType) {
                 "code" -> configureAuthorizationCodeGranting(feature)
                 "token" -> configureImplicitTokenGranting(feature)
