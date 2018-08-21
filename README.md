@@ -128,8 +128,6 @@ Javalin.create().apply {
                 }
 
         tokenStore = InMemoryTokenStore()
-
-        accessTokenConverter = UUIDAccessTokenConverter(1)
     }
 }.start(7000)
 ```
