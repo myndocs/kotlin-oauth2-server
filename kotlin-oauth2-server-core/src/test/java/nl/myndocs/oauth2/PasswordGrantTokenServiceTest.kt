@@ -27,7 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
-internal class TokenServiceTest {
+internal class PasswordGrantTokenServiceTest {
     @MockK
     lateinit var identityService: IdentityService
     @MockK
