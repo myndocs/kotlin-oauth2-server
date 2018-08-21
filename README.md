@@ -4,9 +4,8 @@ The goal of this project is to provide a simple OAuth2 library which can be impl
 
 Configuring the oauth2 server for any framework should be simple and understandable.
 It encourages to adapt to existing implementations instead the other way around.
-## Frameworks
-### Ktor
-Setup
+# Maven
+Include the following repository in order to download the artifacts
 ```xml
 <repositories>
     <repository>
@@ -15,6 +14,17 @@ Setup
     </repository>
 </repositories>
 ```
+
+Setting the version in properties
+```xml
+<properties>
+    <myndocs.oauth.version>0.1.1</myndocs.oauth.version>
+</properties>
+```
+# Frameworks
+## Ktor
+Include the following dependencies
+
 ```xml
 <dependency>
     <groupId>nl.myndocs</groupId>
@@ -48,7 +58,7 @@ Setup
 </dependency>
 ```
 
-Basic setup for Ktor:
+In memory example for Ktor:
 ```kotlin
 embeddedServer(Netty, 8080) {
     install(Oauth2ServerFeature) {
@@ -69,8 +79,62 @@ embeddedServer(Netty, 8080) {
 }.start(wait = true)
 ```
 
-## Custom implementation
-### Identity service
+## Javalin
+Include the following dependencies
+```xml
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>kotlin-oauth2-server-core</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>kotlin-oauth2-server-client-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>kotlin-oauth2-server-javalin</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>kotlin-oauth2-server-identity-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>kotlin-oauth2-server-token-store-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+```
+
+In memory example for Javalin:
+```kotlin
+Javalin.create().apply {
+    enableOauthServer {
+        identityService = InMemoryIdentity()
+                .identity {
+                    username = "foo"
+                    password = "bar"
+                }
+
+        clientService = InMemoryClient()
+                .client {
+                    clientId = "testapp"
+                    clientSecret = "testpass"
+                    scopes = setOf("ROLE_CLIENT")
+                    redirectUris = setOf("https://localhost:7000/callback")
+                }
+
+        tokenStore = InMemoryTokenStore()
+
+        accessTokenConverter = UUIDAccessTokenConverter(1)
+    }
+}.start(7000)
+```
+# Custom implementation
+## Identity service
 Users can be authenticate through the identity service. In OAuth2 terms this would be the resource owner.
 
 ```kotlin
@@ -84,7 +148,7 @@ fun validScopes(forClient: Client, identity: Identity, scopes: Set<String>): Boo
 Each of the methods that needs to be implemented contains `Client`. This could give you extra flexibility.
 For example you could have user base per client, instead of have users over all clients.
 
-### Client service
+## Client service
 Client service is similar to the identity service. 
 
 ```kotlin
@@ -93,7 +157,7 @@ fun clientOf(clientId: String): Client?
 fun validClient(client: Client, clientSecret: String): Boolean
 ```
 
-### Token store
+## Token store
 The following methods have to be implemented for a token store.
 
 ```kotlin
