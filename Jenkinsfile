@@ -3,15 +3,19 @@
 pipeline {
     agent none
 
+    tools {
+        maven 'mvn-3.5.4'
+        jdk 'jdk-8'
+    }
     stages {
-        stage('Build') {
+        stage('Cleanup') {
             steps {
-                echo 'Building...'
+                sh 'mvn clean'
             }
         }
         stage('Test') {
             steps {
-                echo 'Testing...'
+                sh 'mvn test'
             }
         }
     }
