@@ -1,4 +1,5 @@
 # Kotlin OAuth2 server 
+
 ## Goal
 The goal of this project is to provide a simple OAuth2 library which can be implemented in any framework
 
