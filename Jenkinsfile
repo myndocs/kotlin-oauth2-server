@@ -1,18 +1,23 @@
 #!/usr/bin/env groovy
 
 pipeline {
-    agent none
+    agent any
 
     tools {
         maven 'mvn-3.5.4'
         jdk 'jdk-8'
     }
+
     stages {
         stage('Cleanup') {
-            sh 'mvn clean'
+            steps {
+                sh 'mvn clean'
+            }
         }
         stage('Test') {
-            sh 'mvn test'
+            steps {
+                sh 'mvn test'
+            }
         }
     }
 }
