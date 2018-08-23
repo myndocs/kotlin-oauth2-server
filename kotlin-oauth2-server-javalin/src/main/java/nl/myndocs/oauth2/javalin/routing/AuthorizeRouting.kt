@@ -23,8 +23,13 @@ fun routeAuthorizationCodeRedirect(ctx: Context, tokenService: TokenService, que
                 )
         )
 
+        var stateQueryParameter = ""
 
-        ctx.redirect(queryParameters["redirect_uri"] + "?code=${redirect.codeToken}")
+        if (queryParameters["state"] != null) {
+            stateQueryParameter = "&state=" + queryParameters["state"]
+        }
+
+        ctx.redirect(queryParameters["redirect_uri"] + "?code=${redirect.codeToken}$stateQueryParameter")
     } catch (unverifiedIdentityException: InvalidIdentityException) {
         ctx.header("WWW-Authenticate", "Basic realm=\"${queryParameters["client_id"]}\"")
         ctx.status(401)
@@ -47,9 +52,15 @@ fun routeAccessTokenRedirect(ctx: Context, tokenService: TokenService, queryPara
                 )
         )
 
+        var stateQueryParameter = ""
+
+        if (queryParameters["state"] != null) {
+            stateQueryParameter = "&state=" + queryParameters["state"]
+        }
+
         ctx.redirect(
                 queryParameters["redirect_uri"] + "#access_token=${redirect.accessToken}" +
-                        "&token_type=bearer&expires_in=${redirect.expiresIn()}"
+                        "&token_type=bearer&expires_in=${redirect.expiresIn()}$stateQueryParameter"
         )
 
     } catch (unverifiedIdentityException: InvalidIdentityException) {
