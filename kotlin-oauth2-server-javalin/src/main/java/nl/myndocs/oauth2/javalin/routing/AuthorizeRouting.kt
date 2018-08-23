@@ -2,47 +2,54 @@ package nl.myndocs.oauth2.javalin.routing
 
 import io.javalin.Context
 import nl.myndocs.oauth2.TokenService
+import nl.myndocs.oauth2.authenticator.Authenticator
 import nl.myndocs.oauth2.exception.InvalidIdentityException
-import nl.myndocs.oauth2.ktor.feature.util.BasicAuth
 import nl.myndocs.oauth2.request.RedirectAuthorizationCodeRequest
 import nl.myndocs.oauth2.request.RedirectTokenRequest
 
 
-fun routeAuthorizationCodeRedirect(ctx: Context, tokenService: TokenService, queryParameters: Map<String, String?>) {
-    val authorizationHeader = ctx.header("authorization") ?: ""
-    val credentials = BasicAuth.parse(authorizationHeader)
-
+fun routeAuthorizationCodeRedirect(
+        ctx: Context,
+        tokenService: TokenService,
+        queryParameters: Map<String, String?>,
+        authenticator: Authenticator<Context>
+) {
+    val credentials = authenticator.authenticate(ctx)
     try {
         val redirect = tokenService.redirect(
                 RedirectAuthorizationCodeRequest(
                         queryParameters["client_id"],
                         queryParameters["redirect_uri"],
-                        credentials.username ?: "",
-                        credentials.password ?: "",
+                        credentials?.username ?: "",
+                        credentials?.password ?: "",
                         queryParameters["scope"]
                 )
         )
 
-
         ctx.redirect(queryParameters["redirect_uri"] + "?code=${redirect.codeToken}")
     } catch (unverifiedIdentityException: InvalidIdentityException) {
-        ctx.header("WWW-Authenticate", "Basic realm=\"${queryParameters["client_id"]}\"")
+        authenticator.failedAuthentication(ctx)
         ctx.status(401)
     }
 }
 
 
-fun routeAccessTokenRedirect(ctx: Context, tokenService: TokenService, queryParameters: Map<String, String?>) {
-    val authorizationHeader = ctx.header("authorization") ?: ""
-    val credentials = BasicAuth.parse(authorizationHeader)
+fun routeAccessTokenRedirect(
+        ctx: Context,
+        tokenService: TokenService,
+        queryParameters:
+        Map<String, String?>,
+        authenticator: Authenticator<Context>
+) {
+    val credentials = authenticator.authenticate(ctx)
 
     try {
         val redirect = tokenService.redirect(
                 RedirectTokenRequest(
                         queryParameters["client_id"],
                         queryParameters["redirect_uri"],
-                        credentials.username ?: "",
-                        credentials.password ?: "",
+                        credentials?.username ?: "",
+                        credentials?.password ?: "",
                         queryParameters["scope"]
                 )
         )
@@ -53,7 +60,7 @@ fun routeAccessTokenRedirect(ctx: Context, tokenService: TokenService, queryPara
         )
 
     } catch (unverifiedIdentityException: InvalidIdentityException) {
-        ctx.header("WWW-Authenticate", "Basic realm=\"${queryParameters["client_id"]}\"")
+        authenticator.failedAuthentication(ctx)
         ctx.status(401)
     }
 }

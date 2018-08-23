@@ -1,8 +1,10 @@
 package nl.myndocs.oauth2.javalin
 
+import io.javalin.Context
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import nl.myndocs.oauth2.TokenService
+import nl.myndocs.oauth2.authenticator.Authenticator
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.exception.InvalidGrantException
 import nl.myndocs.oauth2.exception.InvalidRequestException
@@ -11,6 +13,7 @@ import nl.myndocs.oauth2.exception.toMap
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.UserInfo
 import nl.myndocs.oauth2.javalin.routing.*
+import nl.myndocs.oauth2.javalin.util.BasicAuthenticator
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.*
 
@@ -29,7 +32,8 @@ data class OauthConfiguration(
                     "username" to userInfo.identity.username,
                     "scopes" to userInfo.scopes
             )
-        }
+        },
+        var authenticator: Authenticator<Context> = BasicAuthenticator
 )
 
 fun Javalin.enableOauthServer(configurationCallback: OauthConfiguration.() -> Unit) {
@@ -88,8 +92,8 @@ fun Javalin.enableOauthServer(configurationCallback: OauthConfiguration.() -> Un
                             .mapValues { ctx.queryParam(it.key) }
 
                     when (responseType) {
-                        "code" -> routeAuthorizationCodeRedirect(ctx, tokenService, paramMap)
-                        "token" -> routeAccessTokenRedirect(ctx, tokenService, paramMap)
+                        "code" -> routeAuthorizationCodeRedirect(ctx, tokenService, paramMap, configuration.authenticator)
+                        "token" -> routeAccessTokenRedirect(ctx, tokenService, paramMap, configuration.authenticator)
                     }
                 } catch (oauthException: OauthException) {
                     ctx.status(400)
