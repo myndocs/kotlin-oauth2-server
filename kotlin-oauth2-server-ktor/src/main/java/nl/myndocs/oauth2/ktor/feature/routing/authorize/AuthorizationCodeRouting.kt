@@ -43,9 +43,15 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
                 )
         )
 
+        var stateQueryParameter = ""
+
+        if (queryParameters["state"] != null) {
+            stateQueryParameter = "&state=" + queryParameters["state"]
+        }
+
 
         call.respondRedirect(
-                queryParameters["redirect_uri"] + "?code=${redirect.codeToken}"
+                queryParameters["redirect_uri"] + "?code=${redirect.codeToken}$stateQueryParameter"
         )
 
         finish()

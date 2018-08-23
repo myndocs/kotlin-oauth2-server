@@ -26,10 +26,15 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureImplicitTokenGrantin
                 )
         )
 
+        var stateQueryParameter = ""
+
+        if (queryParameters["state"] != null) {
+            stateQueryParameter = "&state=" + queryParameters["state"]
+        }
 
         call.respondRedirect(
                 queryParameters["redirect_uri"] + "#access_token=${redirect.accessToken}" +
-                        "&token_type=bearer&expires_in=${redirect.expiresIn()}"
+                        "&token_type=bearer&expires_in=${redirect.expiresIn()}$stateQueryParameter"
         )
 
         finish()

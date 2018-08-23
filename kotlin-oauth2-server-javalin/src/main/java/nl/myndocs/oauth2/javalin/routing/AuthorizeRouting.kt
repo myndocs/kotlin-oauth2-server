@@ -26,7 +26,13 @@ fun routeAuthorizationCodeRedirect(
                 )
         )
 
-        ctx.redirect(queryParameters["redirect_uri"] + "?code=${redirect.codeToken}")
+        var stateQueryParameter = ""
+
+        if (queryParameters["state"] != null) {
+            stateQueryParameter = "&state=" + queryParameters["state"]
+        }
+
+        ctx.redirect(queryParameters["redirect_uri"] + "?code=${redirect.codeToken}$stateQueryParameter")
     } catch (unverifiedIdentityException: InvalidIdentityException) {
         authenticator.failedAuthentication(ctx)
         ctx.status(401)
@@ -54,9 +60,15 @@ fun routeAccessTokenRedirect(
                 )
         )
 
+        var stateQueryParameter = ""
+
+        if (queryParameters["state"] != null) {
+            stateQueryParameter = "&state=" + queryParameters["state"]
+        }
+
         ctx.redirect(
                 queryParameters["redirect_uri"] + "#access_token=${redirect.accessToken}" +
-                        "&token_type=bearer&expires_in=${redirect.expiresIn()}"
+                        "&token_type=bearer&expires_in=${redirect.expiresIn()}$stateQueryParameter"
         )
 
     } catch (unverifiedIdentityException: InvalidIdentityException) {
