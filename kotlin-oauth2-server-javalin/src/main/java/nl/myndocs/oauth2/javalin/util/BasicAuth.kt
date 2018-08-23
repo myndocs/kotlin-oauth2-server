@@ -1,9 +1,16 @@
 package nl.myndocs.oauth2.ktor.feature.util
 
+import nl.myndocs.oauth2.javalin.util.Credentials
 import java.util.*
 
 object BasicAuth {
+    @Deprecated("Removed in 0.2.0")
     fun parse(authorization: String): Credentials {
+        val parseCredentials = parseCredentials(authorization)
+        return Credentials(parseCredentials.username, parseCredentials.password)
+    }
+
+    fun parseCredentials(authorization: String): nl.myndocs.oauth2.authenticator.Credentials {
         var username: String? = null
         var password: String? = null
 
@@ -22,6 +29,6 @@ object BasicAuth {
             }
         }
 
-        return Credentials(username, password)
+        return nl.myndocs.oauth2.authenticator.Credentials(username, password)
     }
 }

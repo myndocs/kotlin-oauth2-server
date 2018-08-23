@@ -1,5 +1,6 @@
 package nl.myndocs.oauth2.ktor.feature
 
+import io.ktor.application.ApplicationCall
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
 import io.ktor.application.call
@@ -11,12 +12,14 @@ import io.ktor.request.path
 import io.ktor.response.respond
 import io.ktor.util.AttributeKey
 import nl.myndocs.oauth2.TokenService
+import nl.myndocs.oauth2.authenticator.Authenticator
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.UserInfo
 import nl.myndocs.oauth2.ktor.feature.json.MapToJson
 import nl.myndocs.oauth2.ktor.feature.routing.authorize.configureAuthorizeEndpoint
 import nl.myndocs.oauth2.ktor.feature.routing.token.configureTokenEndpoint
+import nl.myndocs.oauth2.ktor.feature.util.BasicAuthenticator
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.*
 
@@ -39,6 +42,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
             refreshTokenConverter,
             codeTokenConverter
     )
+    val authenticator: Authenticator<ApplicationCall> = configuration.authenticator
 
     class Configuration {
         var tokenEndpoint = "/oauth/token"
@@ -56,6 +60,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
                     "scopes" to userInfo.scopes
             )
         }
+        var authenticator: Authenticator<ApplicationCall> = BasicAuthenticator
     }
 
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, Oauth2ServerFeature.Configuration, Oauth2ServerFeature> {
