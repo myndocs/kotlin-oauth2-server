@@ -5,7 +5,7 @@ import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.authenticator.Credentials
 import nl.myndocs.oauth2.ktor.feature.util.BasicAuth
 
-object BasicAuthorizer : Authorizer<Context> {
+open class BasicAuthorizer : Authorizer<Context> {
     override fun extractCredentials(context: Context): Credentials? {
         val authorizationHeader = context.header("authorization") ?: ""
         return BasicAuth.parseCredentials(authorizationHeader)

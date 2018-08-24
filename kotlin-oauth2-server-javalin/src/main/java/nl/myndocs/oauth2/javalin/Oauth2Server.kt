@@ -33,7 +33,7 @@ data class OauthConfiguration(
                     "scopes" to userInfo.scopes
             )
         },
-        var authorizer: Authorizer<Context> = BasicAuthorizer
+        var authorizer: Authorizer<Context> = BasicAuthorizer()
 )
 
 fun Javalin.enableOauthServer(configurationCallback: OauthConfiguration.() -> Unit) {
