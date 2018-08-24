@@ -6,7 +6,7 @@ import io.ktor.response.header
 import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.authenticator.Credentials
 
-object BasicAuthorizer : Authorizer<ApplicationCall> {
+open class BasicAuthorizer : Authorizer<ApplicationCall> {
     override fun extractCredentials(context: ApplicationCall): Credentials? {
         val authorizationHeader = context.request.header("authorization") ?: ""
         return BasicAuth.parseCredentials(authorizationHeader)

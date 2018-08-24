@@ -60,7 +60,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
                     "scopes" to userInfo.scopes
             )
         }
-        var authorizer: Authorizer<ApplicationCall> = BasicAuthorizer
+        var authorizer: Authorizer<ApplicationCall> = BasicAuthorizer()
     }
 
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, Oauth2ServerFeature.Configuration, Oauth2ServerFeature> {
