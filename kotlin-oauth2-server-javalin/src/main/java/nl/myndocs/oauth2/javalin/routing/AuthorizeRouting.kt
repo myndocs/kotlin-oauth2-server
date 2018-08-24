@@ -2,7 +2,7 @@ package nl.myndocs.oauth2.javalin.routing
 
 import io.javalin.Context
 import nl.myndocs.oauth2.TokenService
-import nl.myndocs.oauth2.authenticator.Authenticator
+import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.exception.InvalidIdentityException
 import nl.myndocs.oauth2.request.RedirectAuthorizationCodeRequest
 import nl.myndocs.oauth2.request.RedirectTokenRequest
@@ -12,9 +12,9 @@ fun routeAuthorizationCodeRedirect(
         ctx: Context,
         tokenService: TokenService,
         queryParameters: Map<String, String?>,
-        authenticator: Authenticator<Context>
+        authorizer: Authorizer<Context>
 ) {
-    val credentials = authenticator.authenticate(ctx)
+    val credentials = authorizer.extractCredentials(ctx)
     try {
         val redirect = tokenService.redirect(
                 RedirectAuthorizationCodeRequest(
@@ -23,7 +23,9 @@ fun routeAuthorizationCodeRedirect(
                         credentials?.username ?: "",
                         credentials?.password ?: "",
                         queryParameters["scope"]
-                )
+                ),
+                authorizer.authenticator(ctx),
+                authorizer.scopesVerifier(ctx)
         )
 
         var stateQueryParameter = ""
@@ -34,7 +36,7 @@ fun routeAuthorizationCodeRedirect(
 
         ctx.redirect(queryParameters["redirect_uri"] + "?code=${redirect.codeToken}$stateQueryParameter")
     } catch (unverifiedIdentityException: InvalidIdentityException) {
-        authenticator.failedAuthentication(ctx)
+        authorizer.failedAuthentication(ctx)
         ctx.status(401)
     }
 }
@@ -45,9 +47,9 @@ fun routeAccessTokenRedirect(
         tokenService: TokenService,
         queryParameters:
         Map<String, String?>,
-        authenticator: Authenticator<Context>
+        authorizer: Authorizer<Context>
 ) {
-    val credentials = authenticator.authenticate(ctx)
+    val credentials = authorizer.extractCredentials(ctx)
 
     try {
         val redirect = tokenService.redirect(
@@ -57,7 +59,9 @@ fun routeAccessTokenRedirect(
                         credentials?.username ?: "",
                         credentials?.password ?: "",
                         queryParameters["scope"]
-                )
+                ),
+                authorizer.authenticator(ctx),
+                authorizer.scopesVerifier(ctx)
         )
 
         var stateQueryParameter = ""
@@ -72,7 +76,7 @@ fun routeAccessTokenRedirect(
         )
 
     } catch (unverifiedIdentityException: InvalidIdentityException) {
-        authenticator.failedAuthentication(ctx)
+        authorizer.failedAuthentication(ctx)
         ctx.status(401)
     }
 }

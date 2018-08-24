@@ -1,5 +1,7 @@
 package nl.myndocs.oauth2
 
+import nl.myndocs.oauth2.authenticator.Authenticator
+import nl.myndocs.oauth2.authenticator.IdentityScopeVerifier
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.identity.IdentityService
@@ -127,6 +129,10 @@ class TokenService(
 
         val refreshToken = tokenStore.refreshToken(refreshTokenRequest.refreshToken) ?: throw InvalidGrantException()
 
+        if (refreshToken.clientId != refreshTokenRequest.clientId) {
+            throw InvalidGrantException()
+        }
+
         val accessToken = accessTokenConverter.convertToToken(
                 refreshToken.username,
                 refreshToken.clientId,
@@ -139,7 +145,11 @@ class TokenService(
         return accessToken.toTokenResponse()
     }
 
-    fun redirect(redirect: RedirectAuthorizationCodeRequest): CodeToken {
+    fun redirect(
+            redirect: RedirectAuthorizationCodeRequest,
+            authenticator: Authenticator?,
+            identityScopeVerifier: IdentityScopeVerifier?
+    ): CodeToken {
         if (redirect.clientId == null) {
             throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
         }
@@ -163,7 +173,8 @@ class TokenService(
 
         val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
 
-        var validIdentity = identityService.validCredentials(clientOf, identityOf, redirect.password)
+        var validIdentity = authenticator?.validCredentials(clientOf, identityOf, redirect.password)
+                ?: identityService.validCredentials(clientOf, identityOf, redirect.password)
 
         if (!validIdentity) {
             throw InvalidIdentityException()
@@ -175,7 +186,9 @@ class TokenService(
             requestedScopes = clientOf.clientScopes
         }
 
-        val scopesAllowed = scopesAllowed(clientOf.clientScopes, requestedScopes)
+        val scopesAllowed = identityScopeVerifier?.validScopes(clientOf, identityOf, requestedScopes)
+                ?: scopesAllowed(clientOf.clientScopes, requestedScopes)
+
         if (!scopesAllowed) {
             throw InvalidScopeException(requestedScopes.minus(clientOf.clientScopes))
         }
@@ -196,7 +209,11 @@ class TokenService(
         return codeToken
     }
 
-    fun redirect(redirect: RedirectTokenRequest): AccessToken {
+    fun redirect(
+            redirect: RedirectTokenRequest,
+            authenticator: Authenticator?,
+            identityScopeVerifier: IdentityScopeVerifier?
+    ): AccessToken {
         if (redirect.clientId == null) {
             throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
         }
@@ -220,7 +237,8 @@ class TokenService(
 
         val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
 
-        var validIdentity = identityService.validCredentials(clientOf, identityOf, redirect.password)
+        var validIdentity = authenticator?.validCredentials(clientOf, identityOf, redirect.password)
+                ?: identityService.validCredentials(clientOf, identityOf, redirect.password)
 
         if (!validIdentity) {
             throw InvalidIdentityException()
@@ -232,7 +250,8 @@ class TokenService(
             requestedScopes = clientOf.clientScopes
         }
 
-        val scopesAllowed = scopesAllowed(clientOf.clientScopes, requestedScopes)
+        val scopesAllowed = identityScopeVerifier?.validScopes(clientOf, identityOf, requestedScopes)
+                ?: scopesAllowed(clientOf.clientScopes, requestedScopes)
         if (!scopesAllowed) {
             throw InvalidScopeException(requestedScopes.minus(clientOf.clientScopes))
         }

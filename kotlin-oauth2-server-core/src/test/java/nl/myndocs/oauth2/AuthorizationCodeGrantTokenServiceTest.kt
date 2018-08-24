@@ -10,6 +10,7 @@ import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.exception.InvalidClientException
 import nl.myndocs.oauth2.exception.InvalidGrantException
 import nl.myndocs.oauth2.exception.InvalidRequestException
+import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.request.AuthorizationCodeRequest
 import nl.myndocs.oauth2.token.AccessToken
@@ -60,6 +61,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
         val requestScopes = setOf("scope1")
 
         val client = Client(clientId, setOf("scope1", "scope2"), setOf())
+        val identity = Identity(username)
         val codeToken = CodeToken(code, Instant.now(), username, clientId, redirectUri, requestScopes)
 
         val refreshToken = RefreshToken("test", Instant.now(), username, clientId, requestScopes)
@@ -67,6 +69,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
 
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns true
+        every { identityService.identityOf(client, username) } returns identity
         every { tokenStore.consumeCodeToken(code) } returns codeToken
         every { refreshTokenConverter.convertToToken(username, clientId, requestScopes) } returns refreshToken
         every { accessTokenConverter.convertToToken(username, clientId, requestScopes, refreshToken) } returns accessToken

@@ -30,7 +30,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
 
     val queryParameters = call.request.queryParameters
 
-    val credentials = feature.authenticator.authenticate(call)
+    val credentials = feature.authorizer.extractCredentials(call)
 
     try {
         val redirect = feature.tokenService.redirect(
@@ -40,7 +40,9 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
                         credentials?.username ?: "",
                         credentials?.password ?: "",
                         queryParameters["scope"]
-                )
+                ),
+                feature.authorizer.authenticator(call),
+                feature.authorizer.scopesVerifier(call)
         )
 
         var stateQueryParameter = ""
@@ -57,7 +59,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureAuthorizationCodeGra
         finish()
         return
     } catch (unverifiedIdentityException: InvalidIdentityException) {
-        feature.authenticator.failedAuthentication(call)
+        feature.authorizer.failedAuthentication(call)
         call.respond(HttpStatusCode.Unauthorized)
         finish()
         return

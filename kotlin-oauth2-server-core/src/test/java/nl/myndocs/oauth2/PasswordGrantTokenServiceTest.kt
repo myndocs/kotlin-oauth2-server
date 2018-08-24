@@ -77,7 +77,6 @@ internal class PasswordGrantTokenServiceTest {
 
         tokenService.authorize(passwordGrantRequest)
 
-
         verify { tokenStore.storeAccessToken(accessToken) }
     }
 
