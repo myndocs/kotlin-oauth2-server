@@ -42,7 +42,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
             refreshTokenConverter,
             codeTokenConverter
     )
-    val authorizer: Authorizer<ApplicationCall> = configuration.authorizer
+    val authorizerFactory: (ApplicationCall) -> Authorizer = configuration.authorizerFactory
 
     class Configuration {
         var tokenEndpoint = "/oauth/token"
@@ -60,7 +60,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
                     "scopes" to userInfo.scopes
             )
         }
-        var authorizer: Authorizer<ApplicationCall> = BasicAuthorizer()
+        var authorizerFactory: (ApplicationCall) -> Authorizer = ::BasicAuthorizer
     }
 
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, Oauth2ServerFeature.Configuration, Oauth2ServerFeature> {

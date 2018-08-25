@@ -6,13 +6,13 @@ import io.ktor.response.header
 import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.authenticator.Credentials
 
-open class BasicAuthorizer : Authorizer<ApplicationCall> {
-    override fun extractCredentials(context: ApplicationCall): Credentials? {
+open class BasicAuthorizer(protected val context: ApplicationCall) : Authorizer {
+    override fun extractCredentials(): Credentials? {
         val authorizationHeader = context.request.header("authorization") ?: ""
         return BasicAuth.parseCredentials(authorizationHeader)
     }
 
-    override fun failedAuthentication(context: ApplicationCall) {
+    override fun failedAuthentication() {
         context.response.header("WWW-Authenticate", "Basic realm=\"${context.request.queryParameters["client_id"]}\"")
     }
 }
