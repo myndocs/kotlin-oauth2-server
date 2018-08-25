@@ -13,7 +13,8 @@ import nl.myndocs.oauth2.request.RedirectTokenRequest
 suspend fun PipelineContext<Unit, ApplicationCall>.configureImplicitTokenGranting(feature: Oauth2ServerFeature) {
     val queryParameters = call.request.queryParameters
 
-    val credentials = feature.authorizer.extractCredentials(call)
+    val authorizer = feature.authorizerFactory(call)
+    val credentials = authorizer.extractCredentials()
 
     try {
         val redirect = feature.tokenService.redirect(
@@ -24,8 +25,8 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureImplicitTokenGrantin
                         credentials?.password ?: "",
                         queryParameters["scope"]
                 ),
-                feature.authorizer.authenticator(call),
-                feature.authorizer.scopesVerifier(call)
+                authorizer.authenticator(),
+                authorizer.scopesVerifier()
         )
 
         var stateQueryParameter = ""
@@ -42,7 +43,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.configureImplicitTokenGrantin
         finish()
         return
     } catch (unverifiedIdentityException: InvalidIdentityException) {
-        feature.authorizer.failedAuthentication(call)
+        authorizer.failedAuthentication()
         call.respond(HttpStatusCode.Unauthorized)
         finish()
         return

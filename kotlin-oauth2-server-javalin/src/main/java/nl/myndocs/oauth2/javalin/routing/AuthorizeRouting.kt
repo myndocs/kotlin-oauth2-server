@@ -12,9 +12,10 @@ fun routeAuthorizationCodeRedirect(
         ctx: Context,
         tokenService: TokenService,
         queryParameters: Map<String, String?>,
-        authorizer: Authorizer<Context>
+        authorizerFactory: (Context) -> Authorizer
 ) {
-    val credentials = authorizer.extractCredentials(ctx)
+    val authorizer = authorizerFactory(ctx)
+    val credentials = authorizer.extractCredentials()
     try {
         val redirect = tokenService.redirect(
                 RedirectAuthorizationCodeRequest(
@@ -24,8 +25,8 @@ fun routeAuthorizationCodeRedirect(
                         credentials?.password ?: "",
                         queryParameters["scope"]
                 ),
-                authorizer.authenticator(ctx),
-                authorizer.scopesVerifier(ctx)
+                authorizer.authenticator(),
+                authorizer.scopesVerifier()
         )
 
         var stateQueryParameter = ""
@@ -36,7 +37,7 @@ fun routeAuthorizationCodeRedirect(
 
         ctx.redirect(queryParameters["redirect_uri"] + "?code=${redirect.codeToken}$stateQueryParameter")
     } catch (unverifiedIdentityException: InvalidIdentityException) {
-        authorizer.failedAuthentication(ctx)
+        authorizer.failedAuthentication()
         ctx.status(401)
     }
 }
@@ -47,9 +48,10 @@ fun routeAccessTokenRedirect(
         tokenService: TokenService,
         queryParameters:
         Map<String, String?>,
-        authorizer: Authorizer<Context>
+        authorizerFactory: (Context) -> Authorizer
 ) {
-    val credentials = authorizer.extractCredentials(ctx)
+    val authorizer = authorizerFactory(ctx)
+    val credentials = authorizer.extractCredentials()
 
     try {
         val redirect = tokenService.redirect(
@@ -60,8 +62,8 @@ fun routeAccessTokenRedirect(
                         credentials?.password ?: "",
                         queryParameters["scope"]
                 ),
-                authorizer.authenticator(ctx),
-                authorizer.scopesVerifier(ctx)
+                authorizer.authenticator(),
+                authorizer.scopesVerifier()
         )
 
         var stateQueryParameter = ""
@@ -76,7 +78,7 @@ fun routeAccessTokenRedirect(
         )
 
     } catch (unverifiedIdentityException: InvalidIdentityException) {
-        authorizer.failedAuthentication(ctx)
+        authorizer.failedAuthentication()
         ctx.status(401)
     }
 }

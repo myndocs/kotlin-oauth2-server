@@ -33,7 +33,7 @@ data class OauthConfiguration(
                     "scopes" to userInfo.scopes
             )
         },
-        var authorizer: Authorizer<Context> = BasicAuthorizer()
+        var authorizerFactory: (Context) -> Authorizer = ::BasicAuthorizer
 )
 
 fun Javalin.enableOauthServer(configurationCallback: OauthConfiguration.() -> Unit) {
@@ -92,8 +92,8 @@ fun Javalin.enableOauthServer(configurationCallback: OauthConfiguration.() -> Un
                             .mapValues { ctx.queryParam(it.key) }
 
                     when (responseType) {
-                        "code" -> routeAuthorizationCodeRedirect(ctx, tokenService, paramMap, configuration.authorizer)
-                        "token" -> routeAccessTokenRedirect(ctx, tokenService, paramMap, configuration.authorizer)
+                        "code" -> routeAuthorizationCodeRedirect(ctx, tokenService, paramMap, configuration.authorizerFactory)
+                        "token" -> routeAccessTokenRedirect(ctx, tokenService, paramMap, configuration.authorizerFactory)
                     }
                 } catch (oauthException: OauthException) {
                     ctx.status(400)
