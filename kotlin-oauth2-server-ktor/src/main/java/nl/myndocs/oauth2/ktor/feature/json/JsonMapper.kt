@@ -2,8 +2,8 @@ package nl.myndocs.oauth2.ktor.feature.json
 
 import com.google.gson.Gson
 
-object MapToJson {
+object JsonMapper {
     private val gson = Gson()
 
-    fun toJson(map: Map<String, Any?>) = gson.toJson(map)
+    fun toJson(content: Any) = gson.toJson(content)
 }
