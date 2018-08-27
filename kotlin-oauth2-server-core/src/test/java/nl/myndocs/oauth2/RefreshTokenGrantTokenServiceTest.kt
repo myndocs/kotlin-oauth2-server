@@ -41,7 +41,7 @@ internal class RefreshTokenGrantTokenServiceTest {
     lateinit var codeTokenConverter: CodeTokenConverter
 
     @InjectMockKs
-    lateinit var tokenService: TokenService
+    lateinit var tokenService: Oauth2TokenService
 
     val clientId = "client-foo"
     val clientSecret = "client-bar"
