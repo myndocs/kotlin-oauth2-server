@@ -23,7 +23,7 @@ class CallRouter(
     }
 
     fun route(
-            callContext: CallContext<out Any>,
+            callContext: CallContext,
             authorizer: Authorizer) {
         when (callContext.path) {
             tokenEndpoint -> routeTokenEndpoint(callContext)
@@ -32,7 +32,7 @@ class CallRouter(
         }
     }
 
-    private fun routeTokenEndpoint(callContext: CallContext<out Any>) {
+    private fun routeTokenEndpoint(callContext: CallContext) {
         if (callContext.method.toLowerCase() != METHOD_POST) {
             return
         }
@@ -57,7 +57,7 @@ class CallRouter(
         }
     }
 
-    fun routePasswordGrant(callContext: CallContext<out Any>, tokenService: TokenService) {
+    fun routePasswordGrant(callContext: CallContext, tokenService: TokenService) {
         val tokenResponse = tokenService.authorize(
                 PasswordGrantRequest(
                         callContext.formParameters["client_id"],
@@ -71,7 +71,7 @@ class CallRouter(
         callContext.respondJson(tokenResponse.toMap())
     }
 
-    fun routeRefreshTokenGrant(callContext: CallContext<out Any>, tokenService: TokenService) {
+    fun routeRefreshTokenGrant(callContext: CallContext, tokenService: TokenService) {
         val accessToken = tokenService.refresh(
                 RefreshTokenRequest(
                         callContext.formParameters["client_id"],
@@ -83,7 +83,7 @@ class CallRouter(
         callContext.respondJson(accessToken.toMap())
     }
 
-    fun routeAuthorizationCodeGrant(callContext: CallContext<out Any>, tokenService: TokenService) {
+    fun routeAuthorizationCodeGrant(callContext: CallContext, tokenService: TokenService) {
         val accessToken = tokenService.authorize(
                 AuthorizationCodeRequest(
                         callContext.formParameters["client_id"],
@@ -98,7 +98,7 @@ class CallRouter(
 
 
     fun routeAuthorizationCodeRedirect(
-            callContext: CallContext<out Any>,
+            callContext: CallContext,
             tokenService: TokenService,
             authorizer: Authorizer
     ) {
@@ -132,7 +132,7 @@ class CallRouter(
 
 
     fun routeAccessTokenRedirect(
-            callContext: CallContext<out Any>,
+            callContext: CallContext,
             tokenService: TokenService,
             authorizer: Authorizer
     ) {
@@ -169,7 +169,7 @@ class CallRouter(
         }
     }
 
-    private fun routeAuthorizeEndpoint(callContext: CallContext<out Any>, authorizer: Authorizer) {
+    private fun routeAuthorizeEndpoint(callContext: CallContext, authorizer: Authorizer) {
         try {
             if (callContext.method.toLowerCase() != METHOD_GET) {
                 return
@@ -193,7 +193,7 @@ class CallRouter(
         }
     }
 
-    private fun routeUserInfoEndpoint(callContext: CallContext<out Any>) {
+    private fun routeUserInfoEndpoint(callContext: CallContext) {
         if (callContext.method.toLowerCase() != METHOD_GET) {
             return
         }

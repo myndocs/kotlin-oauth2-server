@@ -1,11 +1,6 @@
 package nl.myndocs.oauth2.request
 
-interface CallContext<T> {
-    /**
-     * Driver gives ability to use internal class to do low-level functionality
-     * This would normally be the request/call/context object
-     */
-    val driver: T
+interface CallContext {
     val path: String
     val method: String
     val headers: Map<String, String>

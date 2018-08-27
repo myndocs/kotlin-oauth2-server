@@ -1,6 +1,5 @@
 package nl.myndocs.oauth2.javalin
 
-import io.javalin.Context
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import nl.myndocs.oauth2.CallRouter
@@ -31,7 +30,7 @@ data class OauthConfiguration(
                     "scopes" to userInfo.scopes
             )
         },
-        var authorizerFactory: (CallContext<Context>) -> Authorizer = ::BasicAuthorizer
+        var authorizerFactory: (CallContext) -> Authorizer = ::BasicAuthorizer
 )
 
 fun Javalin.enableOauthServer(configurationCallback: OauthConfiguration.() -> Unit) {

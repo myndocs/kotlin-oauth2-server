@@ -1,6 +1,5 @@
 package nl.myndocs.oauth2.ktor.feature
 
-import io.ktor.application.ApplicationCall
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
 import io.ktor.application.call
@@ -43,7 +42,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
             userInfoEndpoint,
             userInfoCallback
     )
-    val authorizerFactory: (CallContext<ApplicationCall>) -> Authorizer = configuration.authorizerFactory
+    val authorizerFactory: (CallContext) -> Authorizer = configuration.authorizerFactory
 
     class Configuration {
         var tokenEndpoint = "/oauth/token"
@@ -61,7 +60,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
                     "scopes" to userInfo.scopes
             )
         }
-        var authorizerFactory: (CallContext<ApplicationCall>) -> Authorizer = ::BasicAuthorizer
+        var authorizerFactory: (CallContext) -> Authorizer = ::BasicAuthorizer
     }
 
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, Oauth2ServerFeature.Configuration, Oauth2ServerFeature> {

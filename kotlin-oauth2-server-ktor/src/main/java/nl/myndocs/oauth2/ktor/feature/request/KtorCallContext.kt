@@ -14,18 +14,17 @@ import kotlinx.coroutines.experimental.runBlocking
 import nl.myndocs.oauth2.ktor.feature.json.JsonMapper
 import nl.myndocs.oauth2.request.CallContext
 
-class KtorCallContext(val applicationCall: ApplicationCall) : CallContext<ApplicationCall> {
-    override val driver: ApplicationCall = applicationCall
-    override val path: String = driver.request.path()
-    override val method: String = driver.request.httpMethod.value
-    override val headers: Map<String, String> = driver.request
+class KtorCallContext(val applicationCall: ApplicationCall) : CallContext {
+    override val path: String = applicationCall.request.path()
+    override val method: String = applicationCall.request.httpMethod.value
+    override val headers: Map<String, String> = applicationCall.request
             .headers
             .toMap()
-            .mapValues { driver.request.header(it.key) }
+            .mapValues { applicationCall.request.header(it.key) }
             .filterValues { it != null }
             .mapValues { it.value!! }
 
-    override val queryParameters: Map<String, String> = driver.request
+    override val queryParameters: Map<String, String> = applicationCall.request
             .queryParameters
             .toMap()
             .filterValues { it.isNotEmpty() }
@@ -38,7 +37,7 @@ class KtorCallContext(val applicationCall: ApplicationCall) : CallContext<Applic
     private fun receiveParameters(): Map<String, String> {
         if (_formParameters == null) {
             _formParameters = runBlocking {
-                driver.receiveParameters()
+                applicationCall.receiveParameters()
                         .toMap()
                         .filterValues { it.isNotEmpty() }
                         .mapValues { it.value.first() }
@@ -49,16 +48,16 @@ class KtorCallContext(val applicationCall: ApplicationCall) : CallContext<Applic
     }
 
     override fun respondStatus(statusCode: Int) {
-        driver.response.status(HttpStatusCode.fromValue(statusCode))
+        applicationCall.response.status(HttpStatusCode.fromValue(statusCode))
     }
 
     override fun respondHeader(name: String, value: String) {
-        driver.response.header(name, value)
+        applicationCall.response.header(name, value)
     }
 
     override fun respondJson(content: Any) {
         runBlocking {
-            driver.respondText(
+            applicationCall.respondText(
                     JsonMapper.toJson(content),
                     io.ktor.http.ContentType.Application.Json
             )
@@ -67,7 +66,7 @@ class KtorCallContext(val applicationCall: ApplicationCall) : CallContext<Applic
 
     override fun redirect(uri: String) {
         runBlocking {
-            driver.respondRedirect(uri)
+            applicationCall.respondRedirect(uri)
         }
     }
 }

@@ -4,7 +4,7 @@ import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.authenticator.Credentials
 import nl.myndocs.oauth2.request.CallContext
 
-open class BasicAuthorizer(protected val context: CallContext<out Any>) : Authorizer {
+open class BasicAuthorizer(protected val context: CallContext) : Authorizer {
     override fun extractCredentials(): Credentials? {
         val authorizationHeader = context.headers["authorization"] ?: ""
         return BasicAuth.parseCredentials(authorizationHeader)
