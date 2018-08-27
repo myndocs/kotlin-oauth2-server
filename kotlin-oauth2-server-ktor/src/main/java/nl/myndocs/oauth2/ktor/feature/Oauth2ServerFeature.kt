@@ -1,25 +1,18 @@
 package nl.myndocs.oauth2.ktor.feature
 
-import io.ktor.application.ApplicationCall
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
 import io.ktor.application.call
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.path
-import io.ktor.response.respond
 import io.ktor.util.AttributeKey
+import nl.myndocs.oauth2.CallRouter
 import nl.myndocs.oauth2.TokenService
 import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.UserInfo
-import nl.myndocs.oauth2.ktor.feature.json.MapToJson
-import nl.myndocs.oauth2.ktor.feature.routing.authorize.configureAuthorizeEndpoint
-import nl.myndocs.oauth2.ktor.feature.routing.token.configureTokenEndpoint
-import nl.myndocs.oauth2.ktor.feature.util.BasicAuthorizer
+import nl.myndocs.oauth2.ktor.feature.request.KtorCallContext
+import nl.myndocs.oauth2.request.CallContext
+import nl.myndocs.oauth2.request.auth.BasicAuthorizer
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.*
 
@@ -42,7 +35,14 @@ class Oauth2ServerFeature(configuration: Configuration) {
             refreshTokenConverter,
             codeTokenConverter
     )
-    val authorizerFactory: (ApplicationCall) -> Authorizer = configuration.authorizerFactory
+    val callRouter = CallRouter(
+            tokenService,
+            tokenEndpoint,
+            authorizeEndpoint,
+            userInfoEndpoint,
+            userInfoCallback
+    )
+    val authorizerFactory: (CallContext) -> Authorizer = configuration.authorizerFactory
 
     class Configuration {
         var tokenEndpoint = "/oauth/token"
@@ -60,7 +60,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
                     "scopes" to userInfo.scopes
             )
         }
-        var authorizerFactory: (ApplicationCall) -> Authorizer = ::BasicAuthorizer
+        var authorizerFactory: (CallContext) -> Authorizer = ::BasicAuthorizer
     }
 
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, Oauth2ServerFeature.Configuration, Oauth2ServerFeature> {
@@ -73,41 +73,10 @@ class Oauth2ServerFeature(configuration: Configuration) {
             val feature = Oauth2ServerFeature(configuration)
 
             pipeline.intercept(ApplicationCallPipeline.Infrastructure) {
-                configureTokenEndpoint(feature)
-                configureAuthorizeEndpoint(feature)
+                val ktorCallContext = KtorCallContext(call)
+                val authorizer = feature.authorizerFactory(ktorCallContext)
 
-                if (call.request.httpMethod != HttpMethod.Get) {
-                    proceed()
-                    return@intercept
-                }
-
-                val requestPath = call.request.path()
-                if (requestPath != feature.userInfoEndpoint) {
-                    proceed()
-                    return@intercept
-                }
-
-                val authorization = call.request.header("Authorization")
-
-                if (authorization == null) {
-                    call.respond(HttpStatusCode.Unauthorized)
-                    finish()
-                    return@intercept
-                }
-
-                if (!authorization.startsWith("bearer ", true)) {
-                    call.respond(HttpStatusCode.Unauthorized)
-                    finish()
-                    return@intercept
-                }
-
-                val token = authorization.substring(7)
-
-                val userInfoCallback = feature.userInfoCallback(feature.tokenService.userInfo(token))
-
-                call.respond(MapToJson.toJson(userInfoCallback))
-                finish()
-                return@intercept
+                feature.callRouter.route(ktorCallContext, authorizer)
             }
 
             return feature
