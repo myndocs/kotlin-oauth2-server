@@ -43,7 +43,7 @@ object ConfigurationBuilder {
         var authorizerFactory: (CallContext) -> Authorizer = ::BasicAuthorizer
     }
 
-    fun build(configurer: Configuration.() -> Unit): nl.myndocs.oauth2.config.Configuration<TokenService> {
+    fun build(configurer: Configuration.() -> Unit): nl.myndocs.oauth2.config.Configuration {
         val configuration = Configuration()
         configurer(configuration)
 
