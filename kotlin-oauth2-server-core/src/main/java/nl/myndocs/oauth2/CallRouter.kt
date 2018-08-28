@@ -8,9 +8,9 @@ import nl.myndocs.oauth2.token.toMap
 
 class CallRouter(
         private val tokenService: TokenService,
-        private val tokenEndpoint: String,
-        private val authorizeEndpoint: String,
-        private val userinfoEndpoint: String,
+        val tokenEndpoint: String,
+        val authorizeEndpoint: String,
+        val userInfoEndpoint: String,
         private val userInfoCallback: (UserInfo) -> Map<String, Any?>
 ) {
     companion object {
@@ -28,7 +28,7 @@ class CallRouter(
         when (callContext.path) {
             tokenEndpoint -> routeTokenEndpoint(callContext)
             authorizeEndpoint -> routeAuthorizeEndpoint(callContext, authorizer)
-            userinfoEndpoint -> routeUserInfoEndpoint(callContext)
+            userInfoEndpoint -> routeUserInfoEndpoint(callContext)
         }
     }
 
