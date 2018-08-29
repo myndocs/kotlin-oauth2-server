@@ -22,6 +22,7 @@
         <module>kotlin-oauth2-server-identity-inmemory</module>
         <module>kotlin-oauth2-server-token-store-inmemory</module>
         <module>kotlin-oauth2-server-javalin</module>
+        <module>kotlin-oauth2-server-sparkjava</module>
     </modules>
 
     <dependencies>
