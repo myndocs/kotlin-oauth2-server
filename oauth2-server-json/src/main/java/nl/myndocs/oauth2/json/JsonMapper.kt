@@ -1,4 +1,4 @@
-package nl.myndocs.oauth2.sparkjava.json
+package nl.myndocs.oauth2.json
 
 import com.google.gson.Gson
 

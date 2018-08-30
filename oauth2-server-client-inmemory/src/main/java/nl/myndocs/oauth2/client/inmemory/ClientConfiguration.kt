@@ -5,5 +5,5 @@ data class ClientConfiguration(
         var clientSecret: String? = null,
         var scopes: Set<String> = setOf(),
         var redirectUris: Set<String> = setOf(),
-        var oauthFlows: Set<String> = setOf()
+        var authorizedGrantTypes: Set<String> = setOf()
 )

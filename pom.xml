@@ -17,6 +17,7 @@
 
     <modules>
         <module>oauth2-server-core</module>
+        <module>oauth2-server-json</module>
         <module>oauth2-server-ktor</module>
         <module>oauth2-server-client-inmemory</module>
         <module>oauth2-server-identity-inmemory</module>

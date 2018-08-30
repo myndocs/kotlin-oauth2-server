@@ -5,6 +5,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import nl.myndocs.oauth2.client.AuthorizedGrantType
 import nl.myndocs.oauth2.client.Client
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.exception.InvalidClientException
@@ -60,7 +61,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
     fun validAuthorizationCodeGrant() {
         val requestScopes = setOf("scope1")
 
-        val client = Client(clientId, setOf("scope1", "scope2"), setOf())
+        val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.AUTHORIZATION_CODE))
         val identity = Identity(username)
         val codeToken = CodeToken(code, Instant.now(), username, clientId, redirectUri, requestScopes)
 
@@ -88,7 +89,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
 
     @Test
     fun invalidClientException() {
-        val client = Client(clientId, setOf(), setOf())
+        val client = Client(clientId, setOf(), setOf(), setOf(AuthorizedGrantType.AUTHORIZATION_CODE))
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns false
 
@@ -106,7 +107,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
                 redirectUri
         )
 
-        val client = Client(clientId, setOf(), setOf())
+        val client = Client(clientId, setOf(), setOf(), setOf(AuthorizedGrantType.AUTHORIZATION_CODE))
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns true
 
@@ -124,7 +125,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
                 null
         )
 
-        val client = Client(clientId, setOf(), setOf())
+        val client = Client(clientId, setOf(), setOf(), setOf(AuthorizedGrantType.AUTHORIZATION_CODE))
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns true
 
@@ -138,7 +139,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
         val wrongRedirectUri = ""
         val requestScopes = setOf("scope1")
 
-        val client = Client(clientId, setOf("scope1", "scope2"), setOf())
+        val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.AUTHORIZATION_CODE))
         val codeToken = CodeToken(code, Instant.now(), username, clientId, wrongRedirectUri, requestScopes)
 
         val refreshToken = RefreshToken("test", Instant.now(), username, clientId, requestScopes)
@@ -157,7 +158,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
 
     @Test
     fun invalidCodeException() {
-        val client = Client(clientId, setOf("scope1", "scope2"), setOf())
+        val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.AUTHORIZATION_CODE))
 
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns true

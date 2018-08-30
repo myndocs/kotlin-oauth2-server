@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import nl.myndocs.oauth2.client.AuthorizedGrantType
 import nl.myndocs.oauth2.client.Client
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.exception.InvalidClientException
@@ -58,7 +59,7 @@ internal class RefreshTokenGrantTokenServiceTest {
 
     @Test
     fun validRefreshToken() {
-        val client = Client(clientId, setOf("scope1", "scope2"), setOf())
+        val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.REFRESH_TOKEN))
         val token = RefreshToken("test", Instant.now(), username, clientId, scopes)
         val newRefreshToken = RefreshToken("test", Instant.now(), username, clientId, scopes)
         val accessToken = AccessToken("test", "bearer", Instant.now(), username, clientId, scopes, newRefreshToken)
@@ -79,7 +80,7 @@ internal class RefreshTokenGrantTokenServiceTest {
 
     @Test
     fun missingRefreshToken() {
-        val client = Client(clientId, setOf("scope1", "scope2"), setOf())
+        val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.REFRESH_TOKEN))
 
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns true
@@ -106,7 +107,7 @@ internal class RefreshTokenGrantTokenServiceTest {
 
     @Test
     fun invalidClientException() {
-        val client = Client(clientId, setOf(), setOf())
+        val client = Client(clientId, setOf(), setOf(), setOf(AuthorizedGrantType.REFRESH_TOKEN))
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns false
 
@@ -117,7 +118,7 @@ internal class RefreshTokenGrantTokenServiceTest {
 
     @Test
     fun storedClientDoesNotMatchRequestedException() {
-        val client = Client(clientId, setOf("scope1", "scope2"), setOf())
+        val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.REFRESH_TOKEN))
         val token = RefreshToken("test", Instant.now(), username, "wrong-client", scopes)
 
         every { clientService.clientOf(clientId) } returns client
