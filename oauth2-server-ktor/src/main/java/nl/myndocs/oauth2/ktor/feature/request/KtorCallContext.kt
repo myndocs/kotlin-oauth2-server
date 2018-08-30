@@ -11,7 +11,7 @@ import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
 import io.ktor.util.toMap
 import kotlinx.coroutines.experimental.runBlocking
-import nl.myndocs.oauth2.ktor.feature.json.JsonMapper
+import nl.myndocs.oauth2.json.JsonMapper
 import nl.myndocs.oauth2.request.CallContext
 
 class KtorCallContext(val applicationCall: ApplicationCall) : CallContext {
