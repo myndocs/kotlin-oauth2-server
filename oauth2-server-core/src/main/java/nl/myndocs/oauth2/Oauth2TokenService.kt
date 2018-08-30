@@ -2,6 +2,7 @@ package nl.myndocs.oauth2
 
 import nl.myndocs.oauth2.authenticator.Authenticator
 import nl.myndocs.oauth2.authenticator.IdentityScopeVerifier
+import nl.myndocs.oauth2.client.AuthorizedGrantType
 import nl.myndocs.oauth2.client.Client
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.exception.*
@@ -46,6 +47,12 @@ class Oauth2TokenService(
         val requestedClient = clientService.clientOf(
                 passwordGrantRequest.clientId!!
         )!!
+
+        val authorizedGrantType = AuthorizedGrantType.PASSWORD
+        if (!requestedClient.authorizedGrantTypes.contains(authorizedGrantType)) {
+            throw InvalidGrantException("Authorize not allowed: '$authorizedGrantType'")
+        }
+
         val requestedIdentity = identityService.identityOf(
                 requestedClient, passwordGrantRequest.username
         )
@@ -127,6 +134,13 @@ class Oauth2TokenService(
             throw InvalidGrantException()
         }
 
+        val client = clientService.clientOf(refreshToken.clientId)!!
+
+        val authorizedGrantType = AuthorizedGrantType.REFRESH_TOKEN
+        if (!client.authorizedGrantTypes.contains(authorizedGrantType)) {
+            throw InvalidGrantException("Authorize not allowed: '$authorizedGrantType'")
+        }
+
         val accessToken = accessTokenConverter.convertToToken(
                 refreshToken.username,
                 refreshToken.clientId,
@@ -163,6 +177,11 @@ class Oauth2TokenService(
 
         if (!clientOf.redirectUris.contains(redirect.redirectUri)) {
             throw InvalidGrantException("invalid 'redirect_uri'")
+        }
+
+        val authorizedGrantType = AuthorizedGrantType.AUTHORIZATION_CODE
+        if (!clientOf.authorizedGrantTypes.contains(authorizedGrantType)) {
+            throw InvalidGrantException("Authorize not allowed: '$authorizedGrantType'")
         }
 
         val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
@@ -218,6 +237,11 @@ class Oauth2TokenService(
 
         if (!clientOf.redirectUris.contains(redirect.redirectUri)) {
             throw InvalidGrantException("invalid 'redirect_uri'")
+        }
+
+        val authorizedGrantType = AuthorizedGrantType.IMPLICIT
+        if (!clientOf.authorizedGrantTypes.contains(authorizedGrantType)) {
+            throw InvalidGrantException("Authorize not allowed: '$authorizedGrantType'")
         }
 
         val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
