@@ -28,27 +28,27 @@ Include the following dependencies
 ```xml
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-core</artifactId>
+    <artifactId>oauth2-server-core</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-ktor</artifactId>
+    <artifactId>oauth2-server-ktor</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-client-inmemory</artifactId>
+    <artifactId>oauth2-server-client-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-identity-inmemory</artifactId>
+    <artifactId>oauth2-server-identity-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-token-store-inmemory</artifactId>
+    <artifactId>oauth2-server-token-store-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
@@ -84,27 +84,27 @@ Include the following dependencies
 ```xml
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-core</artifactId>
+    <artifactId>oauth2-server-core</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-client-inmemory</artifactId>
+    <artifactId>oauth2-server-client-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-javalin</artifactId>
+    <artifactId>oauth2-server-javalin</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-identity-inmemory</artifactId>
+    <artifactId>oauth2-server-identity-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-token-store-inmemory</artifactId>
+    <artifactId>oauth2-server-token-store-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 ```

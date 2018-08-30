@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>nl.myndocs</groupId>
-            <artifactId>kotlin-oauth2-server-core</artifactId>
+            <artifactId>oauth2-server-core</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
