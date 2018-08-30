@@ -18,7 +18,7 @@ Include the following repository in order to download the artifacts
 Setting the version in properties
 ```xml
 <properties>
-    <myndocs.oauth.version>0.1.1</myndocs.oauth.version>
+    <myndocs.oauth.version>0.2.0</myndocs.oauth.version>
 </properties>
 ```
 # Frameworks
