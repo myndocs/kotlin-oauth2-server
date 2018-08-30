@@ -2,8 +2,10 @@ package nl.myndocs.oauth2
 
 import nl.myndocs.oauth2.authenticator.Authenticator
 import nl.myndocs.oauth2.authenticator.IdentityScopeVerifier
+import nl.myndocs.oauth2.client.Client
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.exception.*
+import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.UserInfo
 import nl.myndocs.oauth2.request.*
@@ -59,15 +61,7 @@ class Oauth2TokenService(
             requestedScopes = requestedClient.clientScopes
         }
 
-        val scopesAllowed = scopesAllowed(requestedClient.clientScopes, requestedScopes)
-
-        if (!scopesAllowed) {
-            throw InvalidScopeException(requestedScopes.minus(requestedClient.clientScopes))
-        }
-
-        if (!identityService.validScopes(requestedClient, requestedIdentity, requestedScopes)) {
-            throw InvalidScopeException(requestedScopes)
-        }
+        validateScopes(requestedClient, requestedIdentity, requestedScopes)
 
         val accessToken = accessTokenConverter.convertToToken(
                 requestedIdentity.username,
@@ -186,16 +180,7 @@ class Oauth2TokenService(
             requestedScopes = clientOf.clientScopes
         }
 
-        val scopesAllowed = identityScopeVerifier?.validScopes(clientOf, identityOf, requestedScopes)
-                ?: scopesAllowed(clientOf.clientScopes, requestedScopes)
-
-        if (!scopesAllowed) {
-            throw InvalidScopeException(requestedScopes.minus(clientOf.clientScopes))
-        }
-
-        if (!identityService.validScopes(clientOf, identityOf, requestedScopes)) {
-            throw InvalidScopeException(requestedScopes)
-        }
+        validateScopes(clientOf, identityOf, requestedScopes, identityScopeVerifier)
 
         val codeToken = codeTokenConverter.convertToToken(
                 identityOf.username,
@@ -250,15 +235,7 @@ class Oauth2TokenService(
             requestedScopes = clientOf.clientScopes
         }
 
-        val scopesAllowed = identityScopeVerifier?.validScopes(clientOf, identityOf, requestedScopes)
-                ?: scopesAllowed(clientOf.clientScopes, requestedScopes)
-        if (!scopesAllowed) {
-            throw InvalidScopeException(requestedScopes.minus(clientOf.clientScopes))
-        }
-
-        if (!identityService.validScopes(clientOf, identityOf, requestedScopes)) {
-            throw InvalidScopeException(requestedScopes)
-        }
+        validateScopes(clientOf, identityOf, requestedScopes, identityScopeVerifier)
 
         val accessToken = accessTokenConverter.convertToToken(
                 identityOf.username,
@@ -270,6 +247,25 @@ class Oauth2TokenService(
         tokenStore.storeAccessToken(accessToken)
 
         return accessToken
+    }
+
+    private fun validateScopes(
+            client: Client,
+            identity: Identity,
+            requestedScopes: Set<String>,
+            identityScopeVerifier: IdentityScopeVerifier? = null) {
+        val scopesAllowed = scopesAllowed(client.clientScopes, requestedScopes)
+        if (!scopesAllowed) {
+            throw InvalidScopeException(requestedScopes.minus(client.clientScopes))
+        }
+
+        val allowedScopes = identityScopeVerifier?.allowedScopes(client, identity, requestedScopes)
+                ?: identityService.allowedScopes(client, identity, requestedScopes)
+
+        val ivalidScopes = requestedScopes.minus(allowedScopes)
+        if (ivalidScopes.isNotEmpty()) {
+            throw InvalidScopeException(ivalidScopes)
+        }
     }
 
     override fun userInfo(accessToken: String): UserInfo {

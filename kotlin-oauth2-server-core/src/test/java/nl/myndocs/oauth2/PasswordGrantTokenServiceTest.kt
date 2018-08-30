@@ -71,7 +71,7 @@ internal class PasswordGrantTokenServiceTest {
         every { clientService.validClient(client, clientSecret) } returns true
         every { identityService.identityOf(client, username) } returns identity
         every { identityService.validCredentials(client, identity, password) } returns true
-        every { identityService.validScopes(client, identity, requestScopes) } returns true
+        every { identityService.allowedScopes(client, identity, requestScopes) } returns scopes
         every { refreshTokenConverter.convertToToken(username, clientId, requestScopes) } returns refreshToken
         every { accessTokenConverter.convertToToken(username, clientId, requestScopes, refreshToken) } returns accessToken
 
@@ -162,7 +162,7 @@ internal class PasswordGrantTokenServiceTest {
         every { clientService.validClient(client, clientSecret) } returns true
         every { identityService.identityOf(client, username) } returns identity
         every { identityService.validCredentials(client, identity, password) } returns true
-        every { identityService.validScopes(client, identity, scopes) } returns false
+        every { identityService.allowedScopes(client, identity, scopes) } returns setOf()
 
         assertThrows(
                 InvalidScopeException::class.java
@@ -178,7 +178,7 @@ internal class PasswordGrantTokenServiceTest {
         every { clientService.validClient(client, clientSecret) } returns true
         every { identityService.identityOf(client, username) } returns identity
         every { identityService.validCredentials(client, identity, password) } returns true
-        every { identityService.validScopes(client, identity, scopes) } returns false
+        every { identityService.allowedScopes(client, identity, scopes) } returns scopes
 
         assertThrows(
                 InvalidScopeException::class.java
@@ -205,7 +205,7 @@ internal class PasswordGrantTokenServiceTest {
         every { clientService.validClient(client, clientSecret) } returns true
         every { identityService.identityOf(client, username) } returns identity
         every { identityService.validCredentials(client, identity, password) } returns true
-        every { identityService.validScopes(client, identity, requestScopes) } returns true
+        every { identityService.allowedScopes(client, identity, requestScopes) } returns requestScopes
         every { refreshTokenConverter.convertToToken(username, clientId, requestScopes) } returns refreshToken
         every { accessTokenConverter.convertToToken(username, clientId, requestScopes, refreshToken) } returns accessToken
 
