@@ -18,7 +18,7 @@ Include the following repository in order to download the artifacts
 Setting the version in properties
 ```xml
 <properties>
-    <myndocs.oauth.version>0.1.1</myndocs.oauth.version>
+    <myndocs.oauth.version>0.2.0</myndocs.oauth.version>
 </properties>
 ```
 # Frameworks
@@ -28,33 +28,28 @@ Include the following dependencies
 ```xml
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-core</artifactId>
+    <artifactId>oauth2-server-core</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-ktor</artifactId>
+    <artifactId>oauth2-server-ktor</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-client-inmemory</artifactId>
+    <artifactId>oauth2-server-client-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-identity-inmemory</artifactId>
+    <artifactId>oauth2-server-identity-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-token-store-inmemory</artifactId>
+    <artifactId>oauth2-server-token-store-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>com.google.code.gson</groupId>
-    <artifactId>gson</artifactId>
-    <version>2.8.5</version>
 </dependency>
 ```
 
@@ -62,6 +57,125 @@ In memory example for Ktor:
 ```kotlin
 embeddedServer(Netty, 8080) {
     install(Oauth2ServerFeature) {
+            tokenService = Oauth2TokenServiceBuilder.build {
+                identityService = InMemoryIdentity()
+                        .identity {
+                            username = "foo"
+                            password = "bar"
+                        }
+                clientService = InMemoryClient()
+                        .client {
+                            clientId = "testapp"
+                            clientSecret = "testpass"
+                            scopes = setOf("trusted")
+                            redirectUris = setOf("https://localhost:8080/callback")
+                            authorizedGrantTypes = setOf(
+                                    AuthorizedGrantType.AUTHORIZATION_CODE,
+                                    AuthorizedGrantType.PASSWORD,
+                                    AuthorizedGrantType.IMPLICIT,
+                                    AuthorizedGrantType.REFRESH_TOKEN
+                            )
+                        }
+                tokenStore = InMemoryTokenStore()
+            }
+    }
+}.start(wait = true)
+```
+
+## Javalin
+Include the following dependencies
+```xml
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-core</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-client-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-javalin</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-identity-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-token-store-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+```
+
+In memory example for Javalin:
+```kotlin
+Javalin.create().apply {
+    enableOauthServer {
+        tokenService = Oauth2TokenServiceBuilder.build {
+            identityService = InMemoryIdentity()
+                    .identity {
+                        username = "foo"
+                        password = "bar"
+                    }
+            clientService = InMemoryClient()
+                    .client {
+                        clientId = "testapp"
+                        clientSecret = "testpass"
+                        scopes = setOf("trusted")
+                        redirectUris = setOf("https://localhost:7000/callback")
+                        authorizedGrantTypes = setOf(
+                                AuthorizedGrantType.AUTHORIZATION_CODE,
+                                AuthorizedGrantType.PASSWORD,
+                                AuthorizedGrantType.IMPLICIT,
+                                AuthorizedGrantType.REFRESH_TOKEN
+                        )
+                    }
+            tokenStore = InMemoryTokenStore()
+        }
+
+    }
+}.start(7000)
+```
+
+## Spark java
+Include the following dependencies
+```xml
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-core</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-client-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-sparkjava</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-identity-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-token-store-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+```
+
+In memory example for Spark java:
+```kotlin
+Oauth2Server.configureOauth2Server {
+    tokenService = Oauth2TokenServiceBuilder.build {
         identityService = InMemoryIdentity()
                 .identity {
                     username = "foo"
@@ -72,65 +186,19 @@ embeddedServer(Netty, 8080) {
                     clientId = "testapp"
                     clientSecret = "testpass"
                     scopes = setOf("trusted")
-                    redirectUris = setOf("https://localhost:8080/callback")
+                    redirectUris = setOf("https://localhost:4567/callback")
+                    authorizedGrantTypes = setOf(
+                            AuthorizedGrantType.AUTHORIZATION_CODE,
+                            AuthorizedGrantType.PASSWORD,
+                            AuthorizedGrantType.IMPLICIT,
+                            AuthorizedGrantType.REFRESH_TOKEN
+                    )
                 }
         tokenStore = InMemoryTokenStore()
     }
-}.start(wait = true)
+}
 ```
 
-## Javalin
-Include the following dependencies
-```xml
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-core</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-client-inmemory</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-javalin</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-identity-inmemory</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>kotlin-oauth2-server-token-store-inmemory</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-```
-
-In memory example for Javalin:
-```kotlin
-Javalin.create().apply {
-    enableOauthServer {
-        identityService = InMemoryIdentity()
-                .identity {
-                    username = "foo"
-                    password = "bar"
-                }
-
-        clientService = InMemoryClient()
-                .client {
-                    clientId = "testapp"
-                    clientSecret = "testpass"
-                    scopes = setOf("ROLE_CLIENT")
-                    redirectUris = setOf("https://localhost:7000/callback")
-                }
-
-        tokenStore = InMemoryTokenStore()
-    }
-}.start(7000)
-```
 # Custom implementation
 ## Identity service
 Users can be authenticate through the identity service. In OAuth2 terms this would be the resource owner.
@@ -140,7 +208,7 @@ fun identityOf(forClient: Client, username: String): Identity?
 
 fun validCredentials(forClient: Client, identity: Identity, password: String): Boolean
 
-fun validScopes(forClient: Client, identity: Identity, scopes: Set<String>): Boolean
+fun allowedScopes(forClient: Client, identity: Identity, scopes: Set<String>): Set<String>
 ```
 
 Each of the methods that needs to be implemented contains `Client`. This could give you extra flexibility.
@@ -163,6 +231,8 @@ fun storeAccessToken(accessToken: AccessToken)
 
 fun accessToken(token: String): AccessToken?
 
+fun revokeAccessToken(token: String)
+
 fun storeCodeToken(codeToken: CodeToken)
 
 fun codeToken(token: String): CodeToken?
@@ -172,6 +242,9 @@ fun consumeCodeToken(token: String): CodeToken?
 fun storeRefreshToken(refreshToken: RefreshToken)
 
 fun refreshToken(token: String): RefreshToken?
+
+fun revokeRefreshToken(token: String)
+
 ```
 
 When `AccessToken` is passed to `storeAccessToken` and it contains a `RefreshToken`, then `storeAccessToken` is also responsible for saving the refresh token.

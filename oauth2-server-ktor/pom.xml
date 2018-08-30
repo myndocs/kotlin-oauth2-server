@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>kotlin-oauth2-server</artifactId>
+        <groupId>nl.myndocs</groupId>
+        <version>0.2.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>oauth2-server-ktor</artifactId>
+
+    <properties>
+        <ktor.version>0.9.3</ktor.version>
+        <serialization.version>0.6.1</serialization.version>
+    </properties>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-core</artifactId>
+            <version>${ktor.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.myndocs</groupId>
+            <artifactId>oauth2-server-core</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.myndocs</groupId>
+            <artifactId>oauth2-server-json</artifactId>
+            <version>${project.version}</version>
+            <classifier>shaded</classifier>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>ktor</id>
+            <url>http://dl.bintray.com/kotlin/ktor</url>
+        </repository>
+        <repository>
+            <id>kotlinx</id>
+            <url>http://dl.bintray.com/kotlin/kotlinx</url>
+        </repository>
+        <repository>
+            <id>jcenter</id>
+            <url>http://jcenter.bintray.com</url>
+        </repository>
+    </repositories>
+</project>
