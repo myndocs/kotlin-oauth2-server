@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>kotlin-oauth2-server-core</artifactId>
+    <artifactId>oauth2-server-core</artifactId>
 
     <dependencies>
         <dependency>

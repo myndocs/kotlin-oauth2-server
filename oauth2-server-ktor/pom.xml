@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>kotlin-oauth2-server-ktor</artifactId>
+    <artifactId>oauth2-server-ktor</artifactId>
 
     <properties>
         <ktor.version>0.9.3</ktor.version>
@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>nl.myndocs</groupId>
-            <artifactId>kotlin-oauth2-server-core</artifactId>
+            <artifactId>oauth2-server-core</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

@@ -9,15 +9,21 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>kotlin-oauth2-server-identity-inmemory</artifactId>
+    <artifactId>oauth2-server-javalin</artifactId>
+
 
     <dependencies>
         <dependency>
             <groupId>nl.myndocs</groupId>
-            <artifactId>kotlin-oauth2-server-core</artifactId>
+            <artifactId>oauth2-server-core</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>2.0.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
-
 </project>
