@@ -16,7 +16,7 @@ class InMemoryClient : ClientService {
 
     override fun clientOf(clientId: String): Client? {
         return clients.filter { it.clientId == clientId }
-                .map { client -> nl.myndocs.oauth2.client.Client(client.clientId!!, client.scopes, client.redirectUris) }
+                .map { client -> nl.myndocs.oauth2.client.Client(client.clientId!!, client.scopes, client.redirectUris, client.authorizedGrantTypes) }
                 .firstOrNull()
     }
 
