@@ -45,4 +45,12 @@ class InMemoryTokenStore : TokenStore {
 
         return tokenFromMap
     }
+
+    override fun revokeAccessToken(token: String) {
+        accessTokens.remove(token)
+    }
+
+    override fun revokeRefreshToken(token: String) {
+        refreshTokens.remove(token)
+    }
 }
