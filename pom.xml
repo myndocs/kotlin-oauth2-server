@@ -16,13 +16,13 @@
     </properties>
 
     <modules>
-        <module>kotlin-oauth2-server-core</module>
-        <module>kotlin-oauth2-server-ktor</module>
-        <module>kotlin-oauth2-server-client-inmemory</module>
-        <module>kotlin-oauth2-server-identity-inmemory</module>
-        <module>kotlin-oauth2-server-token-store-inmemory</module>
-        <module>kotlin-oauth2-server-javalin</module>
-        <module>kotlin-oauth2-server-sparkjava</module>
+        <module>oauth2-server-core</module>
+        <module>oauth2-server-ktor</module>
+        <module>oauth2-server-client-inmemory</module>
+        <module>oauth2-server-identity-inmemory</module>
+        <module>oauth2-server-token-store-inmemory</module>
+        <module>oauth2-server-javalin</module>
+        <module>oauth2-server-sparkjava</module>
     </modules>
 
     <dependencies>
