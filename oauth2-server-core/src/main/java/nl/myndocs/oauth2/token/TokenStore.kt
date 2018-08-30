@@ -5,6 +5,8 @@ interface TokenStore {
 
     fun accessToken(token: String): AccessToken?
 
+    fun revokeAccessToken(token: String)
+
     fun storeCodeToken(codeToken: CodeToken)
 
     fun codeToken(token: String): CodeToken?
@@ -17,4 +19,6 @@ interface TokenStore {
     fun storeRefreshToken(refreshToken: RefreshToken)
 
     fun refreshToken(token: String): RefreshToken?
+
+    fun revokeRefreshToken(token: String)
 }
