@@ -1,5 +1,6 @@
 package nl.myndocs.oauth2.sparkjava.request
 
+import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.sparkjava.json.JsonMapper
 import spark.Request
 import spark.Response

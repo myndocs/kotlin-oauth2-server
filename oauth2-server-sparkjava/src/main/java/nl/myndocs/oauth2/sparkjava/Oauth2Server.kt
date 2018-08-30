@@ -1,5 +1,6 @@
 package nl.myndocs.oauth2.sparkjava
 
+import nl.myndocs.oauth2.config.ConfigurationBuilder
 import nl.myndocs.oauth2.sparkjava.request.SparkjavaCallContext
 import spark.Spark.get
 import spark.Spark.post

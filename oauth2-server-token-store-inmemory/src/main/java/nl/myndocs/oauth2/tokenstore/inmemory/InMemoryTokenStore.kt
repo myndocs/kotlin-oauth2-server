@@ -1,5 +1,7 @@
 package nl.myndocs.oauth2.tokenstore.inmemory
 
+import nl.myndocs.oauth2.token.*
+
 class InMemoryTokenStore : TokenStore {
     private val accessTokens = mutableMapOf<String, AccessToken>()
     private val codes = mutableMapOf<String, CodeToken>()
