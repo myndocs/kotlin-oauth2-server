@@ -7,7 +7,7 @@
     <groupId>nl.myndocs</groupId>
     <artifactId>kotlin-oauth2-server</artifactId>
     <packaging>pom</packaging>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
 
     <properties>
         <kotlin.version>1.2.60</kotlin.version>
@@ -24,6 +24,7 @@
         <module>oauth2-server-token-store-inmemory</module>
         <module>oauth2-server-javalin</module>
         <module>oauth2-server-sparkjava</module>
+        <module>oauth2-server-http4k</module>
     </modules>
 
     <dependencies>

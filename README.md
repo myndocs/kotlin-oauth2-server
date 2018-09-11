@@ -4,7 +4,17 @@ The goal of this project is to provide a simple OAuth2 library which can be impl
 
 Configuring the oauth2 server for any framework should be simple and understandable.
 It encourages to adapt to existing implementations instead the other way around.
-# Maven
+
+# Frameworks
+## Setup
+### Maven
+First define the version to be used and set it as a property
+```xml
+<properties>
+    <myndocs.oauth.version>0.2.1</myndocs.oauth.version>
+</properties>
+```
+
 Include the following repository in order to download the artifacts
 ```xml
 <repositories>
@@ -15,27 +25,15 @@ Include the following repository in order to download the artifacts
 </repositories>
 ```
 
-Setting the version in properties
-```xml
-<properties>
-    <myndocs.oauth.version>0.2.0</myndocs.oauth.version>
-</properties>
-```
-# Frameworks
-## Ktor
-Include the following dependencies
-
+For the frameworks examples we need at least the following dependencies:
 ```xml
 <dependency>
     <groupId>nl.myndocs</groupId>
     <artifactId>oauth2-server-core</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-ktor</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
+
+<!-- In memory dependencies -->
 <dependency>
     <groupId>nl.myndocs</groupId>
     <artifactId>oauth2-server-client-inmemory</artifactId>
@@ -49,6 +47,17 @@ Include the following dependencies
 <dependency>
     <groupId>nl.myndocs</groupId>
     <artifactId>oauth2-server-token-store-inmemory</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+```
+
+## Ktor
+The following dependency is required along with the dependencies described in Setup
+
+```xml
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-ktor</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 ```
@@ -83,31 +92,11 @@ embeddedServer(Netty, 8080) {
 ```
 
 ## Javalin
-Include the following dependencies
+The following dependency is required along with the dependencies described in Setup
 ```xml
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-core</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-client-inmemory</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
     <artifactId>oauth2-server-javalin</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-identity-inmemory</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-token-store-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 ```
@@ -143,31 +132,11 @@ Javalin.create().apply {
 ```
 
 ## Spark java
-Include the following dependencies
+The following dependency is required along with the dependencies described in Setup
 ```xml
 <dependency>
     <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-core</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-client-inmemory</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
     <artifactId>oauth2-server-sparkjava</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-identity-inmemory</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-token-store-inmemory</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
 ```
@@ -198,7 +167,48 @@ Oauth2Server.configureOauth2Server {
     }
 }
 ```
+## http4k
+The following dependency is required along with the dependencies described in Setup
+```xml
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-http4k</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+```
 
+In memory example for http4k:
+```kotlin
+val app: HttpHandler = routes(
+            "/ping" bind GET to { _: Request -> Response(Status.OK).body("pong!") }
+    ) `enable oauth2` {
+        tokenService = Oauth2TokenServiceBuilder.build {
+            identityService = InMemoryIdentity()
+                    .identity {
+                        username = "foo"
+                        password = "bar"
+                    }
+            clientService = InMemoryClient()
+                    .client {
+                        clientId = "testapp"
+                        clientSecret = "testpass"
+                        scopes = setOf("trusted")
+                        redirectUris = setOf("http://localhost:8080/callback")
+                        authorizedGrantTypes = setOf(
+                                AuthorizedGrantType.AUTHORIZATION_CODE,
+                                AuthorizedGrantType.PASSWORD,
+                                AuthorizedGrantType.IMPLICIT,
+                                AuthorizedGrantType.REFRESH_TOKEN
+                        )
+                    }
+            tokenStore = InMemoryTokenStore()
+        }
+    }
+
+    app.asServer(Jetty(9000)).start()
+```
+
+**Note:** `/ping` is only added for demonstration for own defined routes.
 # Custom implementation
 ## Identity service
 Users can be authenticate through the identity service. In OAuth2 terms this would be the resource owner.

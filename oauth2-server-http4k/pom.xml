@@ -9,14 +9,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>oauth2-server-sparkjava</artifactId>
+    <artifactId>oauth2-server-http4k</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.sparkjava</groupId>
-            <artifactId>spark-core</artifactId>
-            <version>2.5.4</version>
-            <scope>provided</scope>
+            <groupId>org.http4k</groupId>
+            <artifactId>http4k-core</artifactId>
+            <version>3.37.1</version>
         </dependency>
         <dependency>
             <groupId>nl.myndocs</groupId>
@@ -31,4 +30,11 @@
             <classifier>shaded</classifier>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>http4k</id>
+            <url>http://dl.bintray.com/http4k</url>
+        </repository>
+    </repositories>
 </project>
