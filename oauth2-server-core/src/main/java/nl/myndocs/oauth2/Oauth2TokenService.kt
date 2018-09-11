@@ -44,9 +44,7 @@ class Oauth2TokenService(
             throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("password"))
         }
 
-        val requestedClient = clientService.clientOf(
-                passwordGrantRequest.clientId!!
-        )!!
+        val requestedClient = clientService.clientOf(passwordGrantRequest.clientId!!) ?: throw InvalidClientException()
 
         val authorizedGrantType = AuthorizedGrantType.PASSWORD
         if (!requestedClient.authorizedGrantTypes.contains(authorizedGrantType)) {
@@ -134,7 +132,7 @@ class Oauth2TokenService(
             throw InvalidGrantException()
         }
 
-        val client = clientService.clientOf(refreshToken.clientId)!!
+        val client = clientService.clientOf(refreshToken.clientId) ?: throw InvalidClientException()
 
         val authorizedGrantType = AuthorizedGrantType.REFRESH_TOKEN
         if (!client.authorizedGrantTypes.contains(authorizedGrantType)) {
@@ -293,9 +291,10 @@ class Oauth2TokenService(
     }
 
     override fun userInfo(accessToken: String): UserInfo {
-        val storedAccessToken = tokenStore.accessToken(accessToken)!!
-        val client = clientService.clientOf(storedAccessToken.clientId)!!
-        val identity = identityService.identityOf(client, storedAccessToken.username)!!
+        val storedAccessToken = tokenStore.accessToken(accessToken) ?: throw InvalidGrantException()
+        val client = clientService.clientOf(storedAccessToken.clientId) ?: throw InvalidClientException()
+        val identity = identityService.identityOf(client, storedAccessToken.username)
+                ?: throw InvalidIdentityException()
 
         return UserInfo(
                 identity,
@@ -305,17 +304,15 @@ class Oauth2TokenService(
     }
 
     private fun throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) {
-        if (clientRequest.clientId == null) {
-            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
-        }
+        val clientId = clientRequest.clientId
+                ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
 
-        if (clientRequest.clientSecret == null) {
-            throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_secret"))
-        }
+        val clientSecret = clientRequest.clientSecret
+                ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_secret"))
 
-        val client = clientService.clientOf(clientRequest.clientId!!) ?: throw InvalidClientException()
+        val client = clientService.clientOf(clientId) ?: throw InvalidClientException()
 
-        if (!clientService.validClient(client, clientRequest.clientSecret!!)) {
+        if (!clientService.validClient(client, clientSecret)) {
             throw InvalidClientException()
         }
     }
