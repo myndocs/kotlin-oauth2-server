@@ -208,7 +208,7 @@ val app: HttpHandler = routes(
     app.asServer(Jetty(9000)).start()
 ```
 
-**Note: ** `/ping` is only added for demonstration for own defined routes.
+**Note:** `/ping` is only added for demonstration for own defined routes.
 # Custom implementation
 ## Identity service
 Users can be authenticate through the identity service. In OAuth2 terms this would be the resource owner.
