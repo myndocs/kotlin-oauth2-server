@@ -16,6 +16,7 @@
             <groupId>org.http4k</groupId>
             <artifactId>http4k-core</artifactId>
             <version>3.37.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>nl.myndocs</groupId>
