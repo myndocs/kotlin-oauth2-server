@@ -5,7 +5,7 @@
     <parent>
         <artifactId>kotlin-oauth2-server</artifactId>
         <groupId>nl.myndocs</groupId>
-        <version>0.2.1</version>
+        <version>0.2.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,6 +16,7 @@
             <groupId>org.http4k</groupId>
             <artifactId>http4k-core</artifactId>
             <version>3.37.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>nl.myndocs</groupId>

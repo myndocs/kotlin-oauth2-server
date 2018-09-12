@@ -11,7 +11,7 @@ It encourages to adapt to existing implementations instead the other way around.
 First define the version to be used and set it as a property
 ```xml
 <properties>
-    <myndocs.oauth.version>0.2.1</myndocs.oauth.version>
+    <myndocs.oauth.version>0.2.2</myndocs.oauth.version>
 </properties>
 ```
 
@@ -20,7 +20,7 @@ Include the following repository in order to download the artifacts
 <repositories>
     <repository>
         <id>myndocs-oauth2</id>
-        <url>https://repo.myndocs.nl/repository/oauth2</url>
+        <url>https://dl.bintray.com/adhesivee/oauth2-server</url>
     </repository>
 </repositories>
 ```
