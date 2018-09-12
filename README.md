@@ -20,7 +20,7 @@ Include the following repository in order to download the artifacts
 <repositories>
     <repository>
         <id>myndocs-oauth2</id>
-        <url>https://repo.myndocs.nl/repository/oauth2</url>
+        <url>https://dl.bintray.com/adhesivee/oauth2-server</url>
     </repository>
 </repositories>
 ```
