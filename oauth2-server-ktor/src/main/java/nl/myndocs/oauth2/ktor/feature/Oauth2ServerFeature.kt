@@ -24,7 +24,7 @@ class Oauth2ServerFeature(configuration: Configuration) {
 
             val feature = Oauth2ServerFeature(configuration)
 
-            pipeline.intercept(ApplicationCallPipeline.Infrastructure) {
+            pipeline.intercept(ApplicationCallPipeline.Features) {
                 val ktorCallContext = KtorCallContext(call)
                 val authorizer = feature.authorizerFactory(ktorCallContext)
 
