@@ -7,7 +7,7 @@ import java.util.*
 class UUIDRefreshTokenConverter(
         private val refreshTokenExpireInSeconds: Int = 86400
 ) : RefreshTokenConverter {
-    override fun convertToToken(username: String, clientId: String, requestedScopes: Set<String>): RefreshToken {
+    override fun convertToToken(username: String?, clientId: String, requestedScopes: Set<String>): RefreshToken {
         return RefreshToken(
                 UUID.randomUUID().toString(),
                 Instant.now().plusSeconds(refreshTokenExpireInSeconds.toLong()),

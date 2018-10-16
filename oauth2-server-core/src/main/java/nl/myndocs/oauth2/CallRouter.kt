@@ -1,6 +1,10 @@
 package nl.myndocs.oauth2
 
 import nl.myndocs.oauth2.authenticator.Authorizer
+import nl.myndocs.oauth2.client.AuthorizedGrantType.AUTHORIZATION_CODE
+import nl.myndocs.oauth2.client.AuthorizedGrantType.CLIENT_CREDENTIALS
+import nl.myndocs.oauth2.client.AuthorizedGrantType.PASSWORD
+import nl.myndocs.oauth2.client.AuthorizedGrantType.REFRESH_TOKEN
 import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.identity.UserInfo
 import nl.myndocs.oauth2.request.*
@@ -38,7 +42,7 @@ class CallRouter(
         }
 
         try {
-            val allowedGrantTypes = setOf("password", "authorization_code", "refresh_token")
+            val allowedGrantTypes = setOf(PASSWORD, AUTHORIZATION_CODE, REFRESH_TOKEN, CLIENT_CREDENTIALS)
             val grantType = callContext.formParameters["grant_type"]
                     ?: throw InvalidRequestException("'grant_type' not given")
 
@@ -50,6 +54,7 @@ class CallRouter(
                 "password" -> routePasswordGrant(callContext, tokenService)
                 "authorization_code" -> routeAuthorizationCodeGrant(callContext, tokenService)
                 "refresh_token" -> routeRefreshTokenGrant(callContext, tokenService)
+                "client_credentials" -> routeClientCredentialsGrant(callContext, tokenService)
             }
         } catch (oauthException: OauthException) {
             callContext.respondStatus(STATUS_BAD_REQUEST)
@@ -67,6 +72,16 @@ class CallRouter(
                         callContext.formParameters["scope"]
                 )
         )
+
+        callContext.respondJson(tokenResponse.toMap())
+    }
+
+    fun routeClientCredentialsGrant(callContext: CallContext, tokenService: TokenService) {
+        val tokenResponse = tokenService.authorize(ClientCredentialsRequest(
+            callContext.formParameters["client_id"],
+            callContext.formParameters["client_secret"],
+            callContext.formParameters["scope"]
+        ))
 
         callContext.respondJson(tokenResponse.toMap())
     }
