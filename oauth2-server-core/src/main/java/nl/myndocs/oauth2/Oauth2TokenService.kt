@@ -119,6 +119,31 @@ class Oauth2TokenService(
         return accessToken.toTokenResponse()
     }
 
+    override fun authorize(clientCredentialsRequest: ClientCredentialsRequest): TokenResponse {
+        throwExceptionIfUnverifiedClient(clientCredentialsRequest)
+
+        val requestedClient = clientService.clientOf(clientCredentialsRequest.clientId!!) ?: throw InvalidClientException()
+
+        val scopes = clientCredentialsRequest.scope
+            ?.let { ScopeParser.parseScopes(it).toSet() }
+            ?: requestedClient.clientScopes
+
+        val accessToken = accessTokenConverter.convertToToken(
+            username = null,
+            clientId = clientCredentialsRequest.clientId,
+            requestedScopes = scopes,
+            refreshToken = refreshTokenConverter.convertToToken(
+                username = null,
+                clientId = clientCredentialsRequest.clientId,
+                requestedScopes = scopes
+            )
+        )
+
+        tokenStore.storeAccessToken(accessToken)
+
+        return accessToken.toTokenResponse()
+    }
+
     override fun refresh(refreshTokenRequest: RefreshTokenRequest): TokenResponse {
         throwExceptionIfUnverifiedClient(refreshTokenRequest)
 
@@ -293,7 +318,7 @@ class Oauth2TokenService(
     override fun userInfo(accessToken: String): UserInfo {
         val storedAccessToken = tokenStore.accessToken(accessToken) ?: throw InvalidGrantException()
         val client = clientService.clientOf(storedAccessToken.clientId) ?: throw InvalidClientException()
-        val identity = identityService.identityOf(client, storedAccessToken.username)
+        val identity = storedAccessToken.username?.let { identityService.identityOf(client, it) }
                 ?: throw InvalidIdentityException()
 
         return UserInfo(

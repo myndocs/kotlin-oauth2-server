@@ -13,6 +13,8 @@ interface TokenService {
 
     fun authorize(authorizationCodeRequest: AuthorizationCodeRequest): TokenResponse
 
+    fun authorize(clientCredentialsRequest: ClientCredentialsRequest): TokenResponse
+
     fun refresh(refreshTokenRequest: RefreshTokenRequest): TokenResponse
 
     fun redirect(
