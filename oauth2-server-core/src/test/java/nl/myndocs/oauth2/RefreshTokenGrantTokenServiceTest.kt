@@ -61,7 +61,7 @@ internal class RefreshTokenGrantTokenServiceTest {
     fun validRefreshToken() {
         val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.REFRESH_TOKEN))
         val token = RefreshToken("test", Instant.now(), username, clientId, scopes)
-        val newRefreshToken = RefreshToken("test", Instant.now(), username, clientId, scopes)
+        val newRefreshToken = RefreshToken("new-test", Instant.now(), username, clientId, scopes)
         val accessToken = AccessToken("test", "bearer", Instant.now(), username, clientId, scopes, newRefreshToken)
         val identity = Identity(username)
 
@@ -70,7 +70,7 @@ internal class RefreshTokenGrantTokenServiceTest {
         every { tokenStore.refreshToken(refreshToken) } returns token
         every { identityService.identityOf(client, username) } returns identity
         every { refreshTokenConverter.convertToToken(username, clientId, scopes) } returns newRefreshToken
-        every { accessTokenConverter.convertToToken(username, clientId, scopes, token) } returns accessToken
+        every { accessTokenConverter.convertToToken(username, clientId, scopes, newRefreshToken) } returns accessToken
 
         tokenService.refresh(refreshTokenRequest)
 
