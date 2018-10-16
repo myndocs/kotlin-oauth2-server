@@ -69,7 +69,7 @@ internal class RefreshTokenGrantTokenServiceTest {
         every { clientService.validClient(client, clientSecret) } returns true
         every { tokenStore.refreshToken(refreshToken) } returns token
         every { identityService.identityOf(client, username) } returns identity
-        every { refreshTokenConverter.convertToToken(username, clientId, scopes) } returns newRefreshToken
+        every { refreshTokenConverter.convertToToken(token) } returns newRefreshToken
         every { accessTokenConverter.convertToToken(username, clientId, scopes, newRefreshToken) } returns accessToken
 
         tokenService.refresh(refreshTokenRequest)
