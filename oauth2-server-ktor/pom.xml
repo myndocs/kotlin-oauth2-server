@@ -12,8 +12,7 @@
     <artifactId>oauth2-server-ktor</artifactId>
 
     <properties>
-        <ktor.version>0.9.5</ktor.version>
-        <serialization.version>0.6.1</serialization.version>
+        <ktor.version>1.0.0-beta-4</ktor.version>
     </properties>
 
 
