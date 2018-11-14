@@ -10,7 +10,7 @@ import io.ktor.response.header
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
 import io.ktor.util.toMap
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import nl.myndocs.oauth2.json.JsonMapper
 import nl.myndocs.oauth2.request.CallContext
 
