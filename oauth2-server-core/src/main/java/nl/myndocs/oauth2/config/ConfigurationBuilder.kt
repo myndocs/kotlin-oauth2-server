@@ -2,7 +2,7 @@ package nl.myndocs.oauth2.config
 
 import nl.myndocs.oauth2.TokenService
 import nl.myndocs.oauth2.authenticator.Authorizer
-import nl.myndocs.oauth2.identity.UserInfo
+import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.auth.BasicAuthorizer
 
@@ -28,16 +28,16 @@ object ConfigurationBuilder {
                 callRouterConfiguration.tokenEndpoint = value
             }
 
-        var userInfoEndpoint: String
-            get() = callRouterConfiguration.userInfoEndpoint
+        var tokenInfoEndpoint: String
+            get() = callRouterConfiguration.tokenInfoEndpoint
             set(value) {
-                callRouterConfiguration.userInfoEndpoint = value
+                callRouterConfiguration.tokenInfoEndpoint = value
             }
 
-        var userInfoCallback: (UserInfo) -> Map<String, Any?>
-            get() = callRouterConfiguration.userInfoCallback
+        var tokenInfoCallback: (TokenInfo) -> Map<String, Any?>
+            get() = callRouterConfiguration.tokenInfoCallback
             set(value) {
-                callRouterConfiguration.userInfoCallback = value
+                callRouterConfiguration.tokenInfoCallback = value
             }
 
         var authorizerFactory: (CallContext) -> Authorizer = ::BasicAuthorizer

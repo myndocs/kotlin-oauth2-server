@@ -9,7 +9,7 @@ class UUIDAccessTokenConverter(
         private val accessTokenExpireInSeconds: Int = 3600
 ) : AccessTokenConverter {
 
-    override fun convertToToken(username: String, clientId: String, requestedScopes: Set<String>, refreshToken: RefreshToken?): AccessToken {
+    override fun convertToToken(username: String?, clientId: String, requestedScopes: Set<String>, refreshToken: RefreshToken?): AccessToken {
         return AccessToken(
                 UUID.randomUUID().toString(),
                 "bearer",

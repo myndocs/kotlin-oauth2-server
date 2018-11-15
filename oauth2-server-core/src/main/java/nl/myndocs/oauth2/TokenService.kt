@@ -2,7 +2,7 @@ package nl.myndocs.oauth2
 
 import nl.myndocs.oauth2.authenticator.Authenticator
 import nl.myndocs.oauth2.authenticator.IdentityScopeVerifier
-import nl.myndocs.oauth2.identity.UserInfo
+import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.*
 import nl.myndocs.oauth2.response.TokenResponse
 import nl.myndocs.oauth2.token.AccessToken
@@ -12,6 +12,8 @@ interface TokenService {
     fun authorize(passwordGrantRequest: PasswordGrantRequest): TokenResponse
 
     fun authorize(authorizationCodeRequest: AuthorizationCodeRequest): TokenResponse
+
+    fun authorize(clientCredentialsRequest: ClientCredentialsRequest): TokenResponse
 
     fun refresh(refreshTokenRequest: RefreshTokenRequest): TokenResponse
 
@@ -27,5 +29,5 @@ interface TokenService {
             identityScopeVerifier: IdentityScopeVerifier?
     ): AccessToken
 
-    fun userInfo(accessToken: String): UserInfo
+    fun tokenInfo(accessToken: String): TokenInfo
 }
