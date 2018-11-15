@@ -26,7 +26,7 @@ fun Javalin.enableOauthServer(configurationCallback: ConfigurationBuilder.Config
             }
         }
 
-        path(callRouter.userInfoEndpoint) {
+        path(callRouter.tokenInfoEndpoint) {
             get { ctx ->
                 val javalinCallContext = JavalinCallContext(ctx)
                 callRouter.route(javalinCallContext, configuration.authorizerFactory(javalinCallContext))

@@ -30,7 +30,7 @@ infix fun RoutingHttpHandler.`enable oauth2`(configurationCallback: Configuratio
 
                 responseBuilder.build()
             },
-            callRouter.userInfoEndpoint bind Method.GET to { request: Request ->
+            callRouter.tokenInfoEndpoint bind Method.GET to { request: Request ->
                 val responseBuilder = ResponseBuilder()
                 val callContext = Http4kCallContext(request, responseBuilder)
                 callRouter.route(callContext, configuration.authorizerFactory(callContext))

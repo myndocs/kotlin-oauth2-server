@@ -2,18 +2,18 @@ package nl.myndocs.oauth2.config
 
 import nl.myndocs.oauth2.CallRouter
 import nl.myndocs.oauth2.TokenService
-import nl.myndocs.oauth2.identity.UserInfo
+import nl.myndocs.oauth2.identity.TokenInfo
 
 internal object CallRouterBuilder {
     class Configuration {
         var tokenEndpoint: String = "/oauth/token"
         var authorizeEndpoint: String = "/oauth/authorize"
-        var userInfoEndpoint: String = "/oauth/userinfo"
-        var userInfoCallback: (UserInfo) -> Map<String, Any?> = { userInfo ->
+        var tokenInfoEndpoint: String = "/oauth/tokeninfo"
+        var tokenInfoCallback: (TokenInfo) -> Map<String, Any?> = { tokenInfo ->
             mapOf(
-                    "username" to userInfo.identity.username,
-                    "scopes" to userInfo.scopes
-            )
+                    "username" to tokenInfo.identity?.username,
+                    "scopes" to tokenInfo.scopes
+            ).filterValues { it != null }
         }
         var tokenService: TokenService? = null
     }
@@ -29,7 +29,7 @@ internal object CallRouterBuilder {
             configuration.tokenService!!,
             configuration.tokenEndpoint,
             configuration.authorizeEndpoint,
-            configuration.userInfoEndpoint,
-            configuration.userInfoCallback
+            configuration.tokenInfoEndpoint,
+            configuration.tokenInfoCallback
     )
 }

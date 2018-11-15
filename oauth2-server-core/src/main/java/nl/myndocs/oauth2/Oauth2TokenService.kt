@@ -8,7 +8,7 @@ import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.IdentityService
-import nl.myndocs.oauth2.identity.UserInfo
+import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.*
 import nl.myndocs.oauth2.response.TokenResponse
 import nl.myndocs.oauth2.scope.ScopeParser
@@ -315,13 +315,12 @@ class Oauth2TokenService(
         }
     }
 
-    override fun userInfo(accessToken: String): UserInfo {
+    override fun tokenInfo(accessToken: String): TokenInfo {
         val storedAccessToken = tokenStore.accessToken(accessToken) ?: throw InvalidGrantException()
         val client = clientService.clientOf(storedAccessToken.clientId) ?: throw InvalidClientException()
         val identity = storedAccessToken.username?.let { identityService.identityOf(client, it) }
-                ?: throw InvalidIdentityException()
 
-        return UserInfo(
+        return TokenInfo(
                 identity,
                 client,
                 storedAccessToken.scopes
