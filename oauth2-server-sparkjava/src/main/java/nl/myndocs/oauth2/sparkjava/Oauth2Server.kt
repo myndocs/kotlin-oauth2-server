@@ -26,7 +26,7 @@ object Oauth2Server {
             res.body()
         }
 
-        get(callRouter.userInfoEndpoint) { req, res ->
+        get(callRouter.tokenInfoEndpoint) { req, res ->
             val sparkjavaCallContext = SparkjavaCallContext(req, res)
             callRouter.route(sparkjavaCallContext, configuration.authorizerFactory(sparkjavaCallContext))
 

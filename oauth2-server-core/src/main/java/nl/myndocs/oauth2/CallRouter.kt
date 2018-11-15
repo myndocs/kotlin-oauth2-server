@@ -6,7 +6,7 @@ import nl.myndocs.oauth2.client.AuthorizedGrantType.CLIENT_CREDENTIALS
 import nl.myndocs.oauth2.client.AuthorizedGrantType.PASSWORD
 import nl.myndocs.oauth2.client.AuthorizedGrantType.REFRESH_TOKEN
 import nl.myndocs.oauth2.exception.*
-import nl.myndocs.oauth2.identity.UserInfo
+import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.*
 import nl.myndocs.oauth2.token.toMap
 
@@ -14,8 +14,8 @@ class CallRouter(
         private val tokenService: TokenService,
         val tokenEndpoint: String,
         val authorizeEndpoint: String,
-        val userInfoEndpoint: String,
-        private val userInfoCallback: (UserInfo) -> Map<String, Any?>
+        val tokenInfoEndpoint: String,
+        private val tokenInfoCallback: (TokenInfo) -> Map<String, Any?>
 ) {
     companion object {
         const val METHOD_POST = "post"
@@ -32,7 +32,7 @@ class CallRouter(
         when (callContext.path) {
             tokenEndpoint -> routeTokenEndpoint(callContext)
             authorizeEndpoint -> routeAuthorizeEndpoint(callContext, authorizer)
-            userInfoEndpoint -> routeUserInfoEndpoint(callContext)
+            tokenInfoEndpoint -> routeTokenInfoEndpoint(callContext)
         }
     }
 
@@ -208,7 +208,7 @@ class CallRouter(
         }
     }
 
-    private fun routeUserInfoEndpoint(callContext: CallContext) {
+    private fun routeTokenInfoEndpoint(callContext: CallContext) {
         if (callContext.method.toLowerCase() != METHOD_GET) {
             return
         }
@@ -222,8 +222,8 @@ class CallRouter(
 
         val token = authorization.substring(7)
 
-        val userInfoCallback = userInfoCallback(tokenService.userInfo(token))
+        val tokenInfoCallback = tokenInfoCallback(tokenService.tokenInfo(token))
 
-        callContext.respondJson(userInfoCallback)
+        callContext.respondJson(tokenInfoCallback)
     }
 }
