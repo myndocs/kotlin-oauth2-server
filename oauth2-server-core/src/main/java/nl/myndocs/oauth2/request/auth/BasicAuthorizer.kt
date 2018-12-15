@@ -3,14 +3,12 @@ package nl.myndocs.oauth2.request.auth
 import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.authenticator.Credentials
 import nl.myndocs.oauth2.request.CallContext
+import nl.myndocs.oauth2.request.headerCaseInsensitive
 
 // @TODO: BasicAuth should be injected instead of static call
 open class BasicAuthorizer(protected val context: CallContext) : Authorizer {
     override fun extractCredentials(): Credentials? {
-        val authorizationHeader = context.headers
-                .filter { it.key.equals("authorization", true) }
-                .values
-                .firstOrNull() ?: ""
+        val authorizationHeader = context.headerCaseInsensitive("authorization") ?: ""
 
         return BasicAuth.parseCredentials(authorizationHeader)
     }
