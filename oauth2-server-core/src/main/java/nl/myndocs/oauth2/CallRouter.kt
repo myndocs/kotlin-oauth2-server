@@ -213,7 +213,7 @@ class CallRouter(
             return
         }
 
-        val authorization = callContext.headers["Authorization"]
+        val authorization = callContext.headerCaseInsensitive("Authorization")
 
         if (authorization == null || !authorization.startsWith("bearer ", true)) {
             callContext.respondStatus(STATUS_UNAUTHORIZED)
