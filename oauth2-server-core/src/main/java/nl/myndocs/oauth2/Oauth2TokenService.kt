@@ -20,12 +20,12 @@ import nl.myndocs.oauth2.token.converter.CodeTokenConverter
 import nl.myndocs.oauth2.token.converter.RefreshTokenConverter
 
 class Oauth2TokenService(
-        private val identityService: IdentityService,
-        private val clientService: ClientService,
-        private val tokenStore: TokenStore,
-        private val accessTokenConverter: AccessTokenConverter,
-        private val refreshTokenConverter: RefreshTokenConverter,
-        private val codeTokenConverter: CodeTokenConverter
+        val identityService: IdentityService,
+        val clientService: ClientService,
+        val tokenStore: TokenStore,
+        val accessTokenConverter: AccessTokenConverter,
+        val refreshTokenConverter: RefreshTokenConverter,
+        val codeTokenConverter: CodeTokenConverter
 ) : TokenService {
     private val INVALID_REQUEST_FIELD_MESSAGE = "'%s' field is missing"
     /**
