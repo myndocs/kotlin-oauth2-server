@@ -13,8 +13,8 @@ import nl.myndocs.oauth2.scope.ScopeParser
 import kotlin.reflect.KClass
 
 class PasswordGrantAuthorizer(
-    private val clientService: ClientService,
-    private val identityService: IdentityService
+        private val clientService: ClientService,
+        private val identityService: IdentityService
 ) : GrantAuthorizer<PasswordGrantRequest> {
     override val shouldVerifyUnverifiedClient: Boolean
         get() = true
@@ -36,8 +36,8 @@ class PasswordGrantAuthorizer(
         val requestedIdentity = identityService.identityOf(requestedClient, clientRequest.username)
 
         if (
-            requestedIdentity == null
-            || !identityService.validCredentials(requestedClient, requestedIdentity, clientRequest.password)
+                requestedIdentity == null
+                || !identityService.validCredentials(requestedClient, requestedIdentity, clientRequest.password)
         ) {
             throw InvalidIdentityException()
         }
@@ -45,9 +45,9 @@ class PasswordGrantAuthorizer(
         val requestedScopes = ScopeParser.parseScopes(clientRequest.scope)
 
         return TokenInfo(
-            identity = requestedIdentity,
-            client = requestedClient,
-            scopes = requestedScopes
+                identity = requestedIdentity,
+                client = requestedClient,
+                scopes = requestedScopes
         )
     }
 }

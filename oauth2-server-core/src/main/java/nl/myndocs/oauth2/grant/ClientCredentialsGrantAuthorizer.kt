@@ -8,7 +8,7 @@ import nl.myndocs.oauth2.scope.ScopeParser
 import kotlin.reflect.KClass
 
 class ClientCredentialsGrantAuthorizer(
-    private val clientService: ClientService
+        private val clientService: ClientService
 ) : GrantAuthorizer<ClientCredentialsRequest> {
     override val clientRequestClass: KClass<ClientCredentialsRequest>
         get() = ClientCredentialsRequest::class
@@ -19,16 +19,16 @@ class ClientCredentialsGrantAuthorizer(
 
     override fun authorize(clientRequest: ClientCredentialsRequest): TokenInfo {
         val requestedClient = clientService.clientOf(clientRequest.clientId!!)
-            ?: throw InvalidClientException()
+                ?: throw InvalidClientException()
 
         val scopes = clientRequest.scope
-            ?.let { ScopeParser.parseScopes(it).toSet() }
-            ?: requestedClient.clientScopes
+                ?.let { ScopeParser.parseScopes(it).toSet() }
+                ?: requestedClient.clientScopes
 
         return TokenInfo(
-            identity = null,
-            client = requestedClient,
-            scopes = scopes
+                identity = null,
+                client = requestedClient,
+                scopes = scopes
         )
     }
 }

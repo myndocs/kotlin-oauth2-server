@@ -21,13 +21,13 @@ import nl.myndocs.oauth2.token.converter.CodeTokenConverter
 import nl.myndocs.oauth2.token.converter.RefreshTokenConverter
 
 class Oauth2TokenService(
-    override val allowedGrantAuthorizers: Map<String, GrantAuthorizer<*>>,
-    private val identityService: IdentityService,
-    private val clientService: ClientService,
-    private val tokenStore: TokenStore,
-    private val accessTokenConverter: AccessTokenConverter,
-    private val refreshTokenConverter: RefreshTokenConverter,
-    private val codeTokenConverter: CodeTokenConverter
+        override val allowedGrantAuthorizers: Map<String, GrantAuthorizer<*>>,
+        private val identityService: IdentityService,
+        private val clientService: ClientService,
+        private val tokenStore: TokenStore,
+        private val accessTokenConverter: AccessTokenConverter,
+        private val refreshTokenConverter: RefreshTokenConverter,
+        private val codeTokenConverter: CodeTokenConverter
 ) : TokenService {
     private val INVALID_REQUEST_FIELD_MESSAGE = "'%s' field is missing"
     /**
@@ -39,7 +39,7 @@ class Oauth2TokenService(
      */
     override fun <TGrantRequest : ClientRequest> authorize(grantType: String, clientRequest: TGrantRequest): TokenResponse {
         val grantTypeAuthorizer = allowedGrantAuthorizers[grantType] as GrantAuthorizer<TGrantRequest>?
-            ?: throw InvalidGrantException("'grant_type' with value '$grantType' not allowed")
+                ?: throw InvalidGrantException("'grant_type' with value '$grantType' not allowed")
         if (!grantTypeAuthorizer.clientRequestClass.isInstance(clientRequest)) {
             throw IllegalArgumentException("'grant_type' of type '$grantType' was mapped to '${grantTypeAuthorizer.clientRequestClass.qualifiedName}' but client request was '${clientRequest.javaClass.name}'")
         }
@@ -59,14 +59,14 @@ class Oauth2TokenService(
         }
 
         val accessToken = accessTokenConverter.convertToToken(
-            username = tokenInfo.identity?.username,
-            clientId = tokenInfo.client.clientId,
-            requestedScopes = tokenInfo.scopes,
-            refreshToken = refreshTokenConverter.convertToToken(
                 username = tokenInfo.identity?.username,
                 clientId = tokenInfo.client.clientId,
-                requestedScopes = tokenInfo.scopes
-            )
+                requestedScopes = tokenInfo.scopes,
+                refreshToken = refreshTokenConverter.convertToToken(
+                        username = tokenInfo.identity?.username,
+                        clientId = tokenInfo.client.clientId,
+                        requestedScopes = tokenInfo.scopes
+                )
         )
 
         tokenStore.storeAccessToken(accessToken)
@@ -75,9 +75,9 @@ class Oauth2TokenService(
     }
 
     override fun redirect(
-        redirect: RedirectAuthorizationCodeRequest,
-        authenticator: Authenticator?,
-        identityScopeVerifier: IdentityScopeVerifier?
+            redirect: RedirectAuthorizationCodeRequest,
+            authenticator: Authenticator?,
+            identityScopeVerifier: IdentityScopeVerifier?
     ): CodeToken {
         if (redirect.clientId == null) {
             throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
@@ -108,7 +108,7 @@ class Oauth2TokenService(
         val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
 
         var validIdentity = authenticator?.validCredentials(clientOf, identityOf, redirect.password)
-            ?: identityService.validCredentials(clientOf, identityOf, redirect.password)
+                ?: identityService.validCredentials(clientOf, identityOf, redirect.password)
 
         if (!validIdentity) {
             throw InvalidIdentityException()
@@ -123,10 +123,10 @@ class Oauth2TokenService(
         validateScopes(clientOf, identityOf, requestedScopes, identityScopeVerifier)
 
         val codeToken = codeTokenConverter.convertToToken(
-            identityOf.username,
-            clientOf.clientId,
-            redirect.redirectUri,
-            requestedScopes
+                identityOf.username,
+                clientOf.clientId,
+                redirect.redirectUri,
+                requestedScopes
         )
 
         tokenStore.storeCodeToken(codeToken)
@@ -135,9 +135,9 @@ class Oauth2TokenService(
     }
 
     override fun redirect(
-        redirect: RedirectTokenRequest,
-        authenticator: Authenticator?,
-        identityScopeVerifier: IdentityScopeVerifier?
+            redirect: RedirectTokenRequest,
+            authenticator: Authenticator?,
+            identityScopeVerifier: IdentityScopeVerifier?
     ): AccessToken {
         if (redirect.clientId == null) {
             throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
@@ -168,7 +168,7 @@ class Oauth2TokenService(
         val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
 
         var validIdentity = authenticator?.validCredentials(clientOf, identityOf, redirect.password)
-            ?: identityService.validCredentials(clientOf, identityOf, redirect.password)
+                ?: identityService.validCredentials(clientOf, identityOf, redirect.password)
 
         if (!validIdentity) {
             throw InvalidIdentityException()
@@ -183,10 +183,10 @@ class Oauth2TokenService(
         validateScopes(clientOf, identityOf, requestedScopes, identityScopeVerifier)
 
         val accessToken = accessTokenConverter.convertToToken(
-            identityOf.username,
-            clientOf.clientId,
-            requestedScopes,
-            null
+                identityOf.username,
+                clientOf.clientId,
+                requestedScopes,
+                null
         )
 
         tokenStore.storeAccessToken(accessToken)
@@ -195,10 +195,10 @@ class Oauth2TokenService(
     }
 
     private fun validateScopes(
-        client: Client,
-        identity: Identity,
-        requestedScopes: Set<String>,
-        identityScopeVerifier: IdentityScopeVerifier? = null
+            client: Client,
+            identity: Identity,
+            requestedScopes: Set<String>,
+            identityScopeVerifier: IdentityScopeVerifier? = null
     ) {
         val scopesAllowed = scopesAllowed(client.clientScopes, requestedScopes)
         if (!scopesAllowed) {
@@ -206,7 +206,7 @@ class Oauth2TokenService(
         }
 
         val allowedScopes = identityScopeVerifier?.allowedScopes(client, identity, requestedScopes)
-            ?: identityService.allowedScopes(client, identity, requestedScopes)
+                ?: identityService.allowedScopes(client, identity, requestedScopes)
 
         val invalidScopes = requestedScopes.minus(allowedScopes)
         if (invalidScopes.isNotEmpty()) {
@@ -220,18 +220,18 @@ class Oauth2TokenService(
         val identity = storedAccessToken.username?.let { identityService.identityOf(client, it) }
 
         return TokenInfo(
-            identity,
-            client,
-            storedAccessToken.scopes
+                identity,
+                client,
+                storedAccessToken.scopes
         )
     }
 
     private fun throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) {
         val clientId = clientRequest.clientId
-            ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
+                ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
 
         val clientSecret = clientRequest.clientSecret
-            ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_secret"))
+                ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_secret"))
 
         val client = clientService.clientOf(clientId) ?: throw InvalidClientException()
 
@@ -245,9 +245,9 @@ class Oauth2TokenService(
     }
 
     private fun AccessToken.toTokenResponse() = TokenResponse(
-        accessToken,
-        tokenType,
-        expiresIn(),
-        refreshToken?.refreshToken
+            accessToken,
+            tokenType,
+            expiresIn(),
+            refreshToken?.refreshToken
     )
 }

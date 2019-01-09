@@ -11,9 +11,9 @@ import nl.myndocs.oauth2.token.TokenStore
 import kotlin.reflect.KClass
 
 class RefreshTokenGrantAuthorizer(
-    private val clientService: ClientService,
-    private val identityService: IdentityService,
-    private val tokenStore: TokenStore
+        private val clientService: ClientService,
+        private val identityService: IdentityService,
+        private val tokenStore: TokenStore
 ) : GrantAuthorizer<RefreshTokenRequest> {
     override val clientRequestClass: KClass<RefreshTokenRequest>
         get() = RefreshTokenRequest::class
@@ -36,9 +36,9 @@ class RefreshTokenGrantAuthorizer(
         val client = clientService.clientOf(refreshToken.clientId) ?: throw InvalidClientException()
 
         return TokenInfo(
-            identity = identityService.identityOf(client, refreshToken.username!!),
-            client = client,
-            scopes = refreshToken.scopes
+                identity = identityService.identityOf(client, refreshToken.username!!),
+                client = client,
+                scopes = refreshToken.scopes
         )
     }
 }

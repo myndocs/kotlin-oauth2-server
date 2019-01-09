@@ -24,13 +24,13 @@ object Oauth2TokenServiceBuilder {
         configurer(configuration)
 
         val allowedGrantAuthorizers = (
-            configuration.allowedGrantAuthorizers ?: mapOf(
-                "password" to PasswordGrantAuthorizer(configuration.clientService!!, configuration.identityService!!),
-                "authorization_code" to AuthorizationCodeGrantAuthorizer(configuration.clientService!!, configuration.identityService!!, configuration.tokenStore!!),
-                "refresh_token" to RefreshTokenGrantAuthorizer(configuration.clientService!!, configuration.identityService!!, configuration.tokenStore!!),
-                "client_credentials" to ClientCredentialsGrantAuthorizer(configuration.clientService!!)
-            )
-            ).plus(configuration.additionalGrantAuthorizers ?: emptyMap())
+                configuration.allowedGrantAuthorizers ?: mapOf(
+                        "password" to PasswordGrantAuthorizer(configuration.clientService!!, configuration.identityService!!),
+                        "authorization_code" to AuthorizationCodeGrantAuthorizer(configuration.clientService!!, configuration.identityService!!, configuration.tokenStore!!),
+                        "refresh_token" to RefreshTokenGrantAuthorizer(configuration.clientService!!, configuration.identityService!!, configuration.tokenStore!!),
+                        "client_credentials" to ClientCredentialsGrantAuthorizer(configuration.clientService!!)
+                )
+                ).plus(configuration.additionalGrantAuthorizers ?: emptyMap())
 
         return Oauth2TokenService(
                 allowedGrantAuthorizers,

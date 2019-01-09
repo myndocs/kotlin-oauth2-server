@@ -10,9 +10,9 @@ import nl.myndocs.oauth2.token.TokenStore
 import kotlin.reflect.KClass
 
 class AuthorizationCodeGrantAuthorizer(
-    private val clientService: ClientService,
-    private val identityService: IdentityService,
-    private val tokenStore: TokenStore
+        private val clientService: ClientService,
+        private val identityService: IdentityService,
+        private val tokenStore: TokenStore
 ) : GrantAuthorizer<AuthorizationCodeRequest> {
     override val clientRequestClass: KClass<AuthorizationCodeRequest>
         get() = AuthorizationCodeRequest::class
@@ -31,7 +31,7 @@ class AuthorizationCodeGrantAuthorizer(
         }
 
         val consumeCodeToken = tokenStore.consumeCodeToken(clientRequest.code)
-            ?: throw InvalidGrantException()
+                ?: throw InvalidGrantException()
 
 
         if (consumeCodeToken.redirectUri != clientRequest.redirectUri || consumeCodeToken.clientId != clientRequest.clientId) {
@@ -41,9 +41,9 @@ class AuthorizationCodeGrantAuthorizer(
         val client = clientService.clientOf(consumeCodeToken.clientId)!!
 
         return TokenInfo(
-            identity = identityService.identityOf(client, consumeCodeToken.username),
-            client = client,
-            scopes = consumeCodeToken.scopes
+                identity = identityService.identityOf(client, consumeCodeToken.username),
+                client = client,
+                scopes = consumeCodeToken.scopes
         )
     }
 }
