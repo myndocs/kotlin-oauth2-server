@@ -2,6 +2,7 @@ package nl.myndocs.oauth2.config
 
 import nl.myndocs.oauth2.TokenService
 import nl.myndocs.oauth2.authenticator.Authorizer
+import nl.myndocs.oauth2.grant.GrantAuthorizer
 import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.auth.BasicAuthorizer

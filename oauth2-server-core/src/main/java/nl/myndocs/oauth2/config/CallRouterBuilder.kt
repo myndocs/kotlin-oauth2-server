@@ -2,7 +2,9 @@ package nl.myndocs.oauth2.config
 
 import nl.myndocs.oauth2.CallRouter
 import nl.myndocs.oauth2.TokenService
+import nl.myndocs.oauth2.grant.GrantAuthorizer
 import nl.myndocs.oauth2.identity.TokenInfo
+import nl.myndocs.oauth2.request.ClientRequest
 
 internal object CallRouterBuilder {
     class Configuration {
@@ -27,6 +29,7 @@ internal object CallRouterBuilder {
 
     fun build(configuration: Configuration) = CallRouter(
             configuration.tokenService!!,
+            configuration.tokenService!!.allowedGrantAuthorizers,
             configuration.tokenEndpoint,
             configuration.authorizeEndpoint,
             configuration.tokenInfoEndpoint,
