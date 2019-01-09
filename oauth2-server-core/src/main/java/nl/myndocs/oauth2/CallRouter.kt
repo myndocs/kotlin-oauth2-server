@@ -5,7 +5,10 @@ import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.grant.Granter
 import nl.myndocs.oauth2.grant.GrantingCall
 import nl.myndocs.oauth2.identity.TokenInfo
-import nl.myndocs.oauth2.request.*
+import nl.myndocs.oauth2.request.CallContext
+import nl.myndocs.oauth2.request.RedirectAuthorizationCodeRequest
+import nl.myndocs.oauth2.request.RedirectTokenRequest
+import nl.myndocs.oauth2.request.headerCaseInsensitive
 
 class CallRouter(
         private val tokenService: TokenService,
@@ -47,8 +50,7 @@ class CallRouter(
                 override val callContext: CallContext
                     get() = callContext
 
-                override val tokenService: TokenService
-                    get() = tokenService
+                override val tokenService = this@CallRouter.tokenService
             }
 
             val granterMap = mutableMapOf<String, Granter>()
