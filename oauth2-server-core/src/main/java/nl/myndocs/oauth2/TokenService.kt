@@ -12,7 +12,7 @@ import nl.myndocs.oauth2.token.CodeToken
 interface TokenService {
     val allowedGrantAuthorizers: Map<String, GrantAuthorizer<*>>
 
-    fun <TGrantType : ClientRequest> authorize(grantType: String, clientRequest: TGrantType): TokenResponse
+    fun <TGrantRequest : ClientRequest> authorize(grantType: String, clientRequest: TGrantRequest): TokenResponse
 
     fun redirect(
             redirect: RedirectAuthorizationCodeRequest,
