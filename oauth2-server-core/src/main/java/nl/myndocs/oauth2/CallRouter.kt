@@ -1,21 +1,22 @@
 package nl.myndocs.oauth2
 
 import nl.myndocs.oauth2.authenticator.Authorizer
-import nl.myndocs.oauth2.client.AuthorizedGrantType.AUTHORIZATION_CODE
-import nl.myndocs.oauth2.client.AuthorizedGrantType.CLIENT_CREDENTIALS
-import nl.myndocs.oauth2.client.AuthorizedGrantType.PASSWORD
-import nl.myndocs.oauth2.client.AuthorizedGrantType.REFRESH_TOKEN
 import nl.myndocs.oauth2.exception.*
+import nl.myndocs.oauth2.grant.Granter
+import nl.myndocs.oauth2.grant.GrantingCall
 import nl.myndocs.oauth2.identity.TokenInfo
-import nl.myndocs.oauth2.request.*
-import nl.myndocs.oauth2.token.toMap
+import nl.myndocs.oauth2.request.CallContext
+import nl.myndocs.oauth2.request.RedirectAuthorizationCodeRequest
+import nl.myndocs.oauth2.request.RedirectTokenRequest
+import nl.myndocs.oauth2.request.headerCaseInsensitive
 
 class CallRouter(
         private val tokenService: TokenService,
         val tokenEndpoint: String,
         val authorizeEndpoint: String,
         val tokenInfoEndpoint: String,
-        private val tokenInfoCallback: (TokenInfo) -> Map<String, Any?>
+        private val tokenInfoCallback: (TokenInfo) -> Map<String, Any?>,
+        private val granters: List<GrantingCall.() -> Granter>
 ) {
     companion object {
         const val METHOD_POST = "post"
@@ -42,75 +43,35 @@ class CallRouter(
         }
 
         try {
-            val allowedGrantTypes = setOf(PASSWORD, AUTHORIZATION_CODE, REFRESH_TOKEN, CLIENT_CREDENTIALS)
             val grantType = callContext.formParameters["grant_type"]
                     ?: throw InvalidRequestException("'grant_type' not given")
+
+            val grantingCall = object: GrantingCall {
+                override val callContext: CallContext
+                    get() = callContext
+
+                override val tokenService = this@CallRouter.tokenService
+            }
+
+            val granterMap = granters
+                    .map {
+                        val granter = grantingCall.it()
+                        granter.grantType to granter
+                    }
+                    .toMap()
+
+            val allowedGrantTypes = granterMap.keys
 
             if (!allowedGrantTypes.contains(grantType)) {
                 throw InvalidGrantException("'grant_type' with value '$grantType' not allowed")
             }
 
-            when (grantType) {
-                "password" -> routePasswordGrant(callContext, tokenService)
-                "authorization_code" -> routeAuthorizationCodeGrant(callContext, tokenService)
-                "refresh_token" -> routeRefreshTokenGrant(callContext, tokenService)
-                "client_credentials" -> routeClientCredentialsGrant(callContext, tokenService)
-            }
+            granterMap[grantType]!!.callback.invoke()
         } catch (oauthException: OauthException) {
             callContext.respondStatus(STATUS_BAD_REQUEST)
             callContext.respondJson(oauthException.toMap())
         }
     }
-
-    fun routePasswordGrant(callContext: CallContext, tokenService: TokenService) {
-        val tokenResponse = tokenService.authorize(
-                PasswordGrantRequest(
-                        callContext.formParameters["client_id"],
-                        callContext.formParameters["client_secret"],
-                        callContext.formParameters["username"],
-                        callContext.formParameters["password"],
-                        callContext.formParameters["scope"]
-                )
-        )
-
-        callContext.respondJson(tokenResponse.toMap())
-    }
-
-    fun routeClientCredentialsGrant(callContext: CallContext, tokenService: TokenService) {
-        val tokenResponse = tokenService.authorize(ClientCredentialsRequest(
-            callContext.formParameters["client_id"],
-            callContext.formParameters["client_secret"],
-            callContext.formParameters["scope"]
-        ))
-
-        callContext.respondJson(tokenResponse.toMap())
-    }
-
-    fun routeRefreshTokenGrant(callContext: CallContext, tokenService: TokenService) {
-        val accessToken = tokenService.refresh(
-                RefreshTokenRequest(
-                        callContext.formParameters["client_id"],
-                        callContext.formParameters["client_secret"],
-                        callContext.formParameters["refresh_token"]
-                )
-        )
-
-        callContext.respondJson(accessToken.toMap())
-    }
-
-    fun routeAuthorizationCodeGrant(callContext: CallContext, tokenService: TokenService) {
-        val accessToken = tokenService.authorize(
-                AuthorizationCodeRequest(
-                        callContext.formParameters["client_id"],
-                        callContext.formParameters["client_secret"],
-                        callContext.formParameters["code"],
-                        callContext.formParameters["redirect_uri"]
-                )
-        )
-
-        callContext.respondJson(accessToken.toMap())
-    }
-
 
     fun routeAuthorizationCodeRedirect(
             callContext: CallContext,

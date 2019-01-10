@@ -2,6 +2,8 @@ package nl.myndocs.oauth2.config
 
 import nl.myndocs.oauth2.TokenService
 import nl.myndocs.oauth2.authenticator.Authorizer
+import nl.myndocs.oauth2.grant.Granter
+import nl.myndocs.oauth2.grant.GrantingCall
 import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.auth.BasicAuthorizer
@@ -38,6 +40,12 @@ object ConfigurationBuilder {
             get() = callRouterConfiguration.tokenInfoCallback
             set(value) {
                 callRouterConfiguration.tokenInfoCallback = value
+            }
+
+        var granters: List<GrantingCall.() -> Granter>
+            get() = callRouterConfiguration.granters
+            set(value) {
+                callRouterConfiguration.granters = value
             }
 
         var authorizerFactory: (CallContext) -> Authorizer = ::BasicAuthorizer
