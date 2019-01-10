@@ -53,12 +53,12 @@ class CallRouter(
                 override val tokenService = this@CallRouter.tokenService
             }
 
-            val granterMap = mutableMapOf<String, Granter>()
-
-            granters.forEach {
-                val granter = grantingCall.it()
-                granterMap[granter.grantType] = granter
-            }
+            val granterMap = granters
+                    .map {
+                        val granter = grantingCall.it()
+                        granter.grantType to granter
+                    }
+                    .toMap()
 
             val allowedGrantTypes = granterMap.keys
 
