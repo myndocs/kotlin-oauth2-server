@@ -1,22 +1,19 @@
 package nl.myndocs.oauth2.config
 
-import nl.myndocs.oauth2.TokenService
 import nl.myndocs.oauth2.authenticator.Authorizer
+import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.grant.Granter
 import nl.myndocs.oauth2.grant.GrantingCall
+import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.auth.BasicAuthorizer
+import nl.myndocs.oauth2.token.TokenStore
+import nl.myndocs.oauth2.token.converter.*
 
 object ConfigurationBuilder {
     class Configuration {
         internal val callRouterConfiguration = CallRouterBuilder.Configuration()
-
-        var tokenService: TokenService?
-            get() = callRouterConfiguration.tokenService
-            set(value) {
-                callRouterConfiguration.tokenService = value
-            }
 
         var authorizationEndpoint: String
             get() = callRouterConfiguration.authorizeEndpoint
@@ -49,15 +46,34 @@ object ConfigurationBuilder {
             }
 
         var authorizerFactory: (CallContext) -> Authorizer = ::BasicAuthorizer
+
+        var identityService: IdentityService? = null
+        var clientService: ClientService? = null
+        var tokenStore: TokenStore? = null
+        var accessTokenConverter: AccessTokenConverter = UUIDAccessTokenConverter()
+        var refreshTokenConverter: RefreshTokenConverter = UUIDRefreshTokenConverter()
+        var codeTokenConverter: CodeTokenConverter = UUIDCodeTokenConverter()
     }
 
     fun build(configurer: Configuration.() -> Unit): nl.myndocs.oauth2.config.Configuration {
         val configuration = Configuration()
         configurer(configuration)
 
+        val grantingCallFactory: (CallContext) -> GrantingCall = { callContext ->
+            object : GrantingCall {
+                override val callContext = callContext
+                override val identityService = configuration.identityService!!
+                override val clientService = configuration.clientService!!
+                override val tokenStore = configuration.tokenStore!!
+                override val converters = Converters(
+                        configuration.accessTokenConverter,
+                        configuration.refreshTokenConverter,
+                        configuration.codeTokenConverter
+                )
+            }
+        }
         return nl.myndocs.oauth2.config.Configuration(
-                configuration.tokenService!!,
-                CallRouterBuilder.build(configuration.callRouterConfiguration),
+                CallRouterBuilder.build(configuration.callRouterConfiguration, grantingCallFactory),
                 configuration.authorizerFactory
         )
     }
