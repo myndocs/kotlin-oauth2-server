@@ -7,7 +7,7 @@
     <groupId>nl.myndocs</groupId>
     <artifactId>kotlin-oauth2-server</artifactId>
     <packaging>pom</packaging>
-    <version>0.3.1</version>
+    <version>0.4.0</version>
 
     <properties>
         <kotlin.version>1.3.0</kotlin.version>
@@ -25,6 +25,7 @@
         <module>oauth2-server-javalin</module>
         <module>oauth2-server-sparkjava</module>
         <module>oauth2-server-http4k</module>
+        <module>oauth2-server-jwt</module>
     </modules>
 
     <dependencies>

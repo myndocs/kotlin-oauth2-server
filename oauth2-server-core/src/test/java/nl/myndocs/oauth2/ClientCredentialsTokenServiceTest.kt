@@ -1,7 +1,6 @@
 package nl.myndocs.oauth2
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
@@ -10,21 +9,28 @@ import nl.myndocs.oauth2.client.AuthorizedGrantType
 import nl.myndocs.oauth2.client.Client
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.exception.InvalidClientException
+import nl.myndocs.oauth2.grant.GrantingCall
+import nl.myndocs.oauth2.grant.authorize
 import nl.myndocs.oauth2.identity.IdentityService
+import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.ClientCredentialsRequest
 import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.RefreshToken
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.AccessTokenConverter
 import nl.myndocs.oauth2.token.converter.CodeTokenConverter
+import nl.myndocs.oauth2.token.converter.Converters
 import nl.myndocs.oauth2.token.converter.RefreshTokenConverter
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
 internal class ClientCredentialsTokenServiceTest {
+    @MockK
+    lateinit var callContext: CallContext
     @MockK
     lateinit var identityService: IdentityService
     @MockK
@@ -38,9 +44,22 @@ internal class ClientCredentialsTokenServiceTest {
     @MockK
     lateinit var codeTokenConverter: CodeTokenConverter
 
-    @InjectMockKs
-    lateinit var tokenService: Oauth2TokenService
+    lateinit var grantingCall: GrantingCall
 
+    @BeforeEach
+    fun initialize() {
+        grantingCall = object : GrantingCall {
+            override val callContext = this@ClientCredentialsTokenServiceTest.callContext
+            override val identityService = this@ClientCredentialsTokenServiceTest.identityService
+            override val clientService = this@ClientCredentialsTokenServiceTest.clientService
+            override val tokenStore = this@ClientCredentialsTokenServiceTest.tokenStore
+            override val converters = Converters(
+                    this@ClientCredentialsTokenServiceTest.accessTokenConverter,
+                    this@ClientCredentialsTokenServiceTest.refreshTokenConverter,
+                    this@ClientCredentialsTokenServiceTest.codeTokenConverter
+            )
+        }
+    }
     private val clientId = "client-foo"
     private val clientSecret = "client-secret"
     private val scope = "scope1"
@@ -58,7 +77,7 @@ internal class ClientCredentialsTokenServiceTest {
         every { refreshTokenConverter.convertToToken(null, clientId, scopes) } returns refreshToken
         every { accessTokenConverter.convertToToken(null, clientId, scopes, refreshToken) } returns accessToken
 
-        tokenService.authorize(clientCredentialsRequest)
+        grantingCall.authorize(clientCredentialsRequest)
 
         verify { tokenStore.storeAccessToken(accessToken) }
     }
@@ -69,7 +88,7 @@ internal class ClientCredentialsTokenServiceTest {
 
         Assertions.assertThrows(
             InvalidClientException::class.java
-        ) { tokenService.authorize(clientCredentialsRequest) }
+        ) { grantingCall.authorize(clientCredentialsRequest) }
     }
 
     @Test
@@ -80,7 +99,7 @@ internal class ClientCredentialsTokenServiceTest {
 
         Assertions.assertThrows(
             InvalidClientException::class.java
-        ) { tokenService.authorize(clientCredentialsRequest) }
+        ) { grantingCall.authorize(clientCredentialsRequest) }
     }
 
     @Test
@@ -101,6 +120,6 @@ internal class ClientCredentialsTokenServiceTest {
         every { refreshTokenConverter.convertToToken(null, clientId, requestScopes) } returns refreshToken
         every { accessTokenConverter.convertToToken(null, clientId, requestScopes, refreshToken) } returns accessToken
 
-        tokenService.authorize(clientCredentialsRequest)
+        grantingCall.authorize(clientCredentialsRequest)
     }
 }

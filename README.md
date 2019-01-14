@@ -51,210 +51,94 @@ For the frameworks examples we need at least the following dependencies:
 </dependency>
 ```
 
-## Ktor
-The following dependency is required along with the dependencies described in Setup
+### Framework implementation
+The following frameworks are supported:
+- [Ktor](docs/ktor.md)
+- [Javalin](docs/javalin.md)
+- [http4k](docs/http4k.md)
+- [Sparkjava](docs/sparkjava.md)
 
-```xml
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-ktor</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
+## Configuration
+### Routing
+Default endpoints are configured:
+
+| Type | Relative url |
+| ----- | ------------- |
+| token | /oauth/token |
+| authorize | /oauth/authorize |
+| token info | /oauth/tokeninfo |
+
+These values can be overridden:
+```kotlin
+tokenEndpoint = "/custom/token"
+authorizationEndpoint = "/custom/authorize"
+tokenInfoEndpoint = "/custom/tokeninfo"
 ```
 
-In memory example for Ktor:
+### In memory 
+In memory implementations are provided to easily setup the project.
+
+#### Identity
+On the `InMemoryIdentity` identities can be registered. These are normally your users:
 ```kotlin
-embeddedServer(Netty, 8080) {
-    install(Oauth2ServerFeature) {
-            tokenService = Oauth2TokenServiceBuilder.build {
-                identityService = InMemoryIdentity()
-                        .identity {
-                            username = "foo"
-                            password = "bar"
-                        }
-                clientService = InMemoryClient()
-                        .client {
-                            clientId = "testapp"
-                            clientSecret = "testpass"
-                            scopes = setOf("trusted")
-                            redirectUris = setOf("https://localhost:8080/callback")
-                            authorizedGrantTypes = setOf(
-                                    AuthorizedGrantType.AUTHORIZATION_CODE,
-                                    AuthorizedGrantType.PASSWORD,
-                                    AuthorizedGrantType.IMPLICIT,
-                                    AuthorizedGrantType.REFRESH_TOKEN
-                            )
-                        }
-                tokenStore = InMemoryTokenStore()
-            }
+identityService = InMemoryIdentity()
+    .identity {
+        username = "foo-1"
+        password = "bar"
     }
-}.start(wait = true)
+    .identity {
+        username = "foo-2"
+        password = "bar"
+    }
 ```
 
-## Javalin
-The following dependency is required along with the dependencies described in Setup
-```xml
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-javalin</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-```
-
-In memory example for Javalin:
+#### Client
+On the `InMemoryClient` clients can be registered:
 ```kotlin
-Javalin.create().apply {
-    enableOauthServer {
-        tokenService = Oauth2TokenServiceBuilder.build {
-            identityService = InMemoryIdentity()
-                    .identity {
-                        username = "foo"
-                        password = "bar"
-                    }
-            clientService = InMemoryClient()
-                    .client {
-                        clientId = "testapp"
-                        clientSecret = "testpass"
-                        scopes = setOf("trusted")
-                        redirectUris = setOf("https://localhost:7000/callback")
-                        authorizedGrantTypes = setOf(
-                                AuthorizedGrantType.AUTHORIZATION_CODE,
-                                AuthorizedGrantType.PASSWORD,
-                                AuthorizedGrantType.IMPLICIT,
-                                AuthorizedGrantType.REFRESH_TOKEN
-                        )
-                    }
-            tokenStore = InMemoryTokenStore()
+clientService = InMemoryClient()
+    .client {
+        clientId = "app1-client"
+        clientSecret = "testpass"
+        scopes = setOf("admin")
+        redirectUris = setOf("https://localhost:8080/callback")
+        authorizedGrantTypes = setOf(
+                AuthorizedGrantType.AUTHORIZATION_CODE,
+                AuthorizedGrantType.PASSWORD,
+                AuthorizedGrantType.IMPLICIT,
+                AuthorizedGrantType.REFRESH_TOKEN
+        )
+    }
+    .client {
+            clientId = "app2-client"
+            clientSecret = "testpass"
+            scopes = setOf("user")
+            redirectUris = setOf("https://localhost:8080/callback")
+            authorizedGrantTypes = setOf(
+                    AuthorizedGrantType.AUTHORIZATION_CODE
+            )
         }
-
-    }
-}.start(7000)
 ```
 
-## Spark java
-The following dependency is required along with the dependencies described in Setup
-```xml
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-sparkjava</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-```
-
-In memory example for Spark java:
+#### Token store
+The `InMemoryTokenStore` stores all kinds of tokens.
 ```kotlin
-Oauth2Server.configureOauth2Server {
-    tokenService = Oauth2TokenServiceBuilder.build {
-        identityService = InMemoryIdentity()
-                .identity {
-                    username = "foo"
-                    password = "bar"
-                }
-        clientService = InMemoryClient()
-                .client {
-                    clientId = "testapp"
-                    clientSecret = "testpass"
-                    scopes = setOf("trusted")
-                    redirectUris = setOf("https://localhost:4567/callback")
-                    authorizedGrantTypes = setOf(
-                            AuthorizedGrantType.AUTHORIZATION_CODE,
-                            AuthorizedGrantType.PASSWORD,
-                            AuthorizedGrantType.IMPLICIT,
-                            AuthorizedGrantType.REFRESH_TOKEN
-                    )
-                }
-        tokenStore = InMemoryTokenStore()
-    }
-}
-```
-## http4k
-The following dependency is required along with the dependencies described in Setup
-```xml
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-http4k</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
+tokenStore = InMemoryTokenStore()
 ```
 
-In memory example for http4k:
+### Converters
+
+#### Access token converter
+By default `UUIDAccessTokenConverter` is used. With a default time-out of 1 hour. To override the time-out for example to half an hour:
 ```kotlin
-val app: HttpHandler = routes(
-            "/ping" bind GET to { _: Request -> Response(Status.OK).body("pong!") }
-    ) `enable oauth2` {
-        tokenService = Oauth2TokenServiceBuilder.build {
-            identityService = InMemoryIdentity()
-                    .identity {
-                        username = "foo"
-                        password = "bar"
-                    }
-            clientService = InMemoryClient()
-                    .client {
-                        clientId = "testapp"
-                        clientSecret = "testpass"
-                        scopes = setOf("trusted")
-                        redirectUris = setOf("http://localhost:8080/callback")
-                        authorizedGrantTypes = setOf(
-                                AuthorizedGrantType.AUTHORIZATION_CODE,
-                                AuthorizedGrantType.PASSWORD,
-                                AuthorizedGrantType.IMPLICIT,
-                                AuthorizedGrantType.REFRESH_TOKEN
-                        )
-                    }
-            tokenStore = InMemoryTokenStore()
-        }
-    }
-
-    app.asServer(Jetty(9000)).start()
+accessTokenConverter = UUIDAccessTokenConverter(1800)
 ```
-
-**Note:** `/ping` is only added for demonstration for own defined routes.
-# Custom implementation
-## Identity service
-Users can be authenticate through the identity service. In OAuth2 terms this would be the resource owner.
-
+#### Refresh token converter
+By default `UUIDRefreshTokenConverter` is used. With a default time-out of 1 hour. To override the time-out for example to half an hour:
 ```kotlin
-fun identityOf(forClient: Client, username: String): Identity?
-
-fun validCredentials(forClient: Client, identity: Identity, password: String): Boolean
-
-fun allowedScopes(forClient: Client, identity: Identity, scopes: Set<String>): Set<String>
+refreshTokenConverter = UUIDRefreshTokenConverter(1800)
 ```
-
-Each of the methods that needs to be implemented contains `Client`. This could give you extra flexibility.
-For example you could have user base per client, instead of have users over all clients.
-
-## Client service
-Client service is similar to the identity service. 
-
+#### Code token converter
+By default `UUIDCodeTokenConverter` is used. With a default time-out of 5 minutes. To override the time-out for example 2 minutes:
 ```kotlin
-fun clientOf(clientId: String): Client?
-
-fun validClient(client: Client, clientSecret: String): Boolean
+codeTokenConverter = UUIDCodeTokenConverter(120)
 ```
-
-## Token store
-The following methods have to be implemented for a token store.
-
-```kotlin
-fun storeAccessToken(accessToken: AccessToken)
-
-fun accessToken(token: String): AccessToken?
-
-fun revokeAccessToken(token: String)
-
-fun storeCodeToken(codeToken: CodeToken)
-
-fun codeToken(token: String): CodeToken?
-
-fun consumeCodeToken(token: String): CodeToken?
-
-fun storeRefreshToken(refreshToken: RefreshToken)
-
-fun refreshToken(token: String): RefreshToken?
-
-fun revokeRefreshToken(token: String)
-
-```
-
-When `AccessToken` is passed to `storeAccessToken` and it contains a `RefreshToken`, then `storeAccessToken` is also responsible for saving the refresh token.
