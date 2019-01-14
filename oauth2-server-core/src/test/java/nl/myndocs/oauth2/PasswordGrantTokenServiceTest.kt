@@ -1,7 +1,6 @@
 package nl.myndocs.oauth2
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
@@ -13,22 +12,29 @@ import nl.myndocs.oauth2.exception.InvalidClientException
 import nl.myndocs.oauth2.exception.InvalidIdentityException
 import nl.myndocs.oauth2.exception.InvalidRequestException
 import nl.myndocs.oauth2.exception.InvalidScopeException
+import nl.myndocs.oauth2.grant.GrantingCall
+import nl.myndocs.oauth2.grant.authorize
 import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.IdentityService
+import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.PasswordGrantRequest
 import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.RefreshToken
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.AccessTokenConverter
 import nl.myndocs.oauth2.token.converter.CodeTokenConverter
+import nl.myndocs.oauth2.token.converter.Converters
 import nl.myndocs.oauth2.token.converter.RefreshTokenConverter
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
 internal class PasswordGrantTokenServiceTest {
+    @MockK
+    lateinit var callContext: CallContext
     @MockK
     lateinit var identityService: IdentityService
     @MockK
@@ -42,9 +48,22 @@ internal class PasswordGrantTokenServiceTest {
     @MockK
     lateinit var codeTokenConverter: CodeTokenConverter
 
-    @InjectMockKs
-    lateinit var tokenService: Oauth2TokenService
+    lateinit var grantingCall: GrantingCall
 
+    @BeforeEach
+    fun initialize() {
+        grantingCall = object : GrantingCall {
+            override val callContext = this@PasswordGrantTokenServiceTest.callContext
+            override val identityService = this@PasswordGrantTokenServiceTest.identityService
+            override val clientService = this@PasswordGrantTokenServiceTest.clientService
+            override val tokenStore = this@PasswordGrantTokenServiceTest.tokenStore
+            override val converters = Converters(
+                    this@PasswordGrantTokenServiceTest.accessTokenConverter,
+                    this@PasswordGrantTokenServiceTest.refreshTokenConverter,
+                    this@PasswordGrantTokenServiceTest.codeTokenConverter
+            )
+        }
+    }
     val clientId = "client-foo"
     val clientSecret = "client-bar"
     val username = "user-foo"
@@ -76,7 +95,7 @@ internal class PasswordGrantTokenServiceTest {
         every { refreshTokenConverter.convertToToken(username, clientId, requestScopes) } returns refreshToken
         every { accessTokenConverter.convertToToken(username, clientId, requestScopes, refreshToken) } returns accessToken
 
-        tokenService.authorize(passwordGrantRequest)
+        grantingCall.authorize(passwordGrantRequest)
 
         verify { tokenStore.storeAccessToken(accessToken) }
     }
@@ -87,7 +106,7 @@ internal class PasswordGrantTokenServiceTest {
 
         assertThrows(
                 InvalidClientException::class.java
-        ) { tokenService.authorize(passwordGrantRequest) }
+        ) { grantingCall.authorize(passwordGrantRequest) }
     }
 
     @Test
@@ -98,7 +117,7 @@ internal class PasswordGrantTokenServiceTest {
 
         assertThrows(
                 InvalidClientException::class.java
-        ) { tokenService.authorize(passwordGrantRequest) }
+        ) { grantingCall.authorize(passwordGrantRequest) }
     }
 
     @Test
@@ -117,7 +136,7 @@ internal class PasswordGrantTokenServiceTest {
 
         assertThrows(
                 InvalidRequestException::class.java
-        ) { tokenService.authorize(passwordGrantRequest) }
+        ) { grantingCall.authorize(passwordGrantRequest) }
     }
 
     @Test
@@ -136,7 +155,7 @@ internal class PasswordGrantTokenServiceTest {
 
         assertThrows(
                 InvalidRequestException::class.java
-        ) { tokenService.authorize(passwordGrantRequest) }
+        ) { grantingCall.authorize(passwordGrantRequest) }
     }
 
     @Test
@@ -151,7 +170,7 @@ internal class PasswordGrantTokenServiceTest {
 
         assertThrows(
                 InvalidIdentityException::class.java
-        ) { tokenService.authorize(passwordGrantRequest) }
+        ) { grantingCall.authorize(passwordGrantRequest) }
     }
 
     @Test
@@ -167,7 +186,7 @@ internal class PasswordGrantTokenServiceTest {
 
         assertThrows(
                 InvalidScopeException::class.java
-        ) { tokenService.authorize(passwordGrantRequest) }
+        ) { grantingCall.authorize(passwordGrantRequest) }
     }
 
     @Test
@@ -183,7 +202,7 @@ internal class PasswordGrantTokenServiceTest {
 
         assertThrows(
                 InvalidScopeException::class.java
-        ) { tokenService.authorize(passwordGrantRequest) }
+        ) { grantingCall.authorize(passwordGrantRequest) }
     }
 
     @Test
@@ -210,6 +229,6 @@ internal class PasswordGrantTokenServiceTest {
         every { refreshTokenConverter.convertToToken(username, clientId, requestScopes) } returns refreshToken
         every { accessTokenConverter.convertToToken(username, clientId, requestScopes, refreshToken) } returns accessToken
 
-        tokenService.authorize(passwordGrantRequest)
+        grantingCall.authorize(passwordGrantRequest)
     }
 }

@@ -1,8 +1,9 @@
 package nl.myndocs.oauth2.config
 
-import nl.myndocs.oauth2.*
+import nl.myndocs.oauth2.CallRouter
 import nl.myndocs.oauth2.grant.*
 import nl.myndocs.oauth2.identity.TokenInfo
+import nl.myndocs.oauth2.request.CallContext
 
 internal object CallRouterBuilder {
     class Configuration {
@@ -15,19 +16,10 @@ internal object CallRouterBuilder {
                     "scopes" to tokenInfo.scopes
             ).filterValues { it != null }
         }
-        var tokenService: TokenService? = null
         var granters: List<GrantingCall.() -> Granter> = listOf()
     }
 
-    fun build(configurer: Configuration.() -> Unit): CallRouter {
-        val configuration = Configuration()
-        configurer(configuration)
-
-        return build(configuration)
-    }
-
-    fun build(configuration: Configuration) = CallRouter(
-            configuration.tokenService!!,
+    fun build(configuration: Configuration, grantingCallFactory: (CallContext) -> GrantingCall) = CallRouter(
             configuration.tokenEndpoint,
             configuration.authorizeEndpoint,
             configuration.tokenInfoEndpoint,
@@ -37,6 +29,7 @@ internal object CallRouterBuilder {
                     { grantAuthorizationCode() },
                     { grantClientCredentials() },
                     { grantRefreshToken() }
-            ) + configuration.granters
+            ) + configuration.granters,
+            grantingCallFactory
     )
 }
