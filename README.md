@@ -75,3 +75,70 @@ authorizationEndpoint = "/custom/authorize"
 tokenInfoEndpoint = "/custom/tokeninfo"
 ```
 
+### In memory 
+In memory implementations are provided to easily setup the project.
+
+#### Identity
+On the `InMemoryIdentity` identities can be registered. These are normally your users:
+```kotlin
+identityService = InMemoryIdentity()
+    .identity {
+        username = "foo-1"
+        password = "bar"
+    }
+    .identity {
+        username = "foo-2"
+        password = "bar"
+    }
+```
+
+#### Client
+On the `InMemoryClient` clients can be registered:
+```kotlin
+clientService = InMemoryClient()
+    .client {
+        clientId = "app1-client"
+        clientSecret = "testpass"
+        scopes = setOf("admin")
+        redirectUris = setOf("https://localhost:8080/callback")
+        authorizedGrantTypes = setOf(
+                AuthorizedGrantType.AUTHORIZATION_CODE,
+                AuthorizedGrantType.PASSWORD,
+                AuthorizedGrantType.IMPLICIT,
+                AuthorizedGrantType.REFRESH_TOKEN
+        )
+    }
+    .client {
+            clientId = "app2-client"
+            clientSecret = "testpass"
+            scopes = setOf("user")
+            redirectUris = setOf("https://localhost:8080/callback")
+            authorizedGrantTypes = setOf(
+                    AuthorizedGrantType.AUTHORIZATION_CODE
+            )
+        }
+```
+
+#### Token store
+The `InMemoryTokenStore` stores all kinds of tokens.
+```kotlin
+tokenStore = InMemoryTokenStore()
+```
+
+### Converters
+
+#### Access token converter
+By default `UUIDAccessTokenConverter` is used. With a default time-out of 1 hour. To override the time-out for example to half an hour:
+```kotlin
+accessTokenConverter = UUIDAccessTokenConverter(1800)
+```
+#### Refresh token converter
+By default `UUIDRefreshTokenConverter` is used. With a default time-out of 1 hour. To override the time-out for example to half an hour:
+```kotlin
+refreshTokenConverter = UUIDRefreshTokenConverter(1800)
+```
+#### Code token converter
+By default `UUIDCodeTokenConverter` is used. With a default time-out of 5 minutes. To override the time-out for example 2 minutes:
+```kotlin
+codeTokenConverter = UUIDCodeTokenConverter(120)
+```
