@@ -25,6 +25,7 @@
         <module>oauth2-server-javalin</module>
         <module>oauth2-server-sparkjava</module>
         <module>oauth2-server-http4k</module>
+        <module>oauth2-server-jwt</module>
     </modules>
 
     <dependencies>
