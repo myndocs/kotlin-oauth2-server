@@ -132,10 +132,45 @@ By default `UUIDAccessTokenConverter` is used. With a default time-out of 1 hour
 ```kotlin
 accessTokenConverter = UUIDAccessTokenConverter(1800)
 ```
+
+To use JWT include the following dependency:
+```xml
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-jwt</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+```
+This uses [auth0 jwt](https://github.com/auth0/java-jwt). To configure:
+```kotlin
+accessTokenConverter = JwtAccessTokenConverter(
+        algorithm = Algorithm.HMAC256("test123"), // mandatory
+        accessTokenExpireInSeconds = 1800, // optional default 3600
+        jwtBuilder = DefaultJwtBuilder // optional uses DefaultJwtBuilder by default
+)
+```
+
 #### Refresh token converter
 By default `UUIDRefreshTokenConverter` is used. With a default time-out of 1 hour. To override the time-out for example to half an hour:
 ```kotlin
 refreshTokenConverter = UUIDRefreshTokenConverter(1800)
+```
+
+To use JWT include the following dependency:
+```xml
+<dependency>
+    <groupId>nl.myndocs</groupId>
+    <artifactId>oauth2-server-jwt</artifactId>
+    <version>${myndocs.oauth.version}</version>
+</dependency>
+```
+This uses [auth0 jwt](https://github.com/auth0/java-jwt). To configure:
+```kotlin
+refreshTokenConverter = JwtRefreshTokenConverter(
+        algorithm = Algorithm.HMAC256("test123"), // mandatory
+        refreshTokenExpireInSeconds = 1800, // optional default 86400
+        jwtBuilder = DefaultJwtBuilder // optional uses DefaultJwtBuilder by default
+)
 ```
 #### Code token converter
 By default `UUIDCodeTokenConverter` is used. With a default time-out of 5 minutes. To override the time-out for example 2 minutes:
