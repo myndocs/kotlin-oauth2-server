@@ -19,6 +19,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.http4k</groupId>
+            <artifactId>http4k-server-jetty</artifactId>
+            <version>3.37.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>nl.myndocs</groupId>
             <artifactId>oauth2-server-core</artifactId>
             <version>${project.version}</version>
@@ -29,6 +35,13 @@
             <artifactId>oauth2-server-json</artifactId>
             <version>${project.version}</version>
             <classifier>shaded</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.myndocs</groupId>
+            <artifactId>oauth2-server-integration-base</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

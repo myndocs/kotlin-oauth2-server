@@ -12,9 +12,8 @@
     <artifactId>oauth2-server-ktor</artifactId>
 
     <properties>
-        <ktor.version>1.0.0-beta-4</ktor.version>
+        <ktor.version>1.1.2</ktor.version>
     </properties>
-
 
     <dependencies>
         <dependency>
@@ -34,6 +33,19 @@
             <artifactId>oauth2-server-json</artifactId>
             <version>${project.version}</version>
             <classifier>shaded</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-netty</artifactId>
+            <version>${ktor.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.myndocs</groupId>
+            <artifactId>oauth2-server-integration-base</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -11,7 +11,6 @@
 
     <artifactId>oauth2-server-javalin</artifactId>
 
-
     <dependencies>
         <dependency>
             <groupId>nl.myndocs</groupId>
@@ -24,6 +23,13 @@
             <artifactId>javalin</artifactId>
             <version>2.0.0</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.myndocs</groupId>
+            <artifactId>oauth2-server-integration-base</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
