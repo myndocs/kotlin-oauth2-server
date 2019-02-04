@@ -9,12 +9,15 @@ import spark.Spark
 class SparkjavaIntegrationTest : BaseIntegrationTest() {
     @BeforeEach
     fun before() {
-        Spark.port(50000)
+        Spark.port(0)
+
         Oauth2Server.configureOauth2Server {
             configBuilder(this)
         }
 
         Spark.awaitInitialization()
+
+        localPort = Spark.port()
     }
 
     @AfterEach

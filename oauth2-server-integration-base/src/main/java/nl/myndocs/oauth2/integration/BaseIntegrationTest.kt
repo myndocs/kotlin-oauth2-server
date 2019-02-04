@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 abstract class BaseIntegrationTest {
-
+    var localPort: Int? = null
     val configBuilder: ConfigurationBuilder.Configuration.() -> Unit = {
         identityService = InMemoryIdentity()
                 .identity {
@@ -54,7 +54,7 @@ abstract class BaseIntegrationTest {
         val url = HttpUrl.Builder()
                 .scheme("http")
                 .host("localhost")
-                .port(50000)
+                .port(localPort!!)
                 .addPathSegment("oauth")
                 .addPathSegment("token")
                 .build()
@@ -85,7 +85,7 @@ abstract class BaseIntegrationTest {
         val url = HttpUrl.Builder()
                 .scheme("http")
                 .host("localhost")
-                .port(50000)
+                .port(localPort!!)
                 .addPathSegment("oauth")
                 .addPathSegment("authorize")
                 .setQueryParameter("response_type", "code")
@@ -115,7 +115,7 @@ abstract class BaseIntegrationTest {
         val tokenUrl = HttpUrl.Builder()
                 .scheme("http")
                 .host("localhost")
-                .port(50000)
+                .port(localPort!!)
                 .addPathSegment("oauth")
                 .addPathSegment("token")
                 .build()

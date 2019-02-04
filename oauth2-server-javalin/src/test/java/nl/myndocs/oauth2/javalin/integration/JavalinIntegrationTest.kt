@@ -14,11 +14,13 @@ class JavalinIntegrationTest : BaseIntegrationTest() {
                     configBuilder(this)
                 }
             }
-            .port(50000)
+            .port(0)
 
     @BeforeEach
     fun before() {
         server.start()
+
+        localPort = server.port()
     }
 
     @AfterEach

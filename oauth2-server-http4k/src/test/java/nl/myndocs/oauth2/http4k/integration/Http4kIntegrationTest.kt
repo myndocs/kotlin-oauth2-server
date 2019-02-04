@@ -12,11 +12,13 @@ import org.junit.jupiter.api.BeforeEach
 class Http4kIntegrationTest : BaseIntegrationTest() {
     val server = routes(*emptyArray<RoutingHttpHandler>())
             .let { it `enable oauth2` { configBuilder(this) } }
-            .let { it.asServer(Jetty(50000)) }
+            .let { it.asServer(Jetty(0)) }
 
     @BeforeEach
     fun before() {
         server.start()
+
+        localPort = server.port()
     }
 
     @AfterEach

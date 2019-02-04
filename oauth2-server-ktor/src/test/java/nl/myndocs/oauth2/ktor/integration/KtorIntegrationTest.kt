@@ -20,6 +20,8 @@ class KtorIntegrationTest : BaseIntegrationTest() {
     @BeforeEach
     fun before() {
         server.start(false)
+
+        localPort = 50000
     }
 
     @AfterEach
