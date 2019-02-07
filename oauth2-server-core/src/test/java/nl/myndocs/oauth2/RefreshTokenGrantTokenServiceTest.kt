@@ -17,6 +17,7 @@ import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.RefreshTokenRequest
+import nl.myndocs.oauth2.response.AccessTokenResponder
 import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.RefreshToken
 import nl.myndocs.oauth2.token.TokenStore
@@ -46,6 +47,8 @@ internal class RefreshTokenGrantTokenServiceTest {
     lateinit var refreshTokenConverter: RefreshTokenConverter
     @MockK
     lateinit var codeTokenConverter: CodeTokenConverter
+    @MockK
+    lateinit var accessTokenResponder: AccessTokenResponder
 
     lateinit var grantingCall: GrantingCall
 
@@ -61,8 +64,10 @@ internal class RefreshTokenGrantTokenServiceTest {
                     this@RefreshTokenGrantTokenServiceTest.refreshTokenConverter,
                     this@RefreshTokenGrantTokenServiceTest.codeTokenConverter
             )
+            override val accessTokenResponder = this@RefreshTokenGrantTokenServiceTest.accessTokenResponder
         }
     }
+
     val clientId = "client-foo"
     val clientSecret = "client-bar"
     val refreshToken = "refresh-token"

@@ -8,6 +8,8 @@ import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.auth.BasicAuthorizer
+import nl.myndocs.oauth2.response.AccessTokenResponder
+import nl.myndocs.oauth2.response.DefaultAccessTokenResponder
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.*
 
@@ -53,6 +55,7 @@ object ConfigurationBuilder {
         var accessTokenConverter: AccessTokenConverter = UUIDAccessTokenConverter()
         var refreshTokenConverter: RefreshTokenConverter = UUIDRefreshTokenConverter()
         var codeTokenConverter: CodeTokenConverter = UUIDCodeTokenConverter()
+        var accessTokenResponder: AccessTokenResponder = DefaultAccessTokenResponder
     }
 
     fun build(configurer: Configuration.() -> Unit): nl.myndocs.oauth2.config.Configuration {
@@ -70,6 +73,7 @@ object ConfigurationBuilder {
                         configuration.refreshTokenConverter,
                         configuration.codeTokenConverter
                 )
+                override val accessTokenResponder = configuration.accessTokenResponder
             }
         }
         return nl.myndocs.oauth2.config.Configuration(
