@@ -50,11 +50,11 @@ fun GrantingCall.authorize(passwordGrantRequest: PasswordGrantRequest): TokenRes
     validateScopes(requestedClient, requestedIdentity, requestedScopes)
 
     val accessToken = converters.accessTokenConverter.convertToToken(
-            requestedIdentity.username,
+            requestedIdentity,
             requestedClient.clientId,
             requestedScopes,
             converters.refreshTokenConverter.convertToToken(
-                    requestedIdentity.username,
+                    requestedIdentity,
                     requestedClient.clientId,
                     requestedScopes
             )
@@ -85,11 +85,11 @@ fun GrantingCall.authorize(authorizationCodeRequest: AuthorizationCodeRequest): 
     }
 
     val accessToken = converters.accessTokenConverter.convertToToken(
-            consumeCodeToken.username,
+            consumeCodeToken.identity,
             consumeCodeToken.clientId,
             consumeCodeToken.scopes,
             converters.refreshTokenConverter.convertToToken(
-                    consumeCodeToken.username,
+                    consumeCodeToken.identity,
                     consumeCodeToken.clientId,
                     consumeCodeToken.scopes
             )
@@ -110,11 +110,11 @@ fun GrantingCall.authorize(clientCredentialsRequest: ClientCredentialsRequest): 
             ?: requestedClient.clientScopes
 
     val accessToken = converters.accessTokenConverter.convertToToken(
-            username = null,
+            identity = null,
             clientId = clientCredentialsRequest.clientId,
             requestedScopes = scopes,
             refreshToken = converters.refreshTokenConverter.convertToToken(
-                    username = null,
+                    identity = null,
                     clientId = clientCredentialsRequest.clientId,
                     requestedScopes = scopes
             )

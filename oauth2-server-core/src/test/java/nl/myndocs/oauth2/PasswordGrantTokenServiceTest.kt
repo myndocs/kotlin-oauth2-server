@@ -84,16 +84,16 @@ internal class PasswordGrantTokenServiceTest {
         val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.PASSWORD))
         val identity = Identity(username)
         val requestScopes = setOf("scope1")
-        val refreshToken = RefreshToken("test", Instant.now(), username, clientId, requestScopes)
-        val accessToken = AccessToken("test", "bearer", Instant.now(), username, clientId, requestScopes, refreshToken)
+        val refreshToken = RefreshToken("test", Instant.now(), identity, clientId, requestScopes)
+        val accessToken = AccessToken("test", "bearer", Instant.now(), identity, clientId, requestScopes, refreshToken)
 
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns true
         every { identityService.identityOf(client, username) } returns identity
         every { identityService.validCredentials(client, identity, password) } returns true
         every { identityService.allowedScopes(client, identity, requestScopes) } returns scopes
-        every { refreshTokenConverter.convertToToken(username, clientId, requestScopes) } returns refreshToken
-        every { accessTokenConverter.convertToToken(username, clientId, requestScopes, refreshToken) } returns accessToken
+        every { refreshTokenConverter.convertToToken(identity, clientId, requestScopes) } returns refreshToken
+        every { accessTokenConverter.convertToToken(identity, clientId, requestScopes, refreshToken) } returns accessToken
 
         grantingCall.authorize(passwordGrantRequest)
 
@@ -218,16 +218,16 @@ internal class PasswordGrantTokenServiceTest {
         val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.PASSWORD))
         val identity = Identity(username)
         val requestScopes = setOf("scope1", "scope2")
-        val refreshToken = RefreshToken("test", Instant.now(), username, clientId, requestScopes)
-        val accessToken = AccessToken("test", "bearer", Instant.now(), username, clientId, requestScopes, refreshToken)
+        val refreshToken = RefreshToken("test", Instant.now(), identity, clientId, requestScopes)
+        val accessToken = AccessToken("test", "bearer", Instant.now(), identity, clientId, requestScopes, refreshToken)
 
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns true
         every { identityService.identityOf(client, username) } returns identity
         every { identityService.validCredentials(client, identity, password) } returns true
         every { identityService.allowedScopes(client, identity, requestScopes) } returns requestScopes
-        every { refreshTokenConverter.convertToToken(username, clientId, requestScopes) } returns refreshToken
-        every { accessTokenConverter.convertToToken(username, clientId, requestScopes, refreshToken) } returns accessToken
+        every { refreshTokenConverter.convertToToken(identity, clientId, requestScopes) } returns refreshToken
+        every { accessTokenConverter.convertToToken(identity, clientId, requestScopes, refreshToken) } returns accessToken
 
         grantingCall.authorize(passwordGrantRequest)
     }

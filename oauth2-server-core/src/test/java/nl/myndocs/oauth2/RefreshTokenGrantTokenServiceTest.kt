@@ -69,6 +69,7 @@ internal class RefreshTokenGrantTokenServiceTest {
     val username = "foo-user"
     val scope = "scope1"
     val scopes = setOf(scope)
+    val identity = Identity(username)
 
     val refreshTokenRequest = RefreshTokenRequest(
             clientId,
@@ -79,9 +80,9 @@ internal class RefreshTokenGrantTokenServiceTest {
     @Test
     fun validRefreshToken() {
         val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.REFRESH_TOKEN))
-        val token = RefreshToken("test", Instant.now(), username, clientId, scopes)
-        val newRefreshToken = RefreshToken("new-test", Instant.now(), username, clientId, scopes)
-        val accessToken = AccessToken("test", "bearer", Instant.now(), username, clientId, scopes, newRefreshToken)
+        val token = RefreshToken("test", Instant.now(), identity, clientId, scopes)
+        val newRefreshToken = RefreshToken("new-test", Instant.now(), identity, clientId, scopes)
+        val accessToken = AccessToken("test", "bearer", Instant.now(), identity, clientId, scopes, newRefreshToken)
         val identity = Identity(username)
 
         every { clientService.clientOf(clientId) } returns client
@@ -89,7 +90,7 @@ internal class RefreshTokenGrantTokenServiceTest {
         every { tokenStore.refreshToken(refreshToken) } returns token
         every { identityService.identityOf(client, username) } returns identity
         every { refreshTokenConverter.convertToToken(token) } returns newRefreshToken
-        every { accessTokenConverter.convertToToken(username, clientId, scopes, newRefreshToken) } returns accessToken
+        every { accessTokenConverter.convertToToken(identity, clientId, scopes, newRefreshToken) } returns accessToken
 
         grantingCall.refresh(refreshTokenRequest)
 
@@ -138,7 +139,7 @@ internal class RefreshTokenGrantTokenServiceTest {
     @Test
     fun storedClientDoesNotMatchRequestedException() {
         val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.REFRESH_TOKEN))
-        val token = RefreshToken("test", Instant.now(), username, "wrong-client", scopes)
+        val token = RefreshToken("test", Instant.now(), identity, "wrong-client", scopes)
 
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns true

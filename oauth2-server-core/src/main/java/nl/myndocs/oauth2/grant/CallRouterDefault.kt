@@ -86,7 +86,7 @@ fun GrantingCall.validateScopes(
 fun GrantingCall.tokenInfo(accessToken: String): TokenInfo {
     val storedAccessToken = tokenStore.accessToken(accessToken) ?: throw InvalidGrantException()
     val client = clientService.clientOf(storedAccessToken.clientId) ?: throw InvalidClientException()
-    val identity = storedAccessToken.username?.let { identityService.identityOf(client, it) }
+    val identity = storedAccessToken.identity?.let { identityService.identityOf(client, it.username) }
 
     return TokenInfo(
             identity,

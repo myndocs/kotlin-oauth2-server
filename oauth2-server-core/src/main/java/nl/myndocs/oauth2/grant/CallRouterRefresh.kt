@@ -29,7 +29,7 @@ fun GrantingCall.refresh(refreshTokenRequest: RefreshTokenRequest): TokenRespons
     }
 
     val accessToken = converters.accessTokenConverter.convertToToken(
-            refreshToken.username,
+            refreshToken.identity,
             refreshToken.clientId,
             refreshToken.scopes,
             converters.refreshTokenConverter.convertToToken(refreshToken)
