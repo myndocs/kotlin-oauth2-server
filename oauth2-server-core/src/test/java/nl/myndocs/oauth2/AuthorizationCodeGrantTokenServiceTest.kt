@@ -16,6 +16,7 @@ import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.request.AuthorizationCodeRequest
 import nl.myndocs.oauth2.request.CallContext
+import nl.myndocs.oauth2.response.AccessTokenResponder
 import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.CodeToken
 import nl.myndocs.oauth2.token.RefreshToken
@@ -46,6 +47,8 @@ internal class AuthorizationCodeGrantTokenServiceTest {
     lateinit var refreshTokenConverter: RefreshTokenConverter
     @MockK
     lateinit var codeTokenConverter: CodeTokenConverter
+    @MockK
+    lateinit var accessTokenResponder: AccessTokenResponder
 
     lateinit var grantingCall: GrantingCall
 
@@ -61,6 +64,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
                     this@AuthorizationCodeGrantTokenServiceTest.refreshTokenConverter,
                     this@AuthorizationCodeGrantTokenServiceTest.codeTokenConverter
             )
+            override val accessTokenResponder = this@AuthorizationCodeGrantTokenServiceTest.accessTokenResponder
         }
     }
 

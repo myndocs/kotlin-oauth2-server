@@ -5,10 +5,10 @@ import nl.myndocs.oauth2.exception.InvalidClientException
 import nl.myndocs.oauth2.exception.InvalidGrantException
 import nl.myndocs.oauth2.exception.InvalidRequestException
 import nl.myndocs.oauth2.request.RefreshTokenRequest
-import nl.myndocs.oauth2.response.TokenResponse
+import nl.myndocs.oauth2.token.AccessToken
 
 
-fun GrantingCall.refresh(refreshTokenRequest: RefreshTokenRequest): TokenResponse {
+fun GrantingCall.refresh(refreshTokenRequest: RefreshTokenRequest): AccessToken {
     throwExceptionIfUnverifiedClient(refreshTokenRequest)
 
     if (refreshTokenRequest.refreshToken == null) {
@@ -37,5 +37,5 @@ fun GrantingCall.refresh(refreshTokenRequest: RefreshTokenRequest): TokenRespons
 
     tokenStore.storeAccessToken(accessToken)
 
-    return accessToken.toTokenResponse()
+    return accessToken
 }

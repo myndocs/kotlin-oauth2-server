@@ -5,8 +5,8 @@ import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.request.AuthorizationCodeRequest
 import nl.myndocs.oauth2.request.ClientCredentialsRequest
 import nl.myndocs.oauth2.request.PasswordGrantRequest
-import nl.myndocs.oauth2.response.TokenResponse
 import nl.myndocs.oauth2.scope.ScopeParser
+import nl.myndocs.oauth2.token.AccessToken
 
 
 /**
@@ -14,7 +14,7 @@ import nl.myndocs.oauth2.scope.ScopeParser
  * @throws InvalidClientException
  * @throws InvalidScopeException
  */
-fun GrantingCall.authorize(passwordGrantRequest: PasswordGrantRequest): TokenResponse {
+fun GrantingCall.authorize(passwordGrantRequest: PasswordGrantRequest): AccessToken {
     throwExceptionIfUnverifiedClient(passwordGrantRequest)
 
     if (passwordGrantRequest.username == null) {
@@ -62,10 +62,10 @@ fun GrantingCall.authorize(passwordGrantRequest: PasswordGrantRequest): TokenRes
 
     tokenStore.storeAccessToken(accessToken)
 
-    return accessToken.toTokenResponse()
+    return accessToken
 }
 
-fun GrantingCall.authorize(authorizationCodeRequest: AuthorizationCodeRequest): TokenResponse {
+fun GrantingCall.authorize(authorizationCodeRequest: AuthorizationCodeRequest): AccessToken {
     throwExceptionIfUnverifiedClient(authorizationCodeRequest)
 
     if (authorizationCodeRequest.code == null) {
@@ -97,10 +97,10 @@ fun GrantingCall.authorize(authorizationCodeRequest: AuthorizationCodeRequest): 
 
     tokenStore.storeAccessToken(accessToken)
 
-    return accessToken.toTokenResponse()
+    return accessToken
 }
 
-fun GrantingCall.authorize(clientCredentialsRequest: ClientCredentialsRequest): TokenResponse {
+fun GrantingCall.authorize(clientCredentialsRequest: ClientCredentialsRequest): AccessToken {
     throwExceptionIfUnverifiedClient(clientCredentialsRequest)
 
     val requestedClient = clientService.clientOf(clientCredentialsRequest.clientId!!) ?: throw InvalidClientException()
@@ -122,5 +122,5 @@ fun GrantingCall.authorize(clientCredentialsRequest: ClientCredentialsRequest): 
 
     tokenStore.storeAccessToken(accessToken)
 
-    return accessToken.toTokenResponse()
+    return accessToken
 }
