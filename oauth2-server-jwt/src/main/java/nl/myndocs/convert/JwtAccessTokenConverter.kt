@@ -1,6 +1,7 @@
 package nl.myndocs.convert
 
 import com.auth0.jwt.algorithms.Algorithm
+import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.RefreshToken
 import nl.myndocs.oauth2.token.converter.AccessTokenConverter
@@ -11,9 +12,9 @@ class JwtAccessTokenConverter(
         private val accessTokenExpireInSeconds: Int = 3600,
         private val jwtBuilder: JwtBuilder = DefaultJwtBuilder
 ) : AccessTokenConverter {
-    override fun convertToToken(username: String?, clientId: String, requestedScopes: Set<String>, refreshToken: RefreshToken?): AccessToken {
+    override fun convertToToken(identity: Identity?, clientId: String, requestedScopes: Set<String>, refreshToken: RefreshToken?): AccessToken {
         val jwtBuilder = jwtBuilder.buildJwt(
-                username,
+                identity,
                 clientId,
                 requestedScopes,
                 accessTokenExpireInSeconds.toLong()
@@ -23,7 +24,7 @@ class JwtAccessTokenConverter(
                 jwtBuilder.sign(algorithm),
                 "bearer",
                 Instant.now().plusSeconds(accessTokenExpireInSeconds.toLong()),
-                username,
+                identity,
                 clientId,
                 requestedScopes,
                 refreshToken

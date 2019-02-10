@@ -1,11 +1,12 @@
 package nl.myndocs.convert
 
 import com.auth0.jwt.JWT
+import nl.myndocs.oauth2.identity.Identity
 import java.time.Instant
 import java.util.*
 
 object DefaultJwtBuilder : JwtBuilder {
-    override fun buildJwt(username: String?, clientId: String, requestedScopes: Set<String>, expiresInSeconds: Long) =
+    override fun buildJwt(identity: Identity?, clientId: String, requestedScopes: Set<String>, expiresInSeconds: Long) =
             JWT.create()
                     .withIssuedAt(Date.from(Instant.now()))
                     .withExpiresAt(
@@ -16,5 +17,5 @@ object DefaultJwtBuilder : JwtBuilder {
                     )
                     .withClaim("client_id", clientId)
                     .withArrayClaim("scopes", requestedScopes.toTypedArray())
-                    .let { withBuilder -> if (username != null) withBuilder.withClaim("username", username) else withBuilder }
+                    .let { withBuilder -> if (identity != null) withBuilder.withClaim("username", identity.username) else withBuilder }
 }

@@ -9,12 +9,9 @@ import nl.myndocs.oauth2.exception.InvalidScopeException
 import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.*
-import nl.myndocs.oauth2.response.TokenResponse
-import nl.myndocs.oauth2.token.AccessToken
-import nl.myndocs.oauth2.token.toMap
 
 fun GrantingCall.grantPassword() = granter("password") {
-    val tokenResponse = authorize(
+    val accessToken = authorize(
             PasswordGrantRequest(
                     callContext.formParameters["client_id"],
                     callContext.formParameters["client_secret"],
@@ -24,17 +21,17 @@ fun GrantingCall.grantPassword() = granter("password") {
             )
     )
 
-    callContext.respondJson(tokenResponse.toMap())
+    callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
 fun GrantingCall.grantClientCredentials() = granter("client_credentials") {
-    val tokenResponse = authorize(ClientCredentialsRequest(
+    val accessToken = authorize(ClientCredentialsRequest(
             callContext.formParameters["client_id"],
             callContext.formParameters["client_secret"],
             callContext.formParameters["scope"]
     ))
 
-    callContext.respondJson(tokenResponse.toMap())
+    callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
 fun GrantingCall.grantRefreshToken() = granter("refresh_token") {
@@ -46,7 +43,7 @@ fun GrantingCall.grantRefreshToken() = granter("refresh_token") {
             )
     )
 
-    callContext.respondJson(accessToken.toMap())
+    callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
 fun GrantingCall.grantAuthorizationCode() = granter("authorization_code") {
@@ -59,7 +56,7 @@ fun GrantingCall.grantAuthorizationCode() = granter("authorization_code") {
             )
     )
 
-    callContext.respondJson(accessToken.toMap())
+    callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
 internal val INVALID_REQUEST_FIELD_MESSAGE = "'%s' field is missing"
@@ -86,7 +83,7 @@ fun GrantingCall.validateScopes(
 fun GrantingCall.tokenInfo(accessToken: String): TokenInfo {
     val storedAccessToken = tokenStore.accessToken(accessToken) ?: throw InvalidGrantException()
     val client = clientService.clientOf(storedAccessToken.clientId) ?: throw InvalidClientException()
-    val identity = storedAccessToken.username?.let { identityService.identityOf(client, it) }
+    val identity = storedAccessToken.identity?.let { identityService.identityOf(client, it.username) }
 
     return TokenInfo(
             identity,
@@ -112,10 +109,3 @@ fun GrantingCall.throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) 
 fun GrantingCall.scopesAllowed(clientScopes: Set<String>, requestedScopes: Set<String>): Boolean {
     return clientScopes.containsAll(requestedScopes)
 }
-
-fun AccessToken.toTokenResponse() = TokenResponse(
-        accessToken,
-        tokenType,
-        expiresIn(),
-        refreshToken?.refreshToken
-)
