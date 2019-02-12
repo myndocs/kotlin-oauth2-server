@@ -14,6 +14,7 @@ import nl.myndocs.oauth2.grant.authorize
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.ClientCredentialsRequest
+import nl.myndocs.oauth2.response.AccessTokenResponder
 import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.RefreshToken
 import nl.myndocs.oauth2.token.TokenStore
@@ -43,6 +44,8 @@ internal class ClientCredentialsTokenServiceTest {
     lateinit var refreshTokenConverter: RefreshTokenConverter
     @MockK
     lateinit var codeTokenConverter: CodeTokenConverter
+    @MockK
+    lateinit var accessTokenResponder: AccessTokenResponder
 
     lateinit var grantingCall: GrantingCall
 
@@ -58,6 +61,7 @@ internal class ClientCredentialsTokenServiceTest {
                     this@ClientCredentialsTokenServiceTest.refreshTokenConverter,
                     this@ClientCredentialsTokenServiceTest.codeTokenConverter
             )
+            override val accessTokenResponder = this@ClientCredentialsTokenServiceTest.accessTokenResponder
         }
     }
     private val clientId = "client-foo"

@@ -16,6 +16,7 @@ import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.request.AuthorizationCodeRequest
 import nl.myndocs.oauth2.request.CallContext
+import nl.myndocs.oauth2.response.AccessTokenResponder
 import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.CodeToken
 import nl.myndocs.oauth2.token.RefreshToken
@@ -46,6 +47,8 @@ internal class AuthorizationCodeGrantTokenServiceTest {
     lateinit var refreshTokenConverter: RefreshTokenConverter
     @MockK
     lateinit var codeTokenConverter: CodeTokenConverter
+    @MockK
+    lateinit var accessTokenResponder: AccessTokenResponder
 
     lateinit var grantingCall: GrantingCall
 
@@ -61,6 +64,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
                     this@AuthorizationCodeGrantTokenServiceTest.refreshTokenConverter,
                     this@AuthorizationCodeGrantTokenServiceTest.codeTokenConverter
             )
+            override val accessTokenResponder = this@AuthorizationCodeGrantTokenServiceTest.accessTokenResponder
         }
     }
 
@@ -69,6 +73,7 @@ internal class AuthorizationCodeGrantTokenServiceTest {
     val code = "user-foo"
     val redirectUri = "http://foo.lcoalhost"
     val username = "user-foo"
+    val identity = Identity(username)
 
     val authorizationCodeRequest = AuthorizationCodeRequest(
             clientId,
@@ -83,17 +88,17 @@ internal class AuthorizationCodeGrantTokenServiceTest {
 
         val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.AUTHORIZATION_CODE))
         val identity = Identity(username)
-        val codeToken = CodeToken(code, Instant.now(), username, clientId, redirectUri, requestScopes)
+        val codeToken = CodeToken(code, Instant.now(), identity, clientId, redirectUri, requestScopes)
 
-        val refreshToken = RefreshToken("test", Instant.now(), username, clientId, requestScopes)
-        val accessToken = AccessToken("test", "bearer", Instant.now(), username, clientId, requestScopes, refreshToken)
+        val refreshToken = RefreshToken("test", Instant.now(), identity, clientId, requestScopes)
+        val accessToken = AccessToken("test", "bearer", Instant.now(), identity, clientId, requestScopes, refreshToken)
 
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns true
         every { identityService.identityOf(client, username) } returns identity
         every { tokenStore.consumeCodeToken(code) } returns codeToken
-        every { refreshTokenConverter.convertToToken(username, clientId, requestScopes) } returns refreshToken
-        every { accessTokenConverter.convertToToken(username, clientId, requestScopes, refreshToken) } returns accessToken
+        every { refreshTokenConverter.convertToToken(identity, clientId, requestScopes) } returns refreshToken
+        every { accessTokenConverter.convertToToken(identity, clientId, requestScopes, refreshToken) } returns accessToken
 
         grantingCall.authorize(authorizationCodeRequest)
     }
@@ -160,16 +165,16 @@ internal class AuthorizationCodeGrantTokenServiceTest {
         val requestScopes = setOf("scope1")
 
         val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.AUTHORIZATION_CODE))
-        val codeToken = CodeToken(code, Instant.now(), username, clientId, wrongRedirectUri, requestScopes)
+        val codeToken = CodeToken(code, Instant.now(), identity, clientId, wrongRedirectUri, requestScopes)
 
-        val refreshToken = RefreshToken("test", Instant.now(), username, clientId, requestScopes)
-        val accessToken = AccessToken("test", "bearer", Instant.now(), username, clientId, requestScopes, refreshToken)
+        val refreshToken = RefreshToken("test", Instant.now(), identity, clientId, requestScopes)
+        val accessToken = AccessToken("test", "bearer", Instant.now(), identity, clientId, requestScopes, refreshToken)
 
         every { clientService.clientOf(clientId) } returns client
         every { clientService.validClient(client, clientSecret) } returns true
         every { tokenStore.consumeCodeToken(code) } returns codeToken
-        every { refreshTokenConverter.convertToToken(username, clientId, requestScopes) } returns refreshToken
-        every { accessTokenConverter.convertToToken(username, clientId, requestScopes, refreshToken) } returns accessToken
+        every { refreshTokenConverter.convertToToken(identity, clientId, requestScopes) } returns refreshToken
+        every { accessTokenConverter.convertToToken(identity, clientId, requestScopes, refreshToken) } returns accessToken
 
         assertThrows(
                 InvalidGrantException::class.java
