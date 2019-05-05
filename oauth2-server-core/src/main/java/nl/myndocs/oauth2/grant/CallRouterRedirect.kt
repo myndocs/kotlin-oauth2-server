@@ -63,7 +63,7 @@ fun GrantingCall.redirect(
     validateScopes(clientOf, identityOf, requestedScopes, identityScopeVerifier)
 
     val codeToken = converters.codeTokenConverter.convertToToken(
-            identityOf.username,
+            identityOf,
             clientOf.clientId,
             redirect.redirectUri,
             requestedScopes
@@ -123,7 +123,7 @@ fun GrantingCall.redirect(
     validateScopes(clientOf, identityOf, requestedScopes, identityScopeVerifier)
 
     val accessToken = converters.accessTokenConverter.convertToToken(
-            identityOf.username,
+            identityOf,
             clientOf.clientId,
             requestedScopes,
             null
