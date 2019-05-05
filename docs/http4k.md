@@ -1,6 +1,8 @@
 # http4k
 
 ## Dependencies
+
+### Maven
 ```xml
 <dependency>
     <groupId>nl.myndocs</groupId>
@@ -8,6 +10,12 @@
     <version>${myndocs.oauth.version}</version>
 </dependency>
 ```
+
+### Gradle
+```groovy
+compile "nl.myndocs:oauth2-server-http4k:$myndocs_oauth_version"
+```
+
 
 ## Implementation
 ```kotlin
