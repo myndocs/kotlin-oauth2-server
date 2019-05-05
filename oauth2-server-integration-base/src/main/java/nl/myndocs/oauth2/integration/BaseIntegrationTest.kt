@@ -84,7 +84,7 @@ abstract class BaseIntegrationTest {
                 .addPathSegment("authorize")
                 .setQueryParameter("response_type", "code")
                 .setQueryParameter("client_id", "testapp")
-                .setQueryParameter("redirect_uri", "http://localhost:$localPort/callback")
+                .setQueryParameter("redirect_uri", "http://localhost:8080/callback")
                 .build()
 
         val request = Request.Builder()
@@ -101,7 +101,7 @@ abstract class BaseIntegrationTest {
         val body = FormBody.Builder()
                 .add("grant_type", "authorization_code")
                 .add("code", response.header("location")!!.asQueryParameters()["code"])
-                .add("redirect_uri", "http://localhost:$localPort/callback")
+                .add("redirect_uri", "http://localhost:8080/callback")
                 .add("client_id", "testapp")
                 .add("client_secret", "testpass")
                 .build()
@@ -147,7 +147,6 @@ abstract class BaseIntegrationTest {
         tokenResponse.close()
 
     }
-
     private fun buildOauthTokenUri() =
             HttpUrl.Builder()
                     .scheme("http")
