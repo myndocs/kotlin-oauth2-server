@@ -51,13 +51,7 @@ abstract class BaseIntegrationTest {
                 .add("client_secret", "testpass")
                 .build()
 
-        val url = HttpUrl.Builder()
-                .scheme("http")
-                .host("localhost")
-                .port(localPort!!)
-                .addPathSegment("oauth")
-                .addPathSegment("token")
-                .build()
+        val url = buildOauthTokenUri()
 
         val request = Request.Builder()
                 .url(url)
@@ -90,7 +84,7 @@ abstract class BaseIntegrationTest {
                 .addPathSegment("authorize")
                 .setQueryParameter("response_type", "code")
                 .setQueryParameter("client_id", "testapp")
-                .setQueryParameter("redirect_uri", "http://localhost:8080/callback")
+                .setQueryParameter("redirect_uri", "http://localhost:$localPort/callback")
                 .build()
 
         val request = Request.Builder()
@@ -107,18 +101,12 @@ abstract class BaseIntegrationTest {
         val body = FormBody.Builder()
                 .add("grant_type", "authorization_code")
                 .add("code", response.header("location")!!.asQueryParameters()["code"])
-                .add("redirect_uri", "http://localhost:8080/callback")
+                .add("redirect_uri", "http://localhost:$localPort/callback")
                 .add("client_id", "testapp")
                 .add("client_secret", "testpass")
                 .build()
 
-        val tokenUrl = HttpUrl.Builder()
-                .scheme("http")
-                .host("localhost")
-                .port(localPort!!)
-                .addPathSegment("oauth")
-                .addPathSegment("token")
-                .build()
+        val tokenUrl = buildOauthTokenUri()
 
         val tokenRequest = Request.Builder()
                 .url(tokenUrl)
@@ -134,6 +122,40 @@ abstract class BaseIntegrationTest {
 
         tokenResponse.close()
     }
+
+    @Test
+    fun `test client credentials flow`() {
+        val client = OkHttpClient()
+        val body = FormBody.Builder()
+                .add("grant_type", "client_credentials")
+                .add("client_id", "testapp")
+                .add("client_secret", "testpass")
+                .build()
+
+        val tokenRequest = Request.Builder()
+                .url(buildOauthTokenUri())
+                .post(body)
+                .build()
+
+        val tokenResponse = client.newCall(tokenRequest)
+                .execute()
+
+        val values = objectMapper.readMap(tokenResponse.body()!!.string())
+        assertThat(values["access_token"], `is`(notNullValue()))
+        assertThat(UUID.fromString(values["access_token"] as String), `is`(instanceOf(UUID::class.java)))
+
+        tokenResponse.close()
+
+    }
+
+    private fun buildOauthTokenUri() =
+            HttpUrl.Builder()
+                    .scheme("http")
+                    .host("localhost")
+                    .port(localPort!!)
+                    .addPathSegment("oauth")
+                    .addPathSegment("token")
+                    .build()
 }
 
 fun ObjectMapper.readMap(content: String) = this.readValue(content, Map::class.java)
