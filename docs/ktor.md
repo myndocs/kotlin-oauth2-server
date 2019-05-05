@@ -2,12 +2,18 @@
 
 ## Dependencies
 
+### Maven
 ```xml
 <dependency>
     <groupId>nl.myndocs</groupId>
     <artifactId>oauth2-server-ktor</artifactId>
     <version>${myndocs.oauth.version}</version>
 </dependency>
+```
+
+### Gradle
+```groovy
+compile "nl.myndocs:oauth2-server-ktor:$myndocs_oauth_version"
 ```
 
 ## Implementation
