@@ -18,6 +18,7 @@
     <modules>
         <module>oauth2-server-core</module>
         <module>oauth2-server-json</module>
+        <module>oauth2-server-integration-base</module>
         <module>oauth2-server-ktor</module>
         <module>oauth2-server-client-inmemory</module>
         <module>oauth2-server-identity-inmemory</module>
@@ -26,7 +27,6 @@
         <module>oauth2-server-sparkjava</module>
         <module>oauth2-server-http4k</module>
         <module>oauth2-server-jwt</module>
-        <module>oauth2-server-integration-base</module>
     </modules>
 
     <dependencies>

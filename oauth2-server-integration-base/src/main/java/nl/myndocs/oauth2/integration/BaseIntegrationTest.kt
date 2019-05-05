@@ -140,7 +140,7 @@ fun ObjectMapper.readMap(content: String) = this.readValue(content, Map::class.j
 
 fun String.asQueryParameters() =
         split("?")[1]
-                .let { it.split("&") }
+                .split("&")
                 .map { it.split("=") }
                 .map { Pair(it[0], it[1]) }
                 .toMap()
