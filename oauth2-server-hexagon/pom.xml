@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>kotlin-oauth2-server</artifactId>
+        <groupId>nl.myndocs</groupId>
+        <version>0.5.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>oauth2-server-hexagon</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.myndocs</groupId>
+            <artifactId>oauth2-server-core</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.hexagonkt</groupId>
+            <artifactId>port_http_server</artifactId>
+            <version>0.26.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.myndocs</groupId>
+            <artifactId>oauth2-server-json</artifactId>
+            <version>${project.version}</version>
+            <classifier>shaded</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.hexagonkt</groupId>
+            <artifactId>http_server_jetty</artifactId>
+            <version>0.26.3</version>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>nl.myndocs</groupId>
+            <artifactId>oauth2-server-integration-base</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>jcenter</id>
+            <url>https://jcenter.bintray.com/</url>
+        </repository>
+    </repositories>
+</project>
