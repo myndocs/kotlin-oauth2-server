@@ -76,9 +76,12 @@ object ConfigurationBuilder {
                 override val accessTokenResponder = configuration.accessTokenResponder
             }
         }
-        return nl.myndocs.oauth2.config.Configuration(
-                CallRouterBuilder.build(configuration.callRouterConfiguration, grantingCallFactory),
-                configuration.authorizerFactory
+        return Configuration(
+                CallRouterBuilder.build(
+                        configuration.callRouterConfiguration,
+                        grantingCallFactory,
+                        configuration.authorizerFactory
+                )
         )
     }
 }

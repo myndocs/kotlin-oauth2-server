@@ -18,7 +18,8 @@ class CallRouter(
         val tokenInfoEndpoint: String,
         private val tokenInfoCallback: (TokenInfo) -> Map<String, Any?>,
         private val granters: List<GrantingCall.() -> Granter>,
-        private val grantingCallFactory: (CallContext) -> GrantingCall
+        private val grantingCallFactory: (CallContext) -> GrantingCall,
+        private val authorizerFactory: (CallContext) -> Authorizer
 ) {
     companion object {
         const val METHOD_POST = "post"
@@ -29,12 +30,10 @@ class CallRouter(
 
     }
 
-    fun route(
-            callContext: CallContext,
-            authorizer: Authorizer) {
+    fun route(callContext: CallContext) {
         when (callContext.path) {
             tokenEndpoint -> routeTokenEndpoint(callContext)
-            authorizeEndpoint -> routeAuthorizeEndpoint(callContext, authorizer)
+            authorizeEndpoint -> routeAuthorizeEndpoint(callContext, authorizerFactory(callContext))
             tokenInfoEndpoint -> routeTokenInfoEndpoint(callContext)
         }
     }

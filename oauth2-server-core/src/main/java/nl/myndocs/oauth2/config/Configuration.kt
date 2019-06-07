@@ -5,6 +5,5 @@ import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.request.CallContext
 
 data class Configuration(
-        val callRouter: CallRouter,
-        val authorizerFactory: (CallContext) -> Authorizer
+        val callRouter: CallRouter
 )

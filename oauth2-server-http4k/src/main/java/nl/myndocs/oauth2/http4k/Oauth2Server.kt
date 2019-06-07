@@ -19,21 +19,21 @@ infix fun RoutingHttpHandler.`enable oauth2`(configurationCallback: Configuratio
             callRouter.tokenEndpoint bind Method.POST to { request: Request ->
                 val responseBuilder = ResponseBuilder()
                 val callContext = Http4kCallContext(request, responseBuilder)
-                callRouter.route(callContext, configuration.authorizerFactory(callContext))
+                callRouter.route(callContext)
 
                 responseBuilder.build()
             },
             callRouter.authorizeEndpoint bind Method.GET to { request: Request ->
                 val responseBuilder = ResponseBuilder()
                 val callContext = Http4kCallContext(request, responseBuilder)
-                callRouter.route(callContext, configuration.authorizerFactory(callContext))
+                callRouter.route(callContext)
 
                 responseBuilder.build()
             },
             callRouter.tokenInfoEndpoint bind Method.GET to { request: Request ->
                 val responseBuilder = ResponseBuilder()
                 val callContext = Http4kCallContext(request, responseBuilder)
-                callRouter.route(callContext, configuration.authorizerFactory(callContext))
+                callRouter.route(callContext)
 
                 responseBuilder.build()
             }
