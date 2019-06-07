@@ -11,6 +11,9 @@
 
     <artifactId>oauth2-server-hexagon</artifactId>
 
+    <properties>
+        <hexagon.version>1.0.0</hexagon.version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>nl.myndocs</groupId>
@@ -21,7 +24,7 @@
         <dependency>
             <groupId>com.hexagonkt</groupId>
             <artifactId>port_http_server</artifactId>
-            <version>0.26.3</version>
+            <version>${hexagon.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -33,7 +36,7 @@
         <dependency>
             <groupId>com.hexagonkt</groupId>
             <artifactId>http_server_jetty</artifactId>
-            <version>0.26.3</version>
+            <version>${hexagon.version}</version>
             <scope>test</scope>
         </dependency>
 
