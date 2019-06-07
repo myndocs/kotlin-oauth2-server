@@ -13,9 +13,6 @@ import nl.myndocs.oauth2.request.CallContext
 class Oauth2ServerFeature(configuration: Configuration) {
     val callRouter = configuration.callRouter
 
-    val authorizerFactory: (CallContext) -> Authorizer = configuration.authorizerFactory
-
-
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, ConfigurationBuilder.Configuration, Oauth2ServerFeature> {
         override val key = AttributeKey<Oauth2ServerFeature>("Oauth2ServerFeature")
 
@@ -26,9 +23,8 @@ class Oauth2ServerFeature(configuration: Configuration) {
 
             pipeline.intercept(ApplicationCallPipeline.Features) {
                 val ktorCallContext = KtorCallContext(call)
-                val authorizer = feature.authorizerFactory(ktorCallContext)
 
-                feature.callRouter.route(ktorCallContext, authorizer)
+                feature.callRouter.route(ktorCallContext)
             }
 
             return feature
