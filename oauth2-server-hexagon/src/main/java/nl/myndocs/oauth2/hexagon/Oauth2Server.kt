@@ -11,19 +11,19 @@ fun Router.enableOauthServer(configurationCallback: ConfigurationBuilder.Configu
 
     val callRouter = configuration.callRouter
 
-
     post(callRouter.tokenEndpoint) {
-        val hexagonCallContext = HexagonCallContext(this)
-        callRouter.route(hexagonCallContext, configuration.authorizerFactory(hexagonCallContext))
+        callRouter.route(HexagonCallContext(this))
     }
 
     get(callRouter.authorizeEndpoint) {
-        val hexagonCallContext = HexagonCallContext(this)
-        callRouter.route(hexagonCallContext, configuration.authorizerFactory(hexagonCallContext))
+        callRouter.route(HexagonCallContext(this))
+    }
+
+    post(callRouter.authorizeEndpoint) {
+        callRouter.route(HexagonCallContext(this))
     }
 
     get(callRouter.tokenInfoEndpoint) {
-        val hexagonCallContext = HexagonCallContext(this)
-        callRouter.route(hexagonCallContext, configuration.authorizerFactory(hexagonCallContext))
+        callRouter.route(HexagonCallContext(this))
     }
 }

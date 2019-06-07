@@ -11,7 +11,7 @@ class HexagonCallContext(val call: Call) : CallContext {
     override val method: String = call.request.method.name
     override val headers: Map<String, String> = call.request.headers
             .mapValues { it.value.joinToString(";") }
-    // @TODO: no proper support for escaped characters
+
     override val queryParameters: Map<String, String> = (call.request
             .runCatching { queryString }
             .getOrNull() ?: "")
