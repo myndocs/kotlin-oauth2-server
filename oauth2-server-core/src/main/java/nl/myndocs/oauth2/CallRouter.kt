@@ -142,7 +142,7 @@ class CallRouter(
 
     private fun routeAuthorizeEndpoint(callContext: CallContext, authorizer: Authorizer) {
         try {
-            if (callContext.method.toLowerCase() != METHOD_GET) {
+            if (!arrayOf(METHOD_GET, METHOD_POST).contains(callContext.method.toLowerCase())) {
                 return
             }
 
