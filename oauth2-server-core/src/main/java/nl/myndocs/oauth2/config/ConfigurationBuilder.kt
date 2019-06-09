@@ -54,8 +54,7 @@ object ConfigurationBuilder {
         var accessTokenResponder: AccessTokenResponder = DefaultAccessTokenResponder
     }
 
-    fun build(configurer: Configuration.() -> Unit): nl.myndocs.oauth2.config.Configuration {
-        val configuration = Configuration()
+    fun build(configurer: Configuration.() -> Unit, configuration: Configuration): nl.myndocs.oauth2.config.Configuration {
         configurer(configuration)
 
         val grantingCallFactory: (CallContext) -> GrantingCall = { callContext ->
@@ -78,5 +77,10 @@ object ConfigurationBuilder {
                         grantingCallFactory
                 )
         )
+    }
+    fun build(configurer: Configuration.() -> Unit): nl.myndocs.oauth2.config.Configuration {
+        val configuration = Configuration()
+
+        return build(configurer, configuration)
     }
 }

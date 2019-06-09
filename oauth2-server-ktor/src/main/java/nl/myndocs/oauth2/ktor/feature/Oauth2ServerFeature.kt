@@ -16,10 +16,10 @@ class Oauth2ServerFeature(configuration: Configuration) {
         override val key = AttributeKey<Oauth2ServerFeature>("Oauth2ServerFeature")
 
         override fun install(pipeline: ApplicationCallPipeline, configure: KtorConfiguration.() -> Unit): Oauth2ServerFeature {
-            val configuration = ConfigurationBuilder.build(configure as ConfigurationBuilder.Configuration.() -> Unit)
-
             val ktorConfiguration = KtorConfiguration()
             configure(ktorConfiguration)
+            val configuration = ConfigurationBuilder.build(configure as ConfigurationBuilder.Configuration.() -> Unit, ktorConfiguration)
+
 
             val feature = Oauth2ServerFeature(configuration)
 
