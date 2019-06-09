@@ -3,7 +3,6 @@ package nl.myndocs.oauth2.javalin
 import io.javalin.Context
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
-import nl.myndocs.oauth2.CallRouter
 import nl.myndocs.oauth2.config.ConfigurationBuilder
 import nl.myndocs.oauth2.javalin.request.JavalinCallContext
 import nl.myndocs.oauth2.request.auth.BasicAuthorizer
@@ -15,9 +14,10 @@ fun Javalin.enableOauthServer(
             val context = JavalinCallContext(ctx)
             val basicAuthorizer = BasicAuthorizer(context)
             if (basicAuthorizer.extractCredentials() == null) {
-                basicAuthorizer.failedAuthentication()
+                basicAuthorizer.openAuthenticationDialog()
             } else {
                 callRouter.route(context, basicAuthorizer.extractCredentials())
+                        .also { if (!it.successfulLogin) { basicAuthorizer.openAuthenticationDialog() } }
             }
         },
         configurationCallback: ConfigurationBuilder.Configuration.() -> Unit

@@ -1,6 +1,5 @@
 package nl.myndocs.oauth2
 
-import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.authenticator.Credentials
 import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.grant.Granter

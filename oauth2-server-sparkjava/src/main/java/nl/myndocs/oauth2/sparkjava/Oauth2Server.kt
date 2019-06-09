@@ -15,9 +15,10 @@ object Oauth2Server {
                 val context = SparkjavaCallContext(request, response)
                 val basicAuthorizer = BasicAuthorizer(context)
                 if (basicAuthorizer.extractCredentials() == null) {
-                    basicAuthorizer.failedAuthentication()
+                    basicAuthorizer.openAuthenticationDialog()
                 } else {
                     callRouter.route(context, basicAuthorizer.extractCredentials())
+                            .also { if (!it.successfulLogin) { basicAuthorizer.openAuthenticationDialog() } }
                 }
             },
             configurationCallback: ConfigurationBuilder.Configuration.() -> Unit

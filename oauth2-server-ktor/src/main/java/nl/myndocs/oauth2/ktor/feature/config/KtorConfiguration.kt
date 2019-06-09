@@ -11,9 +11,10 @@ class KtorConfiguration: ConfigurationBuilder.Configuration() {
         val context = KtorCallContext(call)
         val basicAuthorizer = BasicAuthorizer(context)
         if (basicAuthorizer.extractCredentials() == null) {
-            basicAuthorizer.failedAuthentication()
+            basicAuthorizer.openAuthenticationDialog()
         } else {
             callRouter.route(context, basicAuthorizer.extractCredentials())
+                    .also { if (!it.successfulLogin) { basicAuthorizer.openAuthenticationDialog() } }
         }
     }
 }
