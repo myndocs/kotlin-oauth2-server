@@ -1,20 +1,18 @@
 package nl.myndocs.oauth2.config
 
-import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.client.ClientService
 import nl.myndocs.oauth2.grant.Granter
 import nl.myndocs.oauth2.grant.GrantingCall
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.CallContext
-import nl.myndocs.oauth2.request.auth.BasicAuthorizer
 import nl.myndocs.oauth2.response.AccessTokenResponder
 import nl.myndocs.oauth2.response.DefaultAccessTokenResponder
 import nl.myndocs.oauth2.token.TokenStore
 import nl.myndocs.oauth2.token.converter.*
 
 object ConfigurationBuilder {
-    class Configuration {
+    open class Configuration {
         internal val callRouterConfiguration = CallRouterBuilder.Configuration()
 
         var authorizationEndpoint: String
@@ -47,8 +45,6 @@ object ConfigurationBuilder {
                 callRouterConfiguration.granters = value
             }
 
-        var authorizerFactory: (CallContext) -> Authorizer = ::BasicAuthorizer
-
         var identityService: IdentityService? = null
         var clientService: ClientService? = null
         var tokenStore: TokenStore? = null
@@ -79,8 +75,7 @@ object ConfigurationBuilder {
         return Configuration(
                 CallRouterBuilder.build(
                         configuration.callRouterConfiguration,
-                        grantingCallFactory,
-                        configuration.authorizerFactory
+                        grantingCallFactory
                 )
         )
     }

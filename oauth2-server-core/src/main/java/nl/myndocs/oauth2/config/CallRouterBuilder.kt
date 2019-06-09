@@ -1,7 +1,6 @@
 package nl.myndocs.oauth2.config
 
 import nl.myndocs.oauth2.CallRouter
-import nl.myndocs.oauth2.authenticator.Authorizer
 import nl.myndocs.oauth2.grant.*
 import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.CallContext
@@ -20,7 +19,7 @@ internal object CallRouterBuilder {
         var granters: List<GrantingCall.() -> Granter> = listOf()
     }
 
-    fun build(configuration: Configuration, grantingCallFactory: (CallContext) -> GrantingCall, authorizerFactory: (CallContext) -> Authorizer) = CallRouter(
+    fun build(configuration: Configuration, grantingCallFactory: (CallContext) -> GrantingCall) = CallRouter(
             configuration.tokenEndpoint,
             configuration.authorizeEndpoint,
             configuration.tokenInfoEndpoint,
@@ -31,7 +30,6 @@ internal object CallRouterBuilder {
                     { grantClientCredentials() },
                     { grantRefreshToken() }
             ) + configuration.granters,
-            grantingCallFactory,
-            authorizerFactory
+            grantingCallFactory
     )
 }

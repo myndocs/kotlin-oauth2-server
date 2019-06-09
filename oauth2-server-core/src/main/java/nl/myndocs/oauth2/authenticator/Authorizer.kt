@@ -12,17 +12,4 @@ interface Authorizer {
      * Callback when authentication have failed
      */
     fun failedAuthentication()
-
-    /**
-     * Override default token authentication if Authenticator != null
-     * This allows different authentication per request
-     */
-    fun authenticator(): Authenticator? = null
-
-    /**
-     * Override default token scope verification if IdentityScopeVerifier != null
-     * This allows scopes verification per request
-     * E.g. could be used to make consent pages
-     */
-    fun scopesVerifier(): IdentityScopeVerifier? = null
 }

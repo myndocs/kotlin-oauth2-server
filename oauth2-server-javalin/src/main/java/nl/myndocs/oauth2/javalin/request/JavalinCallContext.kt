@@ -1,6 +1,7 @@
 package nl.myndocs.oauth2.javalin.request
 
 import io.javalin.Context
+import nl.myndocs.oauth2.authenticator.Credentials
 import nl.myndocs.oauth2.request.CallContext
 
 class JavalinCallContext(val context: Context) : CallContext {

@@ -11,7 +11,7 @@ class SparkjavaIntegrationTest : BaseIntegrationTest() {
     fun before() {
         Spark.port(0)
 
-        Oauth2Server.configureOauth2Server {
+        Oauth2Server.configureOauth2Server{
             configBuilder(this)
         }
 
