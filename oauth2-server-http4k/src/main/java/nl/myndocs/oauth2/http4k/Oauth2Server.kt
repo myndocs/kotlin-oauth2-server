@@ -3,13 +3,24 @@ package nl.myndocs.oauth2.http4k
 import nl.myndocs.oauth2.config.ConfigurationBuilder
 import nl.myndocs.oauth2.http4k.request.Http4kCallContext
 import nl.myndocs.oauth2.http4k.response.ResponseBuilder
+import nl.myndocs.oauth2.request.auth.CallContextBasicAuthenticator
+import nl.myndocs.oauth2.router.RedirectRouter
 import org.http4k.core.Method
 import org.http4k.core.Request
+import org.http4k.core.Response
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 
-infix fun RoutingHttpHandler.`enable oauth2`(
+fun RoutingHttpHandler.enableOauth2(
+        authenticationCallback: (Request, RedirectRouter) -> Response = { request, callRouter ->
+            val responseBuilder = ResponseBuilder()
+            val callContext = Http4kCallContext(request, responseBuilder)
+
+            CallContextBasicAuthenticator.handleAuthentication(callContext, callRouter)
+
+            responseBuilder.build()
+        },
         configurationCallback: ConfigurationBuilder.Configuration.() -> Unit
 ): RoutingHttpHandler {
     val configuration = ConfigurationBuilder.build(configurationCallback)
@@ -26,12 +37,7 @@ infix fun RoutingHttpHandler.`enable oauth2`(
                 responseBuilder.build()
             },
             callRouter.authorizeEndpoint bind Method.GET to { request: Request ->
-                // @TODO: Can not support flexible authentication until this class is removed and use request only
-                val responseBuilder = ResponseBuilder()
-                val callContext = Http4kCallContext(request, responseBuilder)
-                callRouter.route(callContext)
-
-                responseBuilder.build()
+                authenticationCallback(request, callRouter)
             },
             callRouter.tokenInfoEndpoint bind Method.GET to { request: Request ->
                 val responseBuilder = ResponseBuilder()
