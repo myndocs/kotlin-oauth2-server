@@ -4,7 +4,7 @@ import nl.myndocs.oauth2.authenticator.Credentials
 import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.headerCaseInsensitive
 
-open class BasicAuthorizer(protected val context: CallContext) {
+open class BasicAuthenticator(protected val context: CallContext) {
     fun extractCredentials(): Credentials? {
         val authorizationHeader = context.headerCaseInsensitive("authorization") ?: ""
 

@@ -3,8 +3,6 @@ package nl.myndocs.oauth2.http4k
 import nl.myndocs.oauth2.config.ConfigurationBuilder
 import nl.myndocs.oauth2.http4k.request.Http4kCallContext
 import nl.myndocs.oauth2.http4k.response.ResponseBuilder
-import nl.myndocs.oauth2.request.auth.BasicAuthorizer
-import nl.myndocs.oauth2.router.RedirectRouter
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.routing.RoutingHttpHandler
