@@ -1,12 +1,20 @@
 package nl.myndocs.oauth2.hexagon
 
+import com.hexagonkt.http.server.Call
 import com.hexagonkt.http.server.Router
-import com.hexagonkt.http.server.Server
 import nl.myndocs.oauth2.config.ConfigurationBuilder
 import nl.myndocs.oauth2.hexagon.request.HexagonCallContext
+import nl.myndocs.oauth2.request.auth.CallContextBasicAuthenticator
+import nl.myndocs.oauth2.router.RedirectRouter
 
 
-fun Router.enableOauthServer(configurationCallback: ConfigurationBuilder.Configuration.() -> Unit) {
+fun Router.enableOauthServer(
+        authenticationCallback: (Call, RedirectRouter) -> Unit = { call, callRouter ->
+            val context = HexagonCallContext(call)
+            CallContextBasicAuthenticator.handleAuthentication(context, callRouter)
+        },
+        configurationCallback: ConfigurationBuilder.Configuration.() -> Unit
+) {
     val configuration = ConfigurationBuilder.build(configurationCallback)
 
     val callRouter = configuration.callRouter
@@ -16,7 +24,7 @@ fun Router.enableOauthServer(configurationCallback: ConfigurationBuilder.Configu
     }
 
     get(callRouter.authorizeEndpoint) {
-        callRouter.route(HexagonCallContext(this))
+        authenticationCallback(this, callRouter)
     }
 
     post(callRouter.authorizeEndpoint) {
