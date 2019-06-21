@@ -1,3 +1,5 @@
+cleanWs()
+
 pipeline {
     agent any
 
@@ -9,7 +11,7 @@ pipeline {
     stages {
         stage('Cleanup') {
             steps {
-                cleanWs()
+
                 sh 'mvn clean'
             }
         }
