@@ -1,5 +1,3 @@
-cleanWs()
-
 pipeline {
     agent any
 
@@ -11,7 +9,6 @@ pipeline {
     stages {
         stage('Cleanup') {
             steps {
-
                 sh 'mvn clean'
             }
         }
@@ -19,6 +16,11 @@ pipeline {
             steps {
               sh 'mvn test'
             }
+        }
+    }
+    post {
+        always {
+            cleanWs()
         }
     }
 }
