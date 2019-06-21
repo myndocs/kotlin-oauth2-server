@@ -64,15 +64,13 @@ internal val INVALID_REQUEST_FIELD_MESSAGE = "'%s' field is missing"
 fun GrantingCall.validateScopes(
         client: Client,
         identity: Identity,
-        requestedScopes: Set<String>,
-        identityScopeVerifier: IdentityScopeVerifier? = null) {
+        requestedScopes: Set<String>) {
     val scopesAllowed = scopesAllowed(client.clientScopes, requestedScopes)
     if (!scopesAllowed) {
         throw InvalidScopeException(requestedScopes.minus(client.clientScopes))
     }
 
-    val allowedScopes = identityScopeVerifier?.allowedScopes(client, identity, requestedScopes)
-            ?: identityService.allowedScopes(client, identity, requestedScopes)
+    val allowedScopes = identityService.allowedScopes(client, identity, requestedScopes)
 
     val ivalidScopes = requestedScopes.minus(allowedScopes)
     if (ivalidScopes.isNotEmpty()) {

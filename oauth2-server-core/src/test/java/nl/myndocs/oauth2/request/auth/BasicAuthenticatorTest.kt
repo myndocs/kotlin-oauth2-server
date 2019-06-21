@@ -8,7 +8,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class BasicAuthorizerTest {
+internal class BasicAuthenticatorTest {
 
     @Test
     fun `test authorization head is case insensitive with all uppercase input`() {
@@ -32,7 +32,7 @@ internal class BasicAuthorizerTest {
         val testCredentials = Base64.getEncoder().encodeToString("$username:$password".toByteArray())
 
         every { callContext.headers } returns mapOf(authorizationKeyName to "basic $testCredentials")
-        val credentials = BasicAuthorizer(callContext)
+        val credentials = BasicAuthenticator(callContext)
                 .extractCredentials()
 
         assertThat(credentials, `is`(notNullValue()))
