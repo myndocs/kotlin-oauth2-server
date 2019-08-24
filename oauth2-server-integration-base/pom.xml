@@ -12,7 +12,7 @@
     <artifactId>oauth2-server-integration-base</artifactId>
 
     <properties>
-        <jackson.version>2.9.9</jackson.version>
+        <jackson.version>2.9.9.3</jackson.version>
     </properties>
 
     <dependencies>
