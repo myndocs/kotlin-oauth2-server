@@ -21,6 +21,8 @@ fun GrantingCall.grantPassword() = granter("password") {
             )
     )
 
+    callContext.respondHeader("Cache-Control", "no-store")
+    callContext.respondHeader("Pragma", "no-cache")
     callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
@@ -31,6 +33,8 @@ fun GrantingCall.grantClientCredentials() = granter("client_credentials") {
             callContext.formParameters["scope"]
     ))
 
+    callContext.respondHeader("Cache-Control", "no-store")
+    callContext.respondHeader("Pragma", "no-cache")
     callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
@@ -43,6 +47,8 @@ fun GrantingCall.grantRefreshToken() = granter("refresh_token") {
             )
     )
 
+    callContext.respondHeader("Cache-Control", "no-store")
+    callContext.respondHeader("Pragma", "no-cache")
     callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
@@ -56,6 +62,8 @@ fun GrantingCall.grantAuthorizationCode() = granter("authorization_code") {
             )
     )
 
+    callContext.respondHeader("Cache-Control", "no-store")
+    callContext.respondHeader("Pragma", "no-cache")
     callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
