@@ -8,15 +8,37 @@ It encourages to adapt to existing implementations instead the other way around.
 # Frameworks
 ## Setup
 ### Maven
-First define the version to be used and set it as a property
+
 ```xml
 <properties>
-    <myndocs.oauth.version>0.5.0</myndocs.oauth.version>
+    <myndocs.oauth.version>0.6.0</myndocs.oauth.version>
 </properties>
-```
 
-Include the following repository in order to download the artifacts
-```xml
+<dependencies>
+    <dependency>
+        <groupId>nl.myndocs</groupId>
+        <artifactId>oauth2-server-core</artifactId>
+        <version>${myndocs.oauth.version}</version>
+    </dependency>
+    
+    <!-- In memory dependencies -->
+    <dependency>
+        <groupId>nl.myndocs</groupId>
+        <artifactId>oauth2-server-client-inmemory</artifactId>
+        <version>${myndocs.oauth.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>nl.myndocs</groupId>
+        <artifactId>oauth2-server-identity-inmemory</artifactId>
+        <version>${myndocs.oauth.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>nl.myndocs</groupId>
+        <artifactId>oauth2-server-token-store-inmemory</artifactId>
+        <version>${myndocs.oauth.version}</version>
+    </dependency>
+</dependencies>
+
 <repositories>
     <repository>
         <id>myndocs-oauth2</id>
@@ -25,31 +47,21 @@ Include the following repository in order to download the artifacts
 </repositories>
 ```
 
-For the frameworks examples we need at least the following dependencies:
-```xml
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-core</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
+### Gradle
+```groovy
+repositories {
+    maven { url 'https://dl.bintray.com/adhesivee/oauth2-server' }
+}
 
-<!-- In memory dependencies -->
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-client-inmemory</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-identity-inmemory</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
-<dependency>
-    <groupId>nl.myndocs</groupId>
-    <artifactId>oauth2-server-token-store-inmemory</artifactId>
-    <version>${myndocs.oauth.version}</version>
-</dependency>
+dependencies {
+    compile "nl.myndocs:oauth2-server-core:$myndocs_oauth_version"
+    // In memory dependencies
+    compile "nl.myndocs:oauth2-server-client-inmemory:$myndocs_oauth_version"
+    compile "nl.myndocs:oauth2-server-identity-inmemory:$myndocs_oauth_version"
+    compile "nl.myndocs:oauth2-server-token-store-inmemory:$myndocs_oauth_version"
+}
 ```
+
 
 ### Framework implementation
 The following frameworks are supported:

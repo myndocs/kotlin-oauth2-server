@@ -21,6 +21,8 @@ fun GrantingCall.grantPassword() = granter("password") {
             )
     )
 
+    callContext.respondHeader("Cache-Control", "no-store")
+    callContext.respondHeader("Pragma", "no-cache")
     callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
@@ -31,6 +33,8 @@ fun GrantingCall.grantClientCredentials() = granter("client_credentials") {
             callContext.formParameters["scope"]
     ))
 
+    callContext.respondHeader("Cache-Control", "no-store")
+    callContext.respondHeader("Pragma", "no-cache")
     callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
@@ -43,6 +47,8 @@ fun GrantingCall.grantRefreshToken() = granter("refresh_token") {
             )
     )
 
+    callContext.respondHeader("Cache-Control", "no-store")
+    callContext.respondHeader("Pragma", "no-cache")
     callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
@@ -56,6 +62,8 @@ fun GrantingCall.grantAuthorizationCode() = granter("authorization_code") {
             )
     )
 
+    callContext.respondHeader("Cache-Control", "no-store")
+    callContext.respondHeader("Pragma", "no-cache")
     callContext.respondJson(accessTokenResponder.createResponse(accessToken))
 }
 
@@ -64,15 +72,13 @@ internal val INVALID_REQUEST_FIELD_MESSAGE = "'%s' field is missing"
 fun GrantingCall.validateScopes(
         client: Client,
         identity: Identity,
-        requestedScopes: Set<String>,
-        identityScopeVerifier: IdentityScopeVerifier? = null) {
+        requestedScopes: Set<String>) {
     val scopesAllowed = scopesAllowed(client.clientScopes, requestedScopes)
     if (!scopesAllowed) {
         throw InvalidScopeException(requestedScopes.minus(client.clientScopes))
     }
 
-    val allowedScopes = identityScopeVerifier?.allowedScopes(client, identity, requestedScopes)
-            ?: identityService.allowedScopes(client, identity, requestedScopes)
+    val allowedScopes = identityService.allowedScopes(client, identity, requestedScopes)
 
     val ivalidScopes = requestedScopes.minus(allowedScopes)
     if (ivalidScopes.isNotEmpty()) {

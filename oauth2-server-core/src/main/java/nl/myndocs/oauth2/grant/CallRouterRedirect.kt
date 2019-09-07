@@ -14,11 +14,7 @@ import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.CodeToken
 
 
-fun GrantingCall.redirect(
-        redirect: RedirectAuthorizationCodeRequest,
-        authenticator: Authenticator?,
-        identityScopeVerifier: IdentityScopeVerifier?
-): CodeToken {
+fun GrantingCall.redirect(redirect: RedirectAuthorizationCodeRequest): CodeToken {
     if (redirect.clientId == null) {
         throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
     }
@@ -46,9 +42,7 @@ fun GrantingCall.redirect(
     }
 
     val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
-
-    var validIdentity = authenticator?.validCredentials(clientOf, identityOf, redirect.password)
-            ?: identityService.validCredentials(clientOf, identityOf, redirect.password)
+    val validIdentity = identityService.validCredentials(clientOf, identityOf, redirect.password)
 
     if (!validIdentity) {
         throw InvalidIdentityException()
@@ -60,7 +54,7 @@ fun GrantingCall.redirect(
         requestedScopes = clientOf.clientScopes
     }
 
-    validateScopes(clientOf, identityOf, requestedScopes, identityScopeVerifier)
+    validateScopes(clientOf, identityOf, requestedScopes)
 
     val codeToken = converters.codeTokenConverter.convertToToken(
             identityOf,
@@ -74,11 +68,7 @@ fun GrantingCall.redirect(
     return codeToken
 }
 
-fun GrantingCall.redirect(
-        redirect: RedirectTokenRequest,
-        authenticator: Authenticator?,
-        identityScopeVerifier: IdentityScopeVerifier?
-): AccessToken {
+fun GrantingCall.redirect(redirect: RedirectTokenRequest): AccessToken {
     if (redirect.clientId == null) {
         throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
     }
@@ -107,8 +97,7 @@ fun GrantingCall.redirect(
 
     val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
 
-    var validIdentity = authenticator?.validCredentials(clientOf, identityOf, redirect.password)
-            ?: identityService.validCredentials(clientOf, identityOf, redirect.password)
+    val validIdentity =  identityService.validCredentials(clientOf, identityOf, redirect.password)
 
     if (!validIdentity) {
         throw InvalidIdentityException()
@@ -117,10 +106,11 @@ fun GrantingCall.redirect(
     var requestedScopes = ScopeParser.parseScopes(redirect.scope)
 
     if (redirect.scope == null) {
+        // @TODO: This behavior is not in the spec and should be configurable https://tools.ietf.org/html/rfc6749#section-3.3
         requestedScopes = clientOf.clientScopes
     }
 
-    validateScopes(clientOf, identityOf, requestedScopes, identityScopeVerifier)
+    validateScopes(clientOf, identityOf, requestedScopes)
 
     val accessToken = converters.accessTokenConverter.convertToToken(
             identityOf,

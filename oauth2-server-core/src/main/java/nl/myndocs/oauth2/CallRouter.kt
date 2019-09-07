@@ -1,6 +1,6 @@
 package nl.myndocs.oauth2
 
-import nl.myndocs.oauth2.authenticator.Authorizer
+import nl.myndocs.oauth2.authenticator.Credentials
 import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.grant.Granter
 import nl.myndocs.oauth2.grant.GrantingCall
@@ -11,6 +11,8 @@ import nl.myndocs.oauth2.request.CallContext
 import nl.myndocs.oauth2.request.RedirectAuthorizationCodeRequest
 import nl.myndocs.oauth2.request.RedirectTokenRequest
 import nl.myndocs.oauth2.request.headerCaseInsensitive
+import nl.myndocs.oauth2.router.RedirectRouter
+import nl.myndocs.oauth2.router.RedirectRouterResponse
 
 class CallRouter(
         val tokenEndpoint: String,
@@ -19,7 +21,7 @@ class CallRouter(
         private val tokenInfoCallback: (TokenInfo) -> Map<String, Any?>,
         private val granters: List<GrantingCall.() -> Granter>,
         private val grantingCallFactory: (CallContext) -> GrantingCall
-) {
+) : RedirectRouter {
     companion object {
         const val METHOD_POST = "post"
         const val METHOD_GET = "get"
@@ -29,15 +31,20 @@ class CallRouter(
 
     }
 
-    fun route(
-            callContext: CallContext,
-            authorizer: Authorizer) {
+    fun route(callContext: CallContext) {
         when (callContext.path) {
             tokenEndpoint -> routeTokenEndpoint(callContext)
-            authorizeEndpoint -> routeAuthorizeEndpoint(callContext, authorizer)
             tokenInfoEndpoint -> routeTokenInfoEndpoint(callContext)
         }
     }
+
+    override fun route(callContext: CallContext, credentials: Credentials?): RedirectRouterResponse {
+        return when (callContext.path) {
+            authorizeEndpoint -> routeAuthorizeEndpoint(callContext, credentials)
+            else -> throw NoRoutesFoundException("Route '${callContext.path}' not found")
+        }
+    }
+
 
     private fun routeTokenEndpoint(callContext: CallContext) {
         if (callContext.method.toLowerCase() != METHOD_POST) {
@@ -72,21 +79,18 @@ class CallRouter(
 
     fun routeAuthorizationCodeRedirect(
             callContext: CallContext,
-            authorizer: Authorizer
-    ) {
+            credentials: Credentials?
+    ): RedirectRouterResponse {
         val queryParameters = callContext.queryParameters
-        val credentials = authorizer.extractCredentials()
         try {
             val redirect = grantingCallFactory(callContext).redirect(
                     RedirectAuthorizationCodeRequest(
                             queryParameters["client_id"],
                             queryParameters["redirect_uri"],
-                            credentials?.username ?: "",
-                            credentials?.password ?: "",
+                            credentials?.username,
+                            credentials?.password,
                             queryParameters["scope"]
-                    ),
-                    authorizer.authenticator(),
-                    authorizer.scopesVerifier()
+                    )
             )
 
             var stateQueryParameter = ""
@@ -96,31 +100,31 @@ class CallRouter(
             }
 
             callContext.redirect(queryParameters["redirect_uri"] + "?code=${redirect.codeToken}$stateQueryParameter")
+
+            return RedirectRouterResponse(true)
         } catch (unverifiedIdentityException: InvalidIdentityException) {
             callContext.respondStatus(STATUS_UNAUTHORIZED)
-            authorizer.failedAuthentication()
+
+            return RedirectRouterResponse(false)
         }
     }
 
 
     fun routeAccessTokenRedirect(
             callContext: CallContext,
-            authorizer: Authorizer
-    ) {
+            credentials: Credentials?
+    ): RedirectRouterResponse {
         val queryParameters = callContext.queryParameters
-        val credentials = authorizer.extractCredentials()
 
         try {
             val redirect = grantingCallFactory(callContext).redirect(
                     RedirectTokenRequest(
                             queryParameters["client_id"],
                             queryParameters["redirect_uri"],
-                            credentials?.username ?: "",
-                            credentials?.password ?: "",
+                            credentials?.username,
+                            credentials?.password,
                             queryParameters["scope"]
-                    ),
-                    authorizer.authenticator(),
-                    authorizer.scopesVerifier()
+                    )
             )
 
             var stateQueryParameter = ""
@@ -134,33 +138,33 @@ class CallRouter(
                             "&token_type=bearer&expires_in=${redirect.expiresIn()}$stateQueryParameter"
             )
 
+            return RedirectRouterResponse(true)
         } catch (unverifiedIdentityException: InvalidIdentityException) {
-            authorizer.failedAuthentication()
             callContext.respondStatus(STATUS_UNAUTHORIZED)
+
+            return RedirectRouterResponse(false)
         }
     }
 
-    private fun routeAuthorizeEndpoint(callContext: CallContext, authorizer: Authorizer) {
+    private fun routeAuthorizeEndpoint(callContext: CallContext, credentials: Credentials?): RedirectRouterResponse {
         try {
-            if (callContext.method.toLowerCase() != METHOD_GET) {
-                return
+            if (!arrayOf(METHOD_GET, METHOD_POST).contains(callContext.method.toLowerCase())) {
+                return RedirectRouterResponse(false)
             }
 
-            val allowedResponseTypes = setOf("code", "token")
             val responseType = callContext.queryParameters["response_type"]
                     ?: throw InvalidRequestException("'response_type' not given")
 
-            if (!allowedResponseTypes.contains(responseType)) {
-                throw InvalidGrantException("'grant_type' with value '$responseType' not allowed")
-            }
-
-            when (responseType) {
-                "code" -> routeAuthorizationCodeRedirect(callContext, authorizer)
-                "token" -> routeAccessTokenRedirect(callContext, authorizer)
+            return when (responseType) {
+                "code" -> routeAuthorizationCodeRedirect(callContext, credentials)
+                "token" -> routeAccessTokenRedirect(callContext, credentials)
+                else -> throw InvalidGrantException("'grant_type' with value '$responseType' not allowed")
             }
         } catch (oauthException: OauthException) {
             callContext.respondStatus(STATUS_BAD_REQUEST)
             callContext.respondJson(oauthException.toMap())
+
+            return RedirectRouterResponse(false)
         }
     }
 

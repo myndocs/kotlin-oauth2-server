@@ -1,6 +1,8 @@
 # http4k
 
 ## Dependencies
+
+### Maven
 ```xml
 <dependency>
     <groupId>nl.myndocs</groupId>
@@ -9,11 +11,17 @@
 </dependency>
 ```
 
+### Gradle
+```groovy
+compile "nl.myndocs:oauth2-server-http4k:$myndocs_oauth_version"
+```
+
+
 ## Implementation
 ```kotlin
 val app: HttpHandler = routes(
             "/ping" bind GET to { _: Request -> Response(Status.OK).body("pong!") }
-    ) `enable oauth2` {
+    ).enableOauth2 {
         identityService = InMemoryIdentity()
                 .identity {
                     username = "foo"
