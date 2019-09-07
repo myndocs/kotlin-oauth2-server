@@ -11,7 +11,7 @@ It encourages to adapt to existing implementations instead the other way around.
 
 ```xml
 <properties>
-    <myndocs.oauth.version>0.5.0</myndocs.oauth.version>
+    <myndocs.oauth.version>0.6.0</myndocs.oauth.version>
 </properties>
 
 <dependencies>
