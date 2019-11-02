@@ -160,6 +160,10 @@ class CallRouter(
                 "token" -> routeAccessTokenRedirect(callContext, credentials)
                 else -> throw InvalidGrantException("'grant_type' with value '$responseType' not allowed")
             }
+        } catch (invalidIdentityException: InvalidIdentityException) {
+            callContext.respondStatus(STATUS_UNAUTHORIZED)
+            callContext.respondJson(invalidIdentityException.toMap())
+            return RedirectRouterResponse(false)
         } catch (oauthException: OauthException) {
             callContext.respondStatus(STATUS_BAD_REQUEST)
             callContext.respondJson(oauthException.toMap())
