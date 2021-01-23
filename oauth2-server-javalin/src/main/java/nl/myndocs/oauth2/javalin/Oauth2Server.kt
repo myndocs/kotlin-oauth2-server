@@ -1,11 +1,10 @@
 package nl.myndocs.oauth2.javalin
 
-import io.javalin.Context
+import io.javalin.http.Context
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import nl.myndocs.oauth2.config.ConfigurationBuilder
 import nl.myndocs.oauth2.javalin.request.JavalinCallContext
-import nl.myndocs.oauth2.request.auth.BasicAuthenticator
 import nl.myndocs.oauth2.request.auth.CallContextBasicAuthenticator
 import nl.myndocs.oauth2.router.RedirectRouter
 

@@ -8,17 +8,16 @@ import org.junit.jupiter.api.BeforeEach
 
 class JavalinIntegrationTest : BaseIntegrationTest() {
 
-    val server = Javalin.create()
+    private val server: Javalin = Javalin.create()
             .apply {
                 enableOauthServer {
                     configBuilder(this)
                 }
             }
-            .port(0)
 
     @BeforeEach
     fun before() {
-        server.start()
+        server.start(0)
 
         localPort = server.port()
     }
