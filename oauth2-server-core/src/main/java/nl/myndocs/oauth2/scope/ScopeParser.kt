@@ -5,7 +5,7 @@ object ScopeParser {
 
     fun parseScopes(scopes: String?): Set<String> {
         if (!scopes.isNullOrBlank()) {
-            return scopes!!.split(SCOPE_SEPARATOR)
+            return scopes.split(SCOPE_SEPARATOR)
                     .toSet()
         }
 

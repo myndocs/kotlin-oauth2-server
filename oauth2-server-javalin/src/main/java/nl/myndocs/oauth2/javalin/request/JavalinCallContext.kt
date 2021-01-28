@@ -1,10 +1,9 @@
 package nl.myndocs.oauth2.javalin.request
 
-import io.javalin.Context
-import nl.myndocs.oauth2.authenticator.Credentials
+import io.javalin.http.Context
 import nl.myndocs.oauth2.request.CallContext
 
-class JavalinCallContext(val context: Context) : CallContext {
+class JavalinCallContext(private val context: Context) : CallContext {
     override val path: String = context.path()
     override val method: String = context.method()
     override val headers: Map<String, String> = context.headerMap()
