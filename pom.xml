@@ -132,8 +132,8 @@
 
     <distributionManagement>
         <repository>
-            <id>kotlin-oauth2-server</id>
-            <url>https://api.bintray.com/maven/adhesivee/oauth2-server/kotlin-oauth2-server/;publish=1</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/myndocs/kotlin-oauth2-server</url>
         </repository>
     </distributionManagement>
 </project>
