@@ -7,11 +7,14 @@ It encourages to adapt to existing implementations instead the other way around.
 
 # Frameworks
 ## Setup
+
+Packages are hosted on GitHub. [Authentication](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-to-github-packages) is required.
+
 ### Maven
 
 ```xml
 <properties>
-    <myndocs.oauth.version>0.6.0</myndocs.oauth.version>
+    <myndocs.oauth.version>0.7.0</myndocs.oauth.version>
 </properties>
 
 <dependencies>
@@ -38,21 +41,10 @@ It encourages to adapt to existing implementations instead the other way around.
         <version>${myndocs.oauth.version}</version>
     </dependency>
 </dependencies>
-
-<repositories>
-    <repository>
-        <id>myndocs-oauth2</id>
-        <url>https://dl.bintray.com/adhesivee/oauth2-server</url>
-    </repository>
-</repositories>
 ```
 
 ### Gradle
 ```groovy
-repositories {
-    maven { url 'https://dl.bintray.com/adhesivee/oauth2-server' }
-}
-
 dependencies {
     compile "nl.myndocs:oauth2-server-core:$myndocs_oauth_version"
     // In memory dependencies
