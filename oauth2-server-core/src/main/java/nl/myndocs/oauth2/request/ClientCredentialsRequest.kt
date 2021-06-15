@@ -4,6 +4,6 @@ data class ClientCredentialsRequest(
     override val clientId: String?,
     override val clientSecret: String?,
     val scope: String?
-) : ClientRequest{
+) : ClientRequest {
     val grant_type = "client_credentials"
 }

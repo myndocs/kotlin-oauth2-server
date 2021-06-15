@@ -7,8 +7,8 @@ interface ExpirableToken {
     val expireTime: Instant
 
     fun expiresIn(): Int =
-            Instant.now().until(expireTime, ChronoUnit.SECONDS).toInt()
+        Instant.now().until(expireTime, ChronoUnit.SECONDS).toInt()
 
     fun expired(): Boolean =
-            expiresIn() <= 0
+        expiresIn() <= 0
 }

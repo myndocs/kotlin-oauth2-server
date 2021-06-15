@@ -6,15 +6,15 @@ import java.time.Instant
 import java.util.*
 
 class UUIDRefreshTokenConverter(
-        private val refreshTokenExpireInSeconds: Int = 86400
+    private val refreshTokenExpireInSeconds: Int = 86400
 ) : RefreshTokenConverter {
     override fun convertToToken(identity: Identity?, clientId: String, requestedScopes: Set<String>): RefreshToken {
         return RefreshToken(
-                UUID.randomUUID().toString(),
-                Instant.now().plusSeconds(refreshTokenExpireInSeconds.toLong()),
-                identity,
-                clientId,
-                requestedScopes
+            UUID.randomUUID().toString(),
+            Instant.now().plusSeconds(refreshTokenExpireInSeconds.toLong()),
+            identity,
+            clientId,
+            requestedScopes
         )
     }
 }

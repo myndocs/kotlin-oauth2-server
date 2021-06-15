@@ -10,8 +10,7 @@ object BasicAuth {
         if (authorization.startsWith("basic ", true)) {
 
             val basicAuthorizationString = String(
-                    Base64.getDecoder()
-                            .decode(authorization.substring(6))
+                Base64.getDecoder().decode(authorization.substring(6))
             )
 
             val splittedString = basicAuthorizationString.split(":")

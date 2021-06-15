@@ -11,13 +11,13 @@ import nl.myndocs.oauth2.request.*
 
 fun GrantingCall.grantPassword() = granter("password") {
     val accessToken = authorize(
-            PasswordGrantRequest(
-                    callContext.formParameters["client_id"],
-                    callContext.formParameters["client_secret"],
-                    callContext.formParameters["username"],
-                    callContext.formParameters["password"],
-                    callContext.formParameters["scope"]
-            )
+        PasswordGrantRequest(
+            callContext.formParameters["client_id"],
+            callContext.formParameters["client_secret"],
+            callContext.formParameters["username"],
+            callContext.formParameters["password"],
+            callContext.formParameters["scope"]
+        )
     )
 
     callContext.respondHeader("Cache-Control", "no-store")
@@ -26,11 +26,13 @@ fun GrantingCall.grantPassword() = granter("password") {
 }
 
 fun GrantingCall.grantClientCredentials() = granter("client_credentials") {
-    val accessToken = authorize(ClientCredentialsRequest(
+    val accessToken = authorize(
+        ClientCredentialsRequest(
             callContext.formParameters["client_id"],
             callContext.formParameters["client_secret"],
             callContext.formParameters["scope"]
-    ))
+        )
+    )
 
     callContext.respondHeader("Cache-Control", "no-store")
     callContext.respondHeader("Pragma", "no-cache")
@@ -39,11 +41,11 @@ fun GrantingCall.grantClientCredentials() = granter("client_credentials") {
 
 fun GrantingCall.grantRefreshToken() = granter("refresh_token") {
     val accessToken = refresh(
-            RefreshTokenRequest(
-                    callContext.formParameters["client_id"],
-                    callContext.formParameters["client_secret"],
-                    callContext.formParameters["refresh_token"]
-            )
+        RefreshTokenRequest(
+            callContext.formParameters["client_id"],
+            callContext.formParameters["client_secret"],
+            callContext.formParameters["refresh_token"]
+        )
     )
 
     callContext.respondHeader("Cache-Control", "no-store")
@@ -53,12 +55,12 @@ fun GrantingCall.grantRefreshToken() = granter("refresh_token") {
 
 fun GrantingCall.grantAuthorizationCode() = granter("authorization_code") {
     val accessToken = authorize(
-            AuthorizationCodeRequest(
-                    callContext.formParameters["client_id"],
-                    callContext.formParameters["client_secret"],
-                    callContext.formParameters["code"],
-                    callContext.formParameters["redirect_uri"]
-            )
+        AuthorizationCodeRequest(
+            callContext.formParameters["client_id"],
+            callContext.formParameters["client_secret"],
+            callContext.formParameters["code"],
+            callContext.formParameters["redirect_uri"]
+        )
     )
 
     callContext.respondHeader("Cache-Control", "no-store")
@@ -69,9 +71,10 @@ fun GrantingCall.grantAuthorizationCode() = granter("authorization_code") {
 internal val INVALID_REQUEST_FIELD_MESSAGE = "'%s' field is missing"
 
 fun GrantingCall.validateScopes(
-        client: Client,
-        identity: Identity,
-        requestedScopes: Set<String>) {
+    client: Client,
+    identity: Identity,
+    requestedScopes: Set<String>
+) {
     val scopesAllowed = scopesAllowed(client.clientScopes, requestedScopes)
     if (!scopesAllowed) {
         throw InvalidScopeException(requestedScopes.minus(client.clientScopes))
@@ -91,18 +94,18 @@ fun GrantingCall.tokenInfo(accessToken: String): TokenInfo {
     val identity = storedAccessToken.identity?.let { identityService.identityOf(client, it.username) }
 
     return TokenInfo(
-            identity,
-            client,
-            storedAccessToken.scopes
+        identity,
+        client,
+        storedAccessToken.scopes
     )
 }
 
 fun GrantingCall.throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) {
     val clientId = clientRequest.clientId
-            ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
+        ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
 
     val clientSecret = clientRequest.clientSecret
-            ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_secret"))
+        ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_secret"))
 
     val client = clientService.clientOf(clientId) ?: throw InvalidClientException()
 

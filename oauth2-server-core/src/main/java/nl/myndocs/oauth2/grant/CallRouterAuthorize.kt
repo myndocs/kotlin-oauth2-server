@@ -8,7 +8,6 @@ import nl.myndocs.oauth2.request.PasswordGrantRequest
 import nl.myndocs.oauth2.scope.ScopeParser
 import nl.myndocs.oauth2.token.AccessToken
 
-
 /**
  * @throws InvalidIdentityException
  * @throws InvalidClientException
@@ -33,15 +32,20 @@ fun GrantingCall.authorize(passwordGrantRequest: PasswordGrantRequest): AccessTo
     }
 
     val requestedIdentity = identityService.identityOf(
-            requestedClient, passwordGrantRequest.username
+        requestedClient, passwordGrantRequest.username
     )
 
-    if (requestedIdentity == null || !identityService.validCredentials(requestedClient, requestedIdentity, passwordGrantRequest.password)) {
+    if (requestedIdentity == null || !identityService.validCredentials(
+            requestedClient,
+            requestedIdentity,
+            passwordGrantRequest.password
+        )
+    ) {
         throw InvalidIdentityException()
     }
 
     var requestedScopes = ScopeParser.parseScopes(passwordGrantRequest.scope)
-            .toSet()
+        .toSet()
 
     if (passwordGrantRequest.scope == null) {
         requestedScopes = requestedClient.clientScopes
@@ -50,14 +54,14 @@ fun GrantingCall.authorize(passwordGrantRequest: PasswordGrantRequest): AccessTo
     validateScopes(requestedClient, requestedIdentity, requestedScopes)
 
     val accessToken = converters.accessTokenConverter.convertToToken(
+        requestedIdentity,
+        requestedClient.clientId,
+        requestedScopes,
+        converters.refreshTokenConverter.convertToToken(
             requestedIdentity,
             requestedClient.clientId,
-            requestedScopes,
-            converters.refreshTokenConverter.convertToToken(
-                    requestedIdentity,
-                    requestedClient.clientId,
-                    requestedScopes
-            )
+            requestedScopes
+        )
     )
 
     tokenStore.storeAccessToken(accessToken)
@@ -77,7 +81,7 @@ fun GrantingCall.authorize(authorizationCodeRequest: AuthorizationCodeRequest): 
     }
 
     val consumeCodeToken = tokenStore.consumeCodeToken(authorizationCodeRequest.code)
-            ?: throw InvalidGrantException()
+        ?: throw InvalidGrantException()
 
 
     if (consumeCodeToken.redirectUri != authorizationCodeRequest.redirectUri || consumeCodeToken.clientId != authorizationCodeRequest.clientId) {
@@ -85,14 +89,14 @@ fun GrantingCall.authorize(authorizationCodeRequest: AuthorizationCodeRequest): 
     }
 
     val accessToken = converters.accessTokenConverter.convertToToken(
+        consumeCodeToken.identity,
+        consumeCodeToken.clientId,
+        consumeCodeToken.scopes,
+        converters.refreshTokenConverter.convertToToken(
             consumeCodeToken.identity,
             consumeCodeToken.clientId,
-            consumeCodeToken.scopes,
-            converters.refreshTokenConverter.convertToToken(
-                    consumeCodeToken.identity,
-                    consumeCodeToken.clientId,
-                    consumeCodeToken.scopes
-            )
+            consumeCodeToken.scopes
+        )
     )
 
     tokenStore.storeAccessToken(accessToken)
@@ -106,18 +110,18 @@ fun GrantingCall.authorize(clientCredentialsRequest: ClientCredentialsRequest): 
     val requestedClient = clientService.clientOf(clientCredentialsRequest.clientId!!) ?: throw InvalidClientException()
 
     val scopes = clientCredentialsRequest.scope
-            ?.let { ScopeParser.parseScopes(it).toSet() }
-            ?: requestedClient.clientScopes
+        ?.let { ScopeParser.parseScopes(it).toSet() }
+        ?: requestedClient.clientScopes
 
     val accessToken = converters.accessTokenConverter.convertToToken(
+        identity = null,
+        clientId = clientCredentialsRequest.clientId,
+        requestedScopes = scopes,
+        refreshToken = converters.refreshTokenConverter.convertToToken(
             identity = null,
             clientId = clientCredentialsRequest.clientId,
-            requestedScopes = scopes,
-            refreshToken = converters.refreshTokenConverter.convertToToken(
-                    identity = null,
-                    clientId = clientCredentialsRequest.clientId,
-                    requestedScopes = scopes
-            )
+            requestedScopes = scopes
+        )
     )
 
     tokenStore.storeAccessToken(accessToken)

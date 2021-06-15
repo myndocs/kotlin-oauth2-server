@@ -54,7 +54,10 @@ object ConfigurationBuilder {
         var accessTokenResponder: AccessTokenResponder = DefaultAccessTokenResponder
     }
 
-    fun build(configurer: Configuration.() -> Unit, configuration: Configuration): nl.myndocs.oauth2.config.Configuration {
+    fun build(
+        configurer: Configuration.() -> Unit,
+        configuration: Configuration
+    ): nl.myndocs.oauth2.config.Configuration {
         configurer(configuration)
 
         val grantingCallFactory: (CallContext) -> GrantingCall = { callContext ->
@@ -64,23 +67,23 @@ object ConfigurationBuilder {
                 override val clientService = configuration.clientService!!
                 override val tokenStore = configuration.tokenStore!!
                 override val converters = Converters(
-                        configuration.accessTokenConverter,
-                        configuration.refreshTokenConverter,
-                        configuration.codeTokenConverter
+                    configuration.accessTokenConverter,
+                    configuration.refreshTokenConverter,
+                    configuration.codeTokenConverter
                 )
                 override val accessTokenResponder = configuration.accessTokenResponder
             }
         }
         return Configuration(
-                CallRouterBuilder.build(
-                        configuration.callRouterConfiguration,
-                        grantingCallFactory
-                )
+            CallRouterBuilder.build(
+                configuration.callRouterConfiguration,
+                grantingCallFactory
+            )
         )
     }
+
     fun build(configurer: Configuration.() -> Unit): nl.myndocs.oauth2.config.Configuration {
         val configuration = Configuration()
-
         return build(configurer, configuration)
     }
 }

@@ -1,7 +1,5 @@
 package nl.myndocs.oauth2.grant
 
-import nl.myndocs.oauth2.authenticator.Authenticator
-import nl.myndocs.oauth2.authenticator.IdentityScopeVerifier
 import nl.myndocs.oauth2.client.AuthorizedGrantType
 import nl.myndocs.oauth2.exception.InvalidClientException
 import nl.myndocs.oauth2.exception.InvalidGrantException
@@ -12,7 +10,6 @@ import nl.myndocs.oauth2.request.RedirectTokenRequest
 import nl.myndocs.oauth2.scope.ScopeParser
 import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.CodeToken
-
 
 fun GrantingCall.redirect(redirect: RedirectAuthorizationCodeRequest): CodeToken {
     if (redirect.clientId == null) {
@@ -57,10 +54,10 @@ fun GrantingCall.redirect(redirect: RedirectAuthorizationCodeRequest): CodeToken
     validateScopes(clientOf, identityOf, requestedScopes)
 
     val codeToken = converters.codeTokenConverter.convertToToken(
-            identityOf,
-            clientOf.clientId,
-            redirect.redirectUri,
-            requestedScopes
+        identityOf,
+        clientOf.clientId,
+        redirect.redirectUri,
+        requestedScopes
     )
 
     tokenStore.storeCodeToken(codeToken)
@@ -97,7 +94,7 @@ fun GrantingCall.redirect(redirect: RedirectTokenRequest): AccessToken {
 
     val identityOf = identityService.identityOf(clientOf, redirect.username) ?: throw InvalidIdentityException()
 
-    val validIdentity =  identityService.validCredentials(clientOf, identityOf, redirect.password)
+    val validIdentity = identityService.validCredentials(clientOf, identityOf, redirect.password)
 
     if (!validIdentity) {
         throw InvalidIdentityException()
@@ -113,10 +110,10 @@ fun GrantingCall.redirect(redirect: RedirectTokenRequest): AccessToken {
     validateScopes(clientOf, identityOf, requestedScopes)
 
     val accessToken = converters.accessTokenConverter.convertToToken(
-            identityOf,
-            clientOf.clientId,
-            requestedScopes,
-            null
+        identityOf,
+        clientOf.clientId,
+        requestedScopes,
+        null
     )
 
     tokenStore.storeAccessToken(accessToken)

@@ -10,11 +10,11 @@ object CallContextBasicAuthenticator {
             basicAuthenticator.openAuthenticationDialog()
         } else {
             callRouter.route(callContext, basicAuthenticator.extractCredentials())
-                    .also {
-                        if (!it.successfulLogin) {
-                            basicAuthenticator.openAuthenticationDialog()
-                        }
+                .also {
+                    if (!it.successfulLogin) {
+                        basicAuthenticator.openAuthenticationDialog()
                     }
+                }
         }
     }
 }

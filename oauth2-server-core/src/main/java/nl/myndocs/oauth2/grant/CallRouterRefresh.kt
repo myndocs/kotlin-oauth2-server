@@ -7,7 +7,6 @@ import nl.myndocs.oauth2.exception.InvalidRequestException
 import nl.myndocs.oauth2.request.RefreshTokenRequest
 import nl.myndocs.oauth2.token.AccessToken
 
-
 fun GrantingCall.refresh(refreshTokenRequest: RefreshTokenRequest): AccessToken {
     throwExceptionIfUnverifiedClient(refreshTokenRequest)
 
@@ -29,10 +28,10 @@ fun GrantingCall.refresh(refreshTokenRequest: RefreshTokenRequest): AccessToken 
     }
 
     val accessToken = converters.accessTokenConverter.convertToToken(
-            refreshToken.identity,
-            refreshToken.clientId,
-            refreshToken.scopes,
-            converters.refreshTokenConverter.convertToToken(refreshToken)
+        refreshToken.identity,
+        refreshToken.clientId,
+        refreshToken.scopes,
+        converters.refreshTokenConverter.convertToToken(refreshToken)
     )
 
     tokenStore.storeAccessToken(accessToken)
