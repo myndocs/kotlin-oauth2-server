@@ -46,11 +46,11 @@ Packages are hosted on GitHub. [Authentication](https://docs.github.com/en/packa
 ### Gradle
 ```groovy
 dependencies {
-    compile "nl.myndocs:oauth2-server-core:$myndocs_oauth_version"
+    implementation "nl.myndocs:oauth2-server-core:$myndocs_oauth_version"
     // In memory dependencies
-    compile "nl.myndocs:oauth2-server-client-inmemory:$myndocs_oauth_version"
-    compile "nl.myndocs:oauth2-server-identity-inmemory:$myndocs_oauth_version"
-    compile "nl.myndocs:oauth2-server-token-store-inmemory:$myndocs_oauth_version"
+    implementation "nl.myndocs:oauth2-server-client-inmemory:$myndocs_oauth_version"
+    implementation "nl.myndocs:oauth2-server-identity-inmemory:$myndocs_oauth_version"
+    implementation "nl.myndocs:oauth2-server-token-store-inmemory:$myndocs_oauth_version"
 }
 ```
 

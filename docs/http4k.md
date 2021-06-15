@@ -13,7 +13,7 @@
 
 ### Gradle
 ```groovy
-compile "nl.myndocs:oauth2-server-http4k:$myndocs_oauth_version"
+implementation "nl.myndocs:oauth2-server-http4k:$myndocs_oauth_version"
 ```
 
 
