@@ -161,8 +161,7 @@ abstract class BaseIntegrationTest {
 fun ObjectMapper.readMap(content: String) = this.readValue(content, Map::class.java)
 
 fun String.asQueryParameters() =
-        split("?")[1]
-                .split("&")
-                .map { it.split("=") }
-                .map { Pair(it[0], it[1]) }
-                .toMap()
+    split("?")[1]
+        .split("&")
+        .map { it.split("=") }
+        .associate { Pair(it[0], it[1]) }
