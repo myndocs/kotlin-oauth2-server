@@ -1,6 +1,5 @@
 package nl.myndocs.oauth2.grant
 
-import nl.myndocs.oauth2.authenticator.IdentityScopeVerifier
 import nl.myndocs.oauth2.client.Client
 import nl.myndocs.oauth2.exception.InvalidClientException
 import nl.myndocs.oauth2.exception.InvalidGrantException
