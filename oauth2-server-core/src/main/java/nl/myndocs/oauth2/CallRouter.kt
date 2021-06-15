@@ -57,12 +57,10 @@ class CallRouter(
 
             val grantingCall = grantingCallFactory(callContext)
 
-            val granterMap = granters
-                    .map {
-                        val granter = grantingCall.it()
-                        granter.grantType to granter
-                    }
-                    .toMap()
+            val granterMap = granters.associate {
+                val granter = grantingCall.it()
+                granter.grantType to granter
+            }
 
             val allowedGrantTypes = granterMap.keys
 
