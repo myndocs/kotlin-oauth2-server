@@ -13,18 +13,17 @@ class HexagonCallContext(val call: Call) : CallContext {
             .mapValues { it.value.joinToString(";") }
 
     override val queryParameters: Map<String, String> = (call.request
-            .runCatching { queryString }
-            .getOrNull() ?: "")
-            .split("&")
-            .filter { it.contains("=") }
-            .map {
-                val (key, value) = it.split("=")
-                Pair(
-                        key.toLowerCase(),
-                        URLDecoder.decode(value, StandardCharsets.UTF_8.name())
-                )
-            }
-            .toMap()
+        .runCatching { queryString }
+        .getOrNull() ?: "")
+        .split("&")
+        .filter { it.contains("=") }
+        .associate {
+            val (key, value) = it.split("=")
+            Pair(
+                key.toLowerCase(),
+                URLDecoder.decode(value, StandardCharsets.UTF_8.name())
+            )
+        }
 
     override val formParameters: Map<String, String> = call.parameters
             .mapValues { it.value.lastOrNull() }

@@ -5,5 +5,10 @@ import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.RefreshToken
 
 interface AccessTokenConverter {
-    fun convertToToken(identity: Identity?, clientId: String, requestedScopes: Set<String>, refreshToken: RefreshToken?): AccessToken
+    fun convertToToken(
+        identity: Identity?,
+        clientId: String,
+        requestedScopes: Set<String>,
+        refreshToken: RefreshToken?
+    ): AccessToken
 }

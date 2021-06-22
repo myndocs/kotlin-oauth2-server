@@ -1,14 +1,8 @@
 package nl.myndocs.oauth2.exception
 
-fun OauthException.toMap(): Map<String, String> {
-
-    val mutableMapOf = mutableMapOf<String, String>(
-            "error" to this.error.errorName
-    )
-
-    if (this.errorDescription != null) {
-        mutableMapOf["error_description"] = this.errorDescription
+fun OauthException.toMap(): Map<String, String> = with(mutableMapOf("error" to error.errorName)) {
+    if (errorDescription != null) {
+        this["error_description"] = errorDescription
     }
-
-    return mutableMapOf.toMap()
+    toMap()
 }

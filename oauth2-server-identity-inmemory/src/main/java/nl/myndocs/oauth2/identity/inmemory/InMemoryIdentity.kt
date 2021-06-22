@@ -16,15 +16,8 @@ class InMemoryIdentity : IdentityService {
     }
 
     override fun identityOf(forClient: Client, username: String): Identity? {
-        val findConfiguration = findConfiguration(username)
-
-        if (findConfiguration == null) {
-            return null
-        }
-
-        return Identity(
-                findConfiguration.username!!
-        )
+        val findConfiguration = findConfiguration(username) ?: return null
+        return Identity(findConfiguration.username!!)
     }
 
     override fun allowedScopes(forClient: Client, identity: Identity, scopes: Set<String>) = scopes

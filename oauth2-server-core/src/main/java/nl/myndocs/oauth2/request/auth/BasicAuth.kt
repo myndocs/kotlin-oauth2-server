@@ -8,17 +8,13 @@ object BasicAuth {
         var password: String? = null
 
         if (authorization.startsWith("basic ", true)) {
+            val basicAuthorizationString = String(Base64.getDecoder().decode(authorization.substring(6)))
 
-            val basicAuthorizationString = String(
-                    Base64.getDecoder()
-                            .decode(authorization.substring(6))
-            )
-
-            val splittedString = basicAuthorizationString.split(":")
-
-            if (splittedString.size == 2) {
-                username = splittedString[0]
-                password = splittedString[1]
+            with(basicAuthorizationString.split(":")) {
+                if (this.size == 2) {
+                    username = this[0]
+                    password = this[1]
+                }
             }
         }
 

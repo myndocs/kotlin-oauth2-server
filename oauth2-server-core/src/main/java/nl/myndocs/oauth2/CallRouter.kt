@@ -15,12 +15,12 @@ import nl.myndocs.oauth2.router.RedirectRouter
 import nl.myndocs.oauth2.router.RedirectRouterResponse
 
 class CallRouter(
-        val tokenEndpoint: String,
-        val authorizeEndpoint: String,
-        val tokenInfoEndpoint: String,
-        private val tokenInfoCallback: (TokenInfo) -> Map<String, Any?>,
-        private val granters: List<GrantingCall.() -> Granter>,
-        private val grantingCallFactory: (CallContext) -> GrantingCall
+    val tokenEndpoint: String,
+    val authorizeEndpoint: String,
+    val tokenInfoEndpoint: String,
+    private val tokenInfoCallback: (TokenInfo) -> Map<String, Any?>,
+    private val granters: List<GrantingCall.() -> Granter>,
+    private val grantingCallFactory: (CallContext) -> GrantingCall
 ) : RedirectRouter {
     companion object {
         const val METHOD_POST = "post"
@@ -28,7 +28,6 @@ class CallRouter(
 
         const val STATUS_BAD_REQUEST = 400
         const val STATUS_UNAUTHORIZED = 401
-
     }
 
     fun route(callContext: CallContext) {
@@ -45,7 +44,6 @@ class CallRouter(
         }
     }
 
-
     private fun routeTokenEndpoint(callContext: CallContext) {
         if (callContext.method.toLowerCase() != METHOD_POST) {
             return
@@ -53,16 +51,14 @@ class CallRouter(
 
         try {
             val grantType = callContext.formParameters["grant_type"]
-                    ?: throw InvalidRequestException("'grant_type' not given")
+                ?: throw InvalidRequestException("'grant_type' not given")
 
             val grantingCall = grantingCallFactory(callContext)
 
-            val granterMap = granters
-                    .map {
-                        val granter = grantingCall.it()
-                        granter.grantType to granter
-                    }
-                    .toMap()
+            val granterMap = granters.associate {
+                val granter = grantingCall.it()
+                granter.grantType to granter
+            }
 
             val allowedGrantTypes = granterMap.keys
 
@@ -78,19 +74,19 @@ class CallRouter(
     }
 
     fun routeAuthorizationCodeRedirect(
-            callContext: CallContext,
-            credentials: Credentials?
+        callContext: CallContext,
+        credentials: Credentials?
     ): RedirectRouterResponse {
         val queryParameters = callContext.queryParameters
         try {
             val redirect = grantingCallFactory(callContext).redirect(
-                    RedirectAuthorizationCodeRequest(
-                            queryParameters["client_id"],
-                            queryParameters["redirect_uri"],
-                            credentials?.username,
-                            credentials?.password,
-                            queryParameters["scope"]
-                    )
+                RedirectAuthorizationCodeRequest(
+                    queryParameters["client_id"],
+                    queryParameters["redirect_uri"],
+                    credentials?.username,
+                    credentials?.password,
+                    queryParameters["scope"]
+                )
             )
 
             var stateQueryParameter = ""
@@ -109,33 +105,31 @@ class CallRouter(
         }
     }
 
-
     fun routeAccessTokenRedirect(
-            callContext: CallContext,
-            credentials: Credentials?
+        callContext: CallContext,
+        credentials: Credentials?
     ): RedirectRouterResponse {
         val queryParameters = callContext.queryParameters
 
         try {
             val redirect = grantingCallFactory(callContext).redirect(
-                    RedirectTokenRequest(
-                            queryParameters["client_id"],
-                            queryParameters["redirect_uri"],
-                            credentials?.username,
-                            credentials?.password,
-                            queryParameters["scope"]
-                    )
+                RedirectTokenRequest(
+                    queryParameters["client_id"],
+                    queryParameters["redirect_uri"],
+                    credentials?.username,
+                    credentials?.password,
+                    queryParameters["scope"]
+                )
             )
 
             var stateQueryParameter = ""
-
             if (queryParameters["state"] != null) {
                 stateQueryParameter = "&state=" + queryParameters["state"]
             }
 
             callContext.redirect(
-                    queryParameters["redirect_uri"] + "#access_token=${redirect.accessToken}" +
-                            "&token_type=bearer&expires_in=${redirect.expiresIn()}$stateQueryParameter"
+                queryParameters["redirect_uri"] + "#access_token=${redirect.accessToken}" +
+                        "&token_type=bearer&expires_in=${redirect.expiresIn()}$stateQueryParameter"
             )
 
             return RedirectRouterResponse(true)
@@ -153,7 +147,7 @@ class CallRouter(
             }
 
             val responseType = callContext.queryParameters["response_type"]
-                    ?: throw InvalidRequestException("'response_type' not given")
+                ?: throw InvalidRequestException("'response_type' not given")
 
             return when (responseType) {
                 "code" -> routeAuthorizationCodeRedirect(callContext, credentials)
@@ -185,7 +179,6 @@ class CallRouter(
         }
 
         val token = authorization.substring(7)
-
         val tokenInfoCallback = tokenInfoCallback(grantingCallFactory(callContext).tokenInfo(token))
 
         callContext.respondJson(tokenInfoCallback)

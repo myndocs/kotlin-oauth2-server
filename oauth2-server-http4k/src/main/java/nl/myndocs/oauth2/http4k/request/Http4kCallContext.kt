@@ -1,6 +1,5 @@
 package nl.myndocs.oauth2.http4k.request
 
-import nl.myndocs.oauth2.authenticator.Credentials
 import nl.myndocs.oauth2.http4k.response.ResponseBuilder
 import nl.myndocs.oauth2.json.JsonMapper
 import nl.myndocs.oauth2.request.CallContext

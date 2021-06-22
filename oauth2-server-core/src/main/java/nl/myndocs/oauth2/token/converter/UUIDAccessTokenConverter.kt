@@ -7,18 +7,23 @@ import java.time.Instant
 import java.util.*
 
 class UUIDAccessTokenConverter(
-        private val accessTokenExpireInSeconds: Int = 3600
+    private val accessTokenExpireInSeconds: Int = 3600
 ) : AccessTokenConverter {
 
-    override fun convertToToken(identity: Identity?, clientId: String, requestedScopes: Set<String>, refreshToken: RefreshToken?): AccessToken {
+    override fun convertToToken(
+        identity: Identity?,
+        clientId: String,
+        requestedScopes: Set<String>,
+        refreshToken: RefreshToken?
+    ): AccessToken {
         return AccessToken(
-                UUID.randomUUID().toString(),
-                "bearer",
-                Instant.now().plusSeconds(accessTokenExpireInSeconds.toLong()),
-                identity,
-                clientId,
-                requestedScopes,
-                refreshToken
+            UUID.randomUUID().toString(),
+            "bearer",
+            Instant.now().plusSeconds(accessTokenExpireInSeconds.toLong()),
+            identity,
+            clientId,
+            requestedScopes,
+            refreshToken
         )
     }
 }

@@ -12,24 +12,24 @@ internal object CallRouterBuilder {
         var tokenInfoEndpoint: String = "/oauth/tokeninfo"
         var tokenInfoCallback: (TokenInfo) -> Map<String, Any?> = { tokenInfo ->
             mapOf(
-                    "username" to tokenInfo.identity?.username,
-                    "scopes" to tokenInfo.scopes
+                "username" to tokenInfo.identity?.username,
+                "scopes" to tokenInfo.scopes
             ).filterValues { it != null }
         }
         var granters: List<GrantingCall.() -> Granter> = listOf()
     }
 
     fun build(configuration: Configuration, grantingCallFactory: (CallContext) -> GrantingCall) = CallRouter(
-            configuration.tokenEndpoint,
-            configuration.authorizeEndpoint,
-            configuration.tokenInfoEndpoint,
-            configuration.tokenInfoCallback,
-            listOf<GrantingCall.() -> Granter>(
-                    { grantPassword() },
-                    { grantAuthorizationCode() },
-                    { grantClientCredentials() },
-                    { grantRefreshToken() }
-            ) + configuration.granters,
-            grantingCallFactory
+        configuration.tokenEndpoint,
+        configuration.authorizeEndpoint,
+        configuration.tokenInfoEndpoint,
+        configuration.tokenInfoCallback,
+        listOf<GrantingCall.() -> Granter>(
+            { grantPassword() },
+            { grantAuthorizationCode() },
+            { grantClientCredentials() },
+            { grantRefreshToken() }
+        ) + configuration.granters,
+        grantingCallFactory
     )
 }
