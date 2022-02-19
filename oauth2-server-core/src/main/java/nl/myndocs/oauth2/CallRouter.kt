@@ -28,6 +28,8 @@ class CallRouter(
 
         const val STATUS_BAD_REQUEST = 400
         const val STATUS_UNAUTHORIZED = 401
+
+        private val unauthorizedResponse = mapOf("message" to "anauthorized")
     }
 
     fun route(callContext: CallContext) {
@@ -99,7 +101,7 @@ class CallRouter(
 
             return RedirectRouterResponse(true)
         } catch (unverifiedIdentityException: InvalidIdentityException) {
-            callContext.respondStatus(STATUS_UNAUTHORIZED)
+            callContext.respondUnauthorized()
 
             return RedirectRouterResponse(false)
         }
@@ -134,7 +136,7 @@ class CallRouter(
 
             return RedirectRouterResponse(true)
         } catch (unverifiedIdentityException: InvalidIdentityException) {
-            callContext.respondStatus(STATUS_UNAUTHORIZED)
+            callContext.respondUnauthorized()
 
             return RedirectRouterResponse(false)
         }
@@ -174,7 +176,7 @@ class CallRouter(
         val authorization = callContext.headerCaseInsensitive("Authorization")
 
         if (authorization == null || !authorization.startsWith("bearer ", true)) {
-            callContext.respondStatus(STATUS_UNAUTHORIZED)
+            callContext.respondUnauthorized()
             return
         }
 
@@ -182,5 +184,10 @@ class CallRouter(
         val tokenInfoCallback = tokenInfoCallback(grantingCallFactory(callContext).tokenInfo(token))
 
         callContext.respondJson(tokenInfoCallback)
+    }
+
+    private fun CallContext.respondUnauthorized() {
+        this.respondStatus(STATUS_UNAUTHORIZED)
+        this.respondJson(unauthorizedResponse)
     }
 }
