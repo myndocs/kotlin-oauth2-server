@@ -15,13 +15,13 @@
         <dependency>
             <groupId>org.http4k</groupId>
             <artifactId>http4k-core</artifactId>
-            <version>3.37.1</version>
+            <version>4.25.13.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.http4k</groupId>
             <artifactId>http4k-server-jetty</artifactId>
-            <version>3.37.1</version>
+            <version>4.25.13.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -12,13 +12,13 @@
     <artifactId>oauth2-server-ktor</artifactId>
 
     <properties>
-        <ktor.version>1.1.2</ktor.version>
+        <ktor.version>2.0.1</ktor.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>io.ktor</groupId>
-            <artifactId>ktor-server-core</artifactId>
+            <artifactId>ktor-server-core-jvm</artifactId>
             <version>${ktor.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -37,7 +37,7 @@
 
         <dependency>
             <groupId>io.ktor</groupId>
-            <artifactId>ktor-server-netty</artifactId>
+            <artifactId>ktor-server-netty-jvm</artifactId>
             <version>${ktor.version}</version>
             <scope>test</scope>
         </dependency>
@@ -47,20 +47,48 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-utils-jvm</artifactId>
+            <version>${ktor.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-host-common</artifactId>
+            <version>${ktor.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <repositories>
         <repository>
             <id>ktor</id>
-            <url>http://dl.bintray.com/kotlin/ktor</url>
+            <url>https://kotlin.bintray.com/ktor</url>
         </repository>
         <repository>
             <id>kotlinx</id>
-            <url>http://dl.bintray.com/kotlin/kotlinx</url>
+            <url>https://kotlin.bintray.com/kotlinx</url>
         </repository>
         <repository>
-            <id>jcenter</id>
-            <url>http://jcenter.bintray.com</url>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>jitpack</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>ktor-eap</id>
+            <url>https://maven.pkg.jetbrains.space/public/p/ktor/eap</url>
+        </repository>
+        <repository>
+            <id>ktor-dev</id>
+            <url>https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev</url>
+        </repository>
+        <repository>
+            <id>central1</id>
+            <url>https://repo.maven.apache.org/maven2</url>
         </repository>
     </repositories>
 </project>

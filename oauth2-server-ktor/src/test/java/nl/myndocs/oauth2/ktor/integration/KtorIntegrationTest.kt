@@ -1,6 +1,6 @@
 package nl.myndocs.oauth2.ktor.integration
 
-import io.ktor.application.install
+import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
@@ -37,7 +37,7 @@ class KtorIntegrationTest : BaseIntegrationTest() {
 
     @AfterEach
     fun after() {
-        server!!.stop(0, 10, TimeUnit.SECONDS)
+        server!!.stop(0, 10000)
     }
 
 }
