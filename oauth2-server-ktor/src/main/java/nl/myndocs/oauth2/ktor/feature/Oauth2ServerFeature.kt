@@ -7,22 +7,21 @@ import nl.myndocs.oauth2.ktor.feature.config.KtorConfiguration
 import nl.myndocs.oauth2.ktor.feature.request.KtorCallContext
 import io.ktor.server.application.*
 
-class Oauth2ServerFeature(configuration: Configuration) {
+public class Oauth2ServerFeature(configuration: Configuration) {
     val callRouter = configuration.callRouter
 
-    companion object Feature : BaseApplicationPlugin<ApplicationCallPipeline, KtorConfiguration, Oauth2ServerFeature> {
+    public companion object : BaseApplicationPlugin<Application, KtorConfiguration, Oauth2ServerFeature> {
         override val key = AttributeKey<Oauth2ServerFeature>("Oauth2ServerFeature")
 
-        override fun install(pipeline: ApplicationCallPipeline, configure: KtorConfiguration.() -> Unit): Oauth2ServerFeature {
+        override fun install(pipeline: Application, configure: KtorConfiguration.() -> Unit): Oauth2ServerFeature {
             val ktorConfiguration = KtorConfiguration()
             configure(ktorConfiguration)
             val configuration =
                 ConfigurationBuilder.build(configure as ConfigurationBuilder.Configuration.() -> Unit, ktorConfiguration)
 
-
             val feature = Oauth2ServerFeature(configuration)
 
-            pipeline.intercept(ApplicationCallPipeline.Features) {
+            pipeline.intercept(ApplicationCallPipeline.Plugins) {
                 val ktorCallContext = KtorCallContext(call)
 
                 if (configuration.callRouter.authorizeEndpoint == ktorCallContext.path) {
