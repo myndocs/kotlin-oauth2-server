@@ -8,13 +8,11 @@ It encourages to adapt to existing implementations instead the other way around.
 # Frameworks
 ## Setup
 
-Packages are hosted on GitHub. [Authentication](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-to-github-packages) is required.
-
 ### Maven
 
 ```xml
 <properties>
-    <myndocs.oauth.version>0.7.0</myndocs.oauth.version>
+    <myndocs.oauth.version>0.7.1</myndocs.oauth.version>
 </properties>
 
 <dependencies>
