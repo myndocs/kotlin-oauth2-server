@@ -29,7 +29,7 @@ class CallRouter(
         const val STATUS_BAD_REQUEST = 400
         const val STATUS_UNAUTHORIZED = 401
 
-        private val unauthorizedResponse = mapOf("message" to "anauthorized")
+        private val unauthorizedResponse = mapOf("message" to "unauthorized")
     }
 
     fun route(callContext: CallContext) {
