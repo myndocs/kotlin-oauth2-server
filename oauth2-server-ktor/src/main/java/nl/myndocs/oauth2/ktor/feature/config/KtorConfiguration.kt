@@ -1,6 +1,6 @@
 package nl.myndocs.oauth2.ktor.feature.config
 
-import io.ktor.application.*
+import io.ktor.server.application.*
 import nl.myndocs.oauth2.config.ConfigurationBuilder
 import nl.myndocs.oauth2.ktor.feature.request.KtorCallContext
 import nl.myndocs.oauth2.request.auth.CallContextBasicAuthenticator
