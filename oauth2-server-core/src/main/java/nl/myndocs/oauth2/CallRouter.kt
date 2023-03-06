@@ -79,11 +79,16 @@ class CallRouter(
     ): RedirectRouterResponse {
         val queryParameters = callContext.queryParameters
         try {
+            val codeChallenge = queryParameters["code_challenge"]
+            val codeChallengeMethod = queryParameters["code_challenge_method"]
+                    ?.let { CodeChallengeMethod.parse(it) }
+                    ?: codeChallenge?.let { CodeChallengeMethod.Plain }
+
             val redirect = grantingCallFactory(callContext).redirect(
                 RedirectAuthorizationCodeRequest(
                     clientId = queryParameters["client_id"],
-                    codeChallenge = queryParameters["code_challenge"],
-                    codeChallengeMethod = queryParameters["code_challenge_method"]?.let { CodeChallengeMethod.parse(it) },
+                    codeChallenge = codeChallenge,
+                    codeChallengeMethod = codeChallengeMethod,
                     redirectUri = queryParameters["redirect_uri"],
                     username = credentials?.username,
                     password = credentials?.password,

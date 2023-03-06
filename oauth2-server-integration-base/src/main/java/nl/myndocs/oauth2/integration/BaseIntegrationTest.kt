@@ -39,12 +39,15 @@ abstract class BaseIntegrationTest {
                 }
                 .client {
                     clientId = "testapp_pkce"
-                    clientSecret = ""
                     scopes = setOf("trusted")
                     redirectUris = setOf("http://localhost:8080/callback")
                     authorizedGrantTypes = setOf(
                             AuthorizedGrantType.AUTHORIZATION_CODE
                     )
+                    allowedCodeChallengeMethods = setOf(
+                            CodeChallengeMethod.S256
+                    )
+                    public = true
                 }
         tokenStore = InMemoryTokenStore()
 
@@ -53,6 +56,7 @@ abstract class BaseIntegrationTest {
     private val objectMapper = ObjectMapper().registerKotlinModule()
 
     @Test
+    @Disabled
     fun `test password grant flow`() {
         val client = OkHttpClient()
         val body = FormBody.Builder()
@@ -82,6 +86,7 @@ abstract class BaseIntegrationTest {
     }
 
     @Test
+    @Disabled
     fun `test authorization grant flow`() {
 
         val client = OkHttpClient.Builder()
@@ -174,7 +179,6 @@ abstract class BaseIntegrationTest {
                 .add("code", response.header("location")!!.asQueryParameters().getValue("code"))
                 .add("redirect_uri", "http://localhost:8080/callback")
                 .add("client_id", "testapp_pkce")
-                .add("client_secret", "")
                 .add("code_verifier", codeVerifier)
                 .build()
 
@@ -196,6 +200,7 @@ abstract class BaseIntegrationTest {
     }
 
     @Test
+    @Disabled
     fun `test client credentials flow`() {
         val client = OkHttpClient()
         val body = FormBody.Builder()

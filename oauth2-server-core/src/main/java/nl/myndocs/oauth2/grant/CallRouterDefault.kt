@@ -1,6 +1,7 @@
 package nl.myndocs.oauth2.grant
 
 import nl.myndocs.oauth2.client.Client
+import nl.myndocs.oauth2.client.CodeChallengeMethod
 import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.TokenInfo
@@ -103,10 +104,13 @@ fun GrantingCall.throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) 
     val clientId = clientRequest.clientId
         ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
 
+    val client = clientService.clientOf(clientId) ?: throw InvalidClientException()
+    if (client.public) {
+        return
+    }
+
     val clientSecret = clientRequest.clientSecret
         ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_secret"))
-
-    val client = clientService.clientOf(clientId) ?: throw InvalidClientException()
 
     if (!clientService.validClient(client, clientSecret)) {
         throw InvalidClientException()
@@ -132,7 +136,7 @@ fun GrantingCall.validateCodeChallenge(codeToken: CodeToken, request: Authorizat
         throw InvalidGrantException()
     }
 
-    val codeChallengeMethod = codeToken.codeChallengeMethod ?: throw InvalidGrantException()
+    val codeChallengeMethod = codeToken.codeChallengeMethod ?: CodeChallengeMethod.Plain
     val validChallengeCode = codeChallengeMethod.validate(codeChallenge = codeChallenge, codeVerifier = codeVerifier)
     if (!validChallengeCode) {
         throw InvalidGrantException()
