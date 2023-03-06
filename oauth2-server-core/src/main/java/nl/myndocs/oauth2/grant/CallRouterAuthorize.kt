@@ -88,6 +88,8 @@ fun GrantingCall.authorize(authorizationCodeRequest: AuthorizationCodeRequest): 
         throw InvalidGrantException()
     }
 
+    validateCodeChallenge(consumeCodeToken, authorizationCodeRequest)
+
     val accessToken = converters.accessTokenConverter.convertToToken(
         consumeCodeToken.identity,
         consumeCodeToken.clientId,

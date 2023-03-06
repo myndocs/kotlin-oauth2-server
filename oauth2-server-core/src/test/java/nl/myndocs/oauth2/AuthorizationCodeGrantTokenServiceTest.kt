@@ -16,6 +16,8 @@ import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.IdentityService
 import nl.myndocs.oauth2.request.AuthorizationCodeRequest
 import nl.myndocs.oauth2.request.CallContext
+import nl.myndocs.oauth2.client.CodeChallengeMethod
+import nl.myndocs.oauth2.extension.sha256
 import nl.myndocs.oauth2.response.AccessTokenResponder
 import nl.myndocs.oauth2.token.AccessToken
 import nl.myndocs.oauth2.token.CodeToken
@@ -101,6 +103,35 @@ internal class AuthorizationCodeGrantTokenServiceTest {
         every { accessTokenConverter.convertToToken(identity, clientId, requestScopes, refreshToken) } returns accessToken
 
         grantingCall.authorize(authorizationCodeRequest)
+    }
+
+    @Test
+    fun validAuthorizationCodePKCEGrant() {
+        val requestScopes = setOf("scope1")
+
+        val codeVerifier = "my-secret-code-challenge"
+        val challengeCode = codeVerifier.sha256()
+        val challengeCodeMethod = CodeChallengeMethod.S256
+
+        val client = Client(clientId, setOf("scope1", "scope2"), setOf(), setOf(AuthorizedGrantType.AUTHORIZATION_CODE))
+        val identity = Identity(username)
+        val codeToken = CodeToken(code, Instant.now(), identity, clientId, redirectUri, requestScopes, challengeCode, challengeCodeMethod)
+
+        val refreshToken = RefreshToken("test", Instant.now(), identity, clientId, requestScopes)
+        val accessToken = AccessToken("test", "bearer", Instant.now(), identity, clientId, requestScopes, refreshToken)
+
+        every { clientService.clientOf(clientId) } returns client
+        every { clientService.validClient(client, "") } returns true
+        every { identityService.identityOf(client, username) } returns identity
+        every { tokenStore.consumeCodeToken(code) } returns codeToken
+        every { refreshTokenConverter.convertToToken(identity, clientId, requestScopes) } returns refreshToken
+        every { accessTokenConverter.convertToToken(identity, clientId, requestScopes, refreshToken) } returns accessToken
+
+        val request = authorizationCodeRequest.copy(
+                clientSecret = "",
+                codeVerifier = codeVerifier
+        )
+        grantingCall.authorize(request)
     }
 
     @Test

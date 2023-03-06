@@ -42,6 +42,8 @@ fun GrantingCall.redirect(redirect: RedirectAuthorizationCodeRequest): CodeToken
     val codeToken = converters.codeTokenConverter.convertToToken(
         identityOf,
         clientOf.clientId,
+        redirect.codeChallenge,
+        redirect.codeChallengeMethod,
         redirect.redirectUri!!,
         requestedScopes
     )
@@ -111,6 +113,8 @@ private fun checkMissingFields(redirect: RedirectAuthorizationCodeRequest) = wit
         username == null -> throwMissingField("username")
         password == null -> throwMissingField("password")
         redirectUri == null -> throwMissingField("redirect_uri")
+        codeChallenge == null && codeChallengeMethod != null -> throwMissingField("code_challenge")
+        codeChallenge != null && codeChallengeMethod == null -> throwMissingField("code_challenge_method")
         else -> this
     }
 }
