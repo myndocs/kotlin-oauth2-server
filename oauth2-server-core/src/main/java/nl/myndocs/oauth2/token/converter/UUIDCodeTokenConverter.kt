@@ -12,6 +12,22 @@ class UUIDCodeTokenConverter(
     override fun convertToToken(
             identity: Identity,
             clientId: String,
+            redirectUri: String,
+            requestedScopes: Set<String>
+    ): CodeToken {
+        return convertToToken(
+                identity = identity,
+                clientId = clientId,
+                codeChallenge = null,
+                codeChallengeMethod = null,
+                redirectUri = redirectUri,
+                requestedScopes = requestedScopes
+        )
+    }
+
+    override fun convertToToken(
+            identity: Identity,
+            clientId: String,
             codeChallenge: String?,
             codeChallengeMethod: CodeChallengeMethod?,
             redirectUri: String,
