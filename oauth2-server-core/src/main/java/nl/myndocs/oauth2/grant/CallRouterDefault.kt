@@ -1,13 +1,12 @@
 package nl.myndocs.oauth2.grant
 
 import nl.myndocs.oauth2.client.Client
-import nl.myndocs.oauth2.exception.InvalidClientException
-import nl.myndocs.oauth2.exception.InvalidGrantException
-import nl.myndocs.oauth2.exception.InvalidRequestException
-import nl.myndocs.oauth2.exception.InvalidScopeException
+import nl.myndocs.oauth2.client.CodeChallengeMethod
+import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.identity.Identity
 import nl.myndocs.oauth2.identity.TokenInfo
 import nl.myndocs.oauth2.request.*
+import nl.myndocs.oauth2.token.CodeToken
 
 fun GrantingCall.grantPassword() = granter("password") {
     val accessToken = authorize(
@@ -59,7 +58,8 @@ fun GrantingCall.grantAuthorizationCode() = granter("authorization_code") {
             callContext.formParameters["client_id"],
             callContext.formParameters["client_secret"],
             callContext.formParameters["code"],
-            callContext.formParameters["redirect_uri"]
+            callContext.formParameters["redirect_uri"],
+            callContext.formParameters["code_verifier"]
         )
     )
 
@@ -104,10 +104,13 @@ fun GrantingCall.throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) 
     val clientId = clientRequest.clientId
         ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_id"))
 
+    val client = clientService.clientOf(clientId) ?: throw InvalidClientException()
+    if (client.public) {
+        return
+    }
+
     val clientSecret = clientRequest.clientSecret
         ?: throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("client_secret"))
-
-    val client = clientService.clientOf(clientId) ?: throw InvalidClientException()
 
     if (!clientService.validClient(client, clientSecret)) {
         throw InvalidClientException()
@@ -116,4 +119,26 @@ fun GrantingCall.throwExceptionIfUnverifiedClient(clientRequest: ClientRequest) 
 
 fun GrantingCall.scopesAllowed(clientScopes: Set<String>, requestedScopes: Set<String>): Boolean {
     return clientScopes.containsAll(requestedScopes)
+}
+
+fun GrantingCall.validateCodeChallenge(codeToken: CodeToken, request: AuthorizationCodeRequest) {
+    val codeChallenge = codeToken.codeChallenge
+    val codeVerifier = request.codeVerifier
+    if (codeChallenge.isNullOrBlank() && request.codeVerifier.isNullOrBlank()) {
+        return
+    }
+
+    if (codeChallenge.isNullOrBlank()) {
+        throw InvalidGrantException()
+    }
+
+    if (codeVerifier.isNullOrBlank()) {
+        throw InvalidGrantException()
+    }
+
+    val codeChallengeMethod = codeToken.codeChallengeMethod ?: CodeChallengeMethod.Plain
+    val validChallengeCode = codeChallengeMethod.validate(codeChallenge = codeChallenge, codeVerifier = codeVerifier)
+    if (!validChallengeCode) {
+        throw InvalidGrantException()
+    }
 }

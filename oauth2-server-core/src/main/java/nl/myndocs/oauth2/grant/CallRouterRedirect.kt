@@ -1,6 +1,8 @@
 package nl.myndocs.oauth2.grant
 
 import nl.myndocs.oauth2.client.AuthorizedGrantType
+import nl.myndocs.oauth2.client.Client
+import nl.myndocs.oauth2.client.CodeChallengeMethod
 import nl.myndocs.oauth2.exception.InvalidClientException
 import nl.myndocs.oauth2.exception.InvalidGrantException
 import nl.myndocs.oauth2.exception.InvalidIdentityException
@@ -25,6 +27,8 @@ fun GrantingCall.redirect(redirect: RedirectAuthorizationCodeRequest): CodeToken
         }
     }
 
+    validatePKCE(clientOf, redirect.codeChallenge, redirect.codeChallengeMethod)
+
     val identityOf = identityService.identityOf(clientOf, redirect.username!!) ?: throw InvalidIdentityException()
 
     val validIdentity = identityService.validCredentials(clientOf, identityOf, redirect.password!!)
@@ -42,6 +46,8 @@ fun GrantingCall.redirect(redirect: RedirectAuthorizationCodeRequest): CodeToken
     val codeToken = converters.codeTokenConverter.convertToToken(
         identityOf,
         clientOf.clientId,
+        redirect.codeChallenge,
+        redirect.codeChallengeMethod,
         redirect.redirectUri!!,
         requestedScopes
     )
@@ -112,5 +118,28 @@ private fun checkMissingFields(redirect: RedirectAuthorizationCodeRequest) = wit
         password == null -> throwMissingField("password")
         redirectUri == null -> throwMissingField("redirect_uri")
         else -> this
+    }
+}
+
+private fun validatePKCE(
+        client: Client,
+        codeChallenge: String?,
+        codeChallengeMethod: CodeChallengeMethod?
+) {
+    if (codeChallenge.isNullOrBlank()) {
+        if (!client.forcePKCE) {
+            return
+        }
+
+        throw InvalidRequestException("PKCE is required. code_challenge is missing")
+    }
+
+    if (codeChallenge.length < 43 || codeChallenge.length > 128) {
+        throw InvalidRequestException("Code challenge length must be between 43 and 128 characters long")
+    }
+
+    val ccm = codeChallengeMethod ?: CodeChallengeMethod.Plain
+    if (!client.allowedCodeChallengeMethods.contains(ccm)) {
+        throw InvalidRequestException("Selected code_challenge_method not supported")
     }
 }

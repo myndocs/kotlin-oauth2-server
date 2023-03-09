@@ -1,16 +1,14 @@
 package nl.myndocs.oauth2
 
 import nl.myndocs.oauth2.authenticator.Credentials
+import nl.myndocs.oauth2.client.CodeChallengeMethod
 import nl.myndocs.oauth2.exception.*
 import nl.myndocs.oauth2.grant.Granter
 import nl.myndocs.oauth2.grant.GrantingCall
 import nl.myndocs.oauth2.grant.redirect
 import nl.myndocs.oauth2.grant.tokenInfo
 import nl.myndocs.oauth2.identity.TokenInfo
-import nl.myndocs.oauth2.request.CallContext
-import nl.myndocs.oauth2.request.RedirectAuthorizationCodeRequest
-import nl.myndocs.oauth2.request.RedirectTokenRequest
-import nl.myndocs.oauth2.request.headerCaseInsensitive
+import nl.myndocs.oauth2.request.*
 import nl.myndocs.oauth2.router.RedirectRouter
 import nl.myndocs.oauth2.router.RedirectRouterResponse
 
@@ -81,13 +79,20 @@ class CallRouter(
     ): RedirectRouterResponse {
         val queryParameters = callContext.queryParameters
         try {
+            val codeChallenge = queryParameters["code_challenge"]
+            val codeChallengeMethod = queryParameters["code_challenge_method"]
+                    ?.let { CodeChallengeMethod.parse(it) }
+                    ?: codeChallenge?.let { CodeChallengeMethod.Plain }
+
             val redirect = grantingCallFactory(callContext).redirect(
                 RedirectAuthorizationCodeRequest(
-                    queryParameters["client_id"],
-                    queryParameters["redirect_uri"],
-                    credentials?.username,
-                    credentials?.password,
-                    queryParameters["scope"]
+                    clientId = queryParameters["client_id"],
+                    codeChallenge = codeChallenge,
+                    codeChallengeMethod = codeChallengeMethod,
+                    redirectUri = queryParameters["redirect_uri"],
+                    username = credentials?.username,
+                    password = credentials?.password,
+                    scope = queryParameters["scope"]
                 )
             )
 

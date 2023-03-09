@@ -80,6 +80,11 @@ fun GrantingCall.authorize(authorizationCodeRequest: AuthorizationCodeRequest): 
         throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("redirect_uri"))
     }
 
+    val client = clientService.clientOf(authorizationCodeRequest.clientId!!)
+    if (authorizationCodeRequest.codeVerifier.isNullOrBlank() && client?.forcePKCE == true) {
+        throw InvalidRequestException(INVALID_REQUEST_FIELD_MESSAGE.format("code_verifier"))
+    }
+
     val consumeCodeToken = tokenStore.consumeCodeToken(authorizationCodeRequest.code)
         ?: throw InvalidGrantException()
 
@@ -87,6 +92,8 @@ fun GrantingCall.authorize(authorizationCodeRequest: AuthorizationCodeRequest): 
     if (consumeCodeToken.redirectUri != authorizationCodeRequest.redirectUri || consumeCodeToken.clientId != authorizationCodeRequest.clientId) {
         throw InvalidGrantException()
     }
+
+    validateCodeChallenge(consumeCodeToken, authorizationCodeRequest)
 
     val accessToken = converters.accessTokenConverter.convertToToken(
         consumeCodeToken.identity,
