@@ -12,7 +12,7 @@
     <artifactId>oauth2-server-integration-base</artifactId>
 
     <properties>
-        <jackson.version>2.11.4</jackson.version>
+        <jackson.version>2.13.0</jackson.version>
         <jackson.databind.version>2.11.4</jackson.databind.version>
     </properties>
 
